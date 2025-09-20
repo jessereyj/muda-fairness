@@ -1,0 +1,111 @@
+DIGEST 1e71e57ae0d77d9043358b0d7ed36f00
+FTemporal
+R24:27 Coq.Lists.List <> <> lib
+R29:33 Coq.Arith.Arith <> <> lib
+R35:37 Coq.micromega.Lia <> <> lib
+R47:59 Coq.Lists.List ListNotations <> mod
+R77:84 MudaCore <> <> lib
+R86:93 Matching <> <> lib
+R95:101 Tactics <> <> lib
+mod 112:119 <> Temporal
+ind 199:204 Temporal is_run
+constr 234:240 Temporal run_nil
+constr 259:265 Temporal run_one
+constr 295:302 Temporal run_cons
+R218:221 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R208:211 Coq.Init.Datatypes <> list ind
+R213:217 MudaCore Core State rec
+R245:250 Temporal <> is_run:1 ind
+R252:253 Coq.Lists.List ListNotations ::list_scope:'['_']' not
+binder 277:277 <> s:3
+R280:285 Temporal <> is_run:1 ind
+R287:287 Coq.Lists.List ListNotations ::list_scope:'['_x_']' not
+R289:289 Coq.Lists.List ListNotations ::list_scope:'['_x_']' not
+R288:288 Temporal <> s:3 var
+binder 313:314 <> s1:4
+binder 316:317 <> s2:5
+binder 319:322 <> rest:6
+R341:350 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R331:334 Matching Matching Step ind
+R336:337 Temporal <> s1:4 var
+R339:340 Temporal <> s2:5 var
+R370:379 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R351:356 Temporal <> is_run:1 ind
+R361:364 Coq.Init.Datatypes <> ::list_scope:x_'::'_x not
+R359:360 Temporal <> s2:5 var
+R365:368 Temporal <> rest:6 var
+R380:385 Temporal <> is_run:1 ind
+R390:393 Coq.Init.Datatypes <> ::list_scope:x_'::'_x not
+R388:389 Temporal <> s1:4 var
+R396:399 Coq.Init.Datatypes <> ::list_scope:x_'::'_x not
+R394:395 Temporal <> s2:5 var
+R400:403 Temporal <> rest:6 var
+scheme 199:204 Temporal is_run_ind
+scheme 199:204 Temporal is_run_sind
+ind 484:489 Temporal G_pair
+constr 547:551 Temporal G_nil
+constr 572:576 Temporal G_one
+constr 608:613 Temporal G_cons
+R500:503 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R495:499 MudaCore Core State rec
+R509:512 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R504:508 MudaCore Core State rec
+binder 492:492 <> P:7
+R531:534 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R521:524 Coq.Init.Datatypes <> list ind
+R526:530 MudaCore Core State rec
+R556:561 Temporal <> G_pair:8 ind
+R565:566 Coq.Lists.List ListNotations ::list_scope:'['_']' not
+R563:563 Temporal <> P:7 var
+binder 588:588 <> s:10
+R591:596 Temporal <> G_pair:8 ind
+R600:600 Coq.Lists.List ListNotations ::list_scope:'['_x_']' not
+R602:602 Coq.Lists.List ListNotations ::list_scope:'['_x_']' not
+R601:601 Temporal <> s:10 var
+R598:598 Temporal <> P:7 var
+binder 624:625 <> s1:11
+binder 627:628 <> s2:12
+binder 630:633 <> rest:13
+R649:658 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R642:642 Temporal <> P:7 var
+R647:648 Temporal <> s2:12 var
+R644:645 Temporal <> s1:11 var
+R680:689 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R659:664 Temporal <> G_pair:8 ind
+R671:674 Coq.Init.Datatypes <> ::list_scope:x_'::'_x not
+R669:670 Temporal <> s2:12 var
+R675:678 Temporal <> rest:13 var
+R666:666 Temporal <> P:7 var
+R690:695 Temporal <> G_pair:8 ind
+R702:705 Coq.Init.Datatypes <> ::list_scope:x_'::'_x not
+R700:701 Temporal <> s1:11 var
+R708:711 Coq.Init.Datatypes <> ::list_scope:x_'::'_x not
+R706:707 Temporal <> s2:12 var
+R712:715 Temporal <> rest:13 var
+R697:697 Temporal <> P:7 var
+scheme 484:489 Temporal G_pair_ind
+scheme 484:489 Temporal G_pair_sind
+def 794:803 Temporal finality_P
+R812:816 MudaCore Core State rec
+binder 806:807 <> s1:14
+binder 809:810 <> s2:15
+R833:843 MudaCore Core monotone_Mt def
+R846:847 MudaCore Core Mt proj
+R849:850 Temporal <> s1:14 var
+R854:855 MudaCore Core Mt proj
+R857:858 Temporal <> s2:15 var
+prf 871:892 Temporal finality_holds_on_step
+binder 907:908 <> s1:16
+binder 910:911 <> s2:17
+R924:927 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R914:917 Matching Matching Step ind
+R919:920 Temporal <> s1:16 var
+R922:923 Temporal <> s2:17 var
+R928:937 Temporal Temporal finality_P def
+R939:940 Temporal <> s1:16 var
+R942:943 Temporal <> s2:17 var
+R970:979 Temporal Temporal finality_P def
+R992:1004 Matching Matching step_monotone thm
+R992:1004 Matching Matching step_monotone thm
+R1017:1024 Temporal Temporal <> mod
+R1035:1042 Temporal Temporal <> mod

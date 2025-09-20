@@ -1,0 +1,146 @@
+DIGEST 2e00960f257ba8760ed1e268d73d76ee
+FSorting
+R24:27 Coq.Lists.List <> <> lib
+R29:33 Coq.Arith.Arith <> <> lib
+R35:37 Coq.micromega.Lia <> <> lib
+R47:59 Coq.Lists.List ListNotations <> mod
+R77:84 MudaCore <> <> lib
+mod 95:101 <> Sorting
+ax 263:271 Sorting PriorityB
+R278:281 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R275:277 MudaCore Core Bid rec
+R285:288 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R282:284 MudaCore Core Bid rec
+ax 307:315 Sorting PriorityS
+R322:325 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R319:321 MudaCore Core Ask rec
+R329:332 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R326:328 MudaCore Core Ask rec
+ax 348:369 Sorting PriorityB_strict_total
+R377:377 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R403:411 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+binder 385:385 <> x:5
+R388:389 Coq.Init.Logic <> ::type_scope:'~'_x not
+R390:398 Sorting Sorting PriorityB defax
+R400:400 Sorting <> x:5 var
+R402:402 Sorting <> x:5 var
+R412:412 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R474:483 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R536:536 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+binder 420:420 <> x:6
+binder 422:422 <> y:7
+binder 424:424 <> z:8
+R440:443 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R427:435 Sorting Sorting PriorityB defax
+R437:437 Sorting <> x:6 var
+R439:439 Sorting <> y:7 var
+R457:460 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R444:452 Sorting Sorting PriorityB defax
+R454:454 Sorting <> y:7 var
+R456:456 Sorting <> z:8 var
+R461:469 Sorting Sorting PriorityB defax
+R471:471 Sorting <> x:6 var
+R473:473 Sorting <> z:8 var
+binder 491:491 <> x:9
+binder 493:493 <> y:10
+R502:505 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R497:500 Coq.Init.Logic <> ::type_scope:x_'<>'_x not
+R496:496 Sorting <> x:9 var
+R501:501 Sorting <> y:10 var
+R519:522 Coq.Init.Logic <> ::type_scope:x_'\/'_x not
+R506:514 Sorting Sorting PriorityB defax
+R516:516 Sorting <> x:9 var
+R518:518 Sorting <> y:10 var
+R523:531 Sorting Sorting PriorityB defax
+R533:533 Sorting <> y:10 var
+R535:535 Sorting <> x:9 var
+ax 548:569 Sorting PriorityS_strict_total
+R577:577 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R603:611 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+binder 585:585 <> x:13
+R588:589 Coq.Init.Logic <> ::type_scope:'~'_x not
+R590:598 Sorting Sorting PriorityS defax
+R600:600 Sorting <> x:13 var
+R602:602 Sorting <> x:13 var
+R612:612 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R674:683 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R736:736 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+binder 620:620 <> x:14
+binder 622:622 <> y:15
+binder 624:624 <> z:16
+R640:643 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R627:635 Sorting Sorting PriorityS defax
+R637:637 Sorting <> x:14 var
+R639:639 Sorting <> y:15 var
+R657:660 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R644:652 Sorting Sorting PriorityS defax
+R654:654 Sorting <> y:15 var
+R656:656 Sorting <> z:16 var
+R661:669 Sorting Sorting PriorityS defax
+R671:671 Sorting <> x:14 var
+R673:673 Sorting <> z:16 var
+binder 691:691 <> x:17
+binder 693:693 <> y:18
+R702:705 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R697:700 Coq.Init.Logic <> ::type_scope:x_'<>'_x not
+R696:696 Sorting <> x:17 var
+R701:701 Sorting <> y:18 var
+R719:722 Coq.Init.Logic <> ::type_scope:x_'\/'_x not
+R706:714 Sorting Sorting PriorityS defax
+R716:716 Sorting <> x:17 var
+R718:718 Sorting <> y:18 var
+R723:731 Sorting Sorting PriorityS defax
+R733:733 Sorting <> y:18 var
+R735:735 Sorting <> x:17 var
+ax 810:829 Sorting PriorityB_price_time
+binder 843:844 <> b1:21
+binder 846:847 <> b2:22
+R911:920 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R871:875 Coq.Init.Logic <> ::type_scope:x_'\/'_x not
+R910:910 Coq.Init.Logic <> ::type_scope:x_'\/'_x not
+R862:864 Coq.Init.Peano <> ::nat_scope:x_'>'_x not
+R856:858 MudaCore Core p_b proj
+R860:861 Sorting <> b1:21 var
+R865:867 MudaCore Core p_b proj
+R869:870 Sorting <> b2:22 var
+R891:894 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R882:884 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R876:878 MudaCore Core p_b proj
+R880:881 Sorting <> b1:21 var
+R885:887 MudaCore Core p_b proj
+R889:890 Sorting <> b2:22 var
+R901:903 Coq.Init.Peano <> ::nat_scope:x_'<'_x not
+R895:897 MudaCore Core t_b proj
+R899:900 Sorting <> b1:21 var
+R904:906 MudaCore Core t_b proj
+R908:909 Sorting <> b2:22 var
+R921:929 Sorting Sorting PriorityB defax
+R931:932 Sorting <> b1:21 var
+R934:935 Sorting <> b2:22 var
+ax 947:966 Sorting PriorityS_price_time
+binder 980:981 <> a1:25
+binder 983:984 <> a2:26
+R1048:1057 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R1008:1012 Coq.Init.Logic <> ::type_scope:x_'\/'_x not
+R1047:1047 Coq.Init.Logic <> ::type_scope:x_'\/'_x not
+R999:1001 Coq.Init.Peano <> ::nat_scope:x_'<'_x not
+R993:995 MudaCore Core a_s proj
+R997:998 Sorting <> a1:25 var
+R1002:1004 MudaCore Core a_s proj
+R1006:1007 Sorting <> a2:26 var
+R1028:1031 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R1019:1021 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R1013:1015 MudaCore Core a_s proj
+R1017:1018 Sorting <> a1:25 var
+R1022:1024 MudaCore Core a_s proj
+R1026:1027 Sorting <> a2:26 var
+R1038:1040 Coq.Init.Peano <> ::nat_scope:x_'<'_x not
+R1032:1034 MudaCore Core t_s proj
+R1036:1037 Sorting <> a1:25 var
+R1041:1043 MudaCore Core t_s proj
+R1045:1046 Sorting <> a2:26 var
+R1058:1066 Sorting Sorting PriorityS defax
+R1068:1069 Sorting <> a1:25 var
+R1071:1072 Sorting <> a2:26 var
+R1079:1085 Sorting Sorting <> mod
+R1096:1102 Sorting Sorting <> mod

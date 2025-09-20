@@ -1,0 +1,52 @@
+DIGEST 85d202d1236f9fa2e1425d4a5d736793
+FClearingPrice
+R24:27 Coq.Lists.List <> <> lib
+R29:33 Coq.Arith.Arith <> <> lib
+R35:37 Coq.micromega.Lia <> <> lib
+R47:59 Coq.Lists.List ListNotations <> mod
+R77:84 MudaCore <> <> lib
+R86:93 Matching <> <> lib
+R95:101 Tactics <> <> lib
+mod 112:124 <> ClearingPrice
+ax 206:211 ClearingPrice c_star
+R220:223 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R215:219 MudaCore Core State rec
+R224:226 Coq.Init.Datatypes <> nat ind
+ax 241:253 ClearingPrice marginal_pair
+R262:265 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R257:261 MudaCore Core State rec
+R266:271 Coq.Init.Datatypes <> option ind
+R273:277 MudaCore Core Match rec
+ax 289:305 ClearingPrice c_star_properties
+binder 320:320 <> s:5
+binder 322:322 <> m:6
+R355:364 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R346:348 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R331:343 ClearingPrice ClearingPrice marginal_pair defax
+R345:345 ClearingPrice <> s:5 var
+R349:352 Coq.Init.Datatypes <> Some constr
+R354:354 ClearingPrice <> m:6 var
+R387:390 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R375:378 Coq.Init.Peano <> ::nat_scope:x_'>='_x not
+R365:367 MudaCore Core p_b proj
+R370:371 MudaCore Core mb proj
+R373:373 ClearingPrice <> m:6 var
+R379:384 ClearingPrice ClearingPrice c_star defax
+R386:386 ClearingPrice <> s:5 var
+R399:402 Coq.Init.Peano <> ::nat_scope:x_'>='_x not
+R391:396 ClearingPrice ClearingPrice c_star defax
+R398:398 ClearingPrice <> s:5 var
+R403:405 MudaCore Core a_s proj
+R408:409 MudaCore Core ma proj
+R411:411 ClearingPrice <> m:6 var
+ax 424:451 ClearingPrice uniform_price_for_all_trades
+binder 466:466 <> s:9
+binder 468:468 <> m:10
+R488:491 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R477:478 Coq.Lists.List <> In def
+R483:484 MudaCore Core Mt proj
+R486:486 ClearingPrice <> s:9 var
+R480:480 ClearingPrice <> m:10 var
+R492:495 Coq.Init.Logic <> True ind
+R502:514 ClearingPrice ClearingPrice <> mod
+R525:537 ClearingPrice ClearingPrice <> mod

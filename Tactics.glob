@@ -1,0 +1,6 @@
+DIGEST 76fb7f194e7fe05a1a99c4b5590d2776
+FTactics
+R24:27 Coq.Lists.List <> <> lib
+R29:33 Coq.Arith.Arith <> <> lib
+R35:37 Coq.micromega.Lia <> <> lib
+R47:59 Coq.Lists.List ListNotations <> mod

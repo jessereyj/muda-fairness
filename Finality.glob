@@ -1,0 +1,27 @@
+DIGEST 55774d6df855fc3268908b5eec54e3cb
+FFinality
+R24:27 Coq.Lists.List <> <> lib
+R29:33 Coq.Arith.Arith <> <> lib
+R35:37 Coq.micromega.Lia <> <> lib
+R47:59 Coq.Lists.List ListNotations <> mod
+R77:84 MudaCore <> <> lib
+R86:93 Matching <> <> lib
+R95:102 Temporal <> <> lib
+R104:110 Tactics <> <> lib
+mod 121:128 <> Finality
+prf 141:163 Finality match_finality_monotone
+binder 178:179 <> s0:1
+binder 181:182 <> sT:2
+R196:199 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R185:189 Matching Matching Steps ind
+R191:192 Finality <> s0:1 var
+R194:195 Finality <> sT:2 var
+R200:210 MudaCore Core monotone_Mt def
+R213:214 MudaCore Core Mt proj
+R216:217 Finality <> s0:1 var
+R221:222 MudaCore Core Mt proj
+R224:225 Finality <> sT:2 var
+R256:269 Matching Matching steps_monotone thm
+R256:269 Matching Matching steps_monotone thm
+R281:288 Finality Finality <> mod
+R299:306 Finality Finality <> mod

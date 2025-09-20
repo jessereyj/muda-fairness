@@ -1,0 +1,62 @@
+DIGEST 52caa51a1d6567c8d385567dab728d5c
+FPriorityFairness
+R24:27 Coq.Lists.List <> <> lib
+R29:33 Coq.Arith.Arith <> <> lib
+R35:37 Coq.micromega.Lia <> <> lib
+R47:59 Coq.Lists.List ListNotations <> mod
+R77:84 MudaCore <> <> lib
+R86:92 Sorting <> <> lib
+R94:101 Matching <> <> lib
+R103:109 Tactics <> <> lib
+mod 120:135 <> PriorityFairness
+prf 148:174 PriorityFairness priority_fairness_selection
+binder 189:190 <> Bs:1
+binder 192:193 <> Ss:2
+binder 195:195 <> b:3
+binder 197:197 <> a:4
+R237:246 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R228:230 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R206:221 Matching Matching HighestFeasibleB defax
+R223:224 PriorityFairness <> Bs:1 var
+R226:227 PriorityFairness <> Ss:2 var
+R231:234 Coq.Init.Datatypes <> Some constr
+R236:236 PriorityFairness <> b:3 var
+R278:287 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R269:271 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R247:261 Matching Matching LowestFeasibleS defax
+R264:265 PriorityFairness <> Bs:1 var
+R267:268 PriorityFairness <> Ss:2 var
+R272:275 Coq.Init.Datatypes <> Some constr
+R277:277 PriorityFairness <> a:4 var
+R301:310 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R288:296 MudaCore Core matchable def
+R298:298 PriorityFairness <> b:3 var
+R300:300 PriorityFairness <> a:4 var
+binder 318:319 <> b':5
+R330:341 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R322:323 Coq.Lists.List <> In def
+R328:329 PriorityFairness <> Bs:1 var
+R325:326 PriorityFairness <> b':5 var
+R342:342 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R381:393 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R343:349 Coq.Init.Logic <> ::type_scope:'exists'_x_'..'_x_','_x not
+R352:353 Coq.Init.Logic <> ::type_scope:'exists'_x_'..'_x_','_x not
+binder 350:351 <> a':6
+R362:365 Coq.Init.Logic <> ::type_scope:x_'/\'_x not
+R354:355 Coq.Lists.List <> In def
+R360:361 PriorityFairness <> Ss:2 var
+R357:358 PriorityFairness <> a':6 var
+R366:374 MudaCore Core matchable def
+R376:377 PriorityFairness <> b':5 var
+R379:380 PriorityFairness <> a':6 var
+R400:403 Coq.Init.Logic <> ::type_scope:x_'\/'_x not
+R396:398 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R394:395 PriorityFairness <> b':5 var
+R399:399 PriorityFairness <> b:3 var
+R404:412 Sorting Sorting PriorityB defax
+R414:414 PriorityFairness <> b:3 var
+R416:417 PriorityFairness <> b':5 var
+R574:595 Matching Matching HighestFeasibleB_sound prfax
+R574:595 Matching Matching HighestFeasibleB_sound prfax
+R775:790 PriorityFairness PriorityFairness <> mod
+R801:816 PriorityFairness PriorityFairness <> mod
