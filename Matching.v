@@ -222,36 +222,84 @@ Module Matching.
   Qed.
 
 
-
-  Lemma best_byB_spec :
-    forall cur x y,
-      best_byB cur x = Some y ->
-      (y = x \/ (exists z, cur = Some z /\ y = z)) /\
-      (forall z, cur = Some z -> y = x \/ PriorityB y z).
-  Proof.
-    intros cur x y; destruct cur as [z|]; cbn; intro H.
-    - destruct (betterB x z) eqn:Eb; inversion H; subst; clear H.
-      + split; [left; reflexivity|].
-        intros z' Hz'. inversion Hz'; subst.
-        right. apply (proj1 (betterB_correct _ _)) in Eb. exact Eb.
-      + split; [right; eexists; split; eauto|].
-        intros z' Hz'. inversion Hz'; subst. left; reflexivity.
-    - inversion H; subst. split; [left; reflexivity|].
-      intros z' Hz'. inversion Hz'.
-  Qed.
-
-  (* ---------- “Best” feasible bid: presence + maximality ---------- *)
-
-  (* Old problematic spec removed. Use this simpler, correct spec instead. *)
+  (* ---- best_byB: simple, correct spec (only says the winner is x or the old cur) ---- *)
   Lemma best_byB_spec :
     forall cur x y,
       best_byB cur x = Some y ->
       (y = x \/ exists z, cur = Some z /\ y = z).
   Proof.
     intros cur x y; destruct cur as [z|]; cbn; intro H.
-    - destruct (betterB x z) eqn:Eb; inversion H; subst; clear H; [left; reflexivity|].
-      right. eexists; split; eauto.
-    - inversion H; subst. left; reflexivity.
+    - destruct (betterB x z) eqn:Eb; inversion H; subst; clear H.
+      + left; reflexivity.
+      + right; eexists; split; eauto.
+    - inversion H; subst; left; reflexivity.
+  Qed.
+
+  Lemma best_feasible_bid_sound :
+    forall Bs Ss b,
+      best_feasible_bid Bs Ss = Some b ->
+      In b Bs /\
+      (exists a, In a Ss /\ matchable b a) /\
+      (forall b', In b' Bs ->
+        (exists a', In a' Ss /\ matchable b' a') ->
+        b' = b \/ PriorityB b b').
+  Proof.
+    intros Bs Ss; induction Bs as [|x t IH]; cbn; intros b H; try discriminate.
+    set (r := best_feasible_bid t Ss).
+    destruct (has_feasible_ask x Ss) eqn:Hhas.
+    - (* x has some feasible ask *)
+      destruct (best_byB r x) eqn:Hbest; inversion H; subst; clear H.
+      + (* chose x *)
+        pose proof (has_feasible_ask_sound _ _ Hhas) as [a [Hina Hm]].
+        split; [left; reflexivity|].
+        split; [now eauto|].
+        intros b' HinB' Hex.
+        destruct HinB' as [->|HinT]; [left; reflexivity|].
+        (* show PriorityB x b' using the tail's best rb *)
+        destruct r as [rb|] eqn:Er; cbn in Hbest.
+        * (* r = Some rb and best_byB chose x => betterB x rb = true *)
+          rewrite Er in Hbest.
+          destruct (betterB x rb) eqn:Eb; [|discriminate].
+          pose proof (proj1 (betterB_correct _ _) Eb) as Hx_rb.
+          (* rb dominates any feasible b' in tail *)
+          specialize (IH Er) as [HinR [HexR MaxR]].
+          specialize (MaxR b' HinT Hex) as [->|Hrb_b'].
+          { left; reflexivity. }
+          { right. destruct PriorityB_strict_total as [_ [Ptrans _]].
+            eapply Ptrans; eauto. }
+        * (* r=None => tail had no feasible bidder; but Hex gives feasible b' in tail *)
+          exfalso. inversion Hex as [a' [Ina' _]]; inversion HinT.
+      + (* chose r from tail *)
+        specialize (IH eq_refl) as [HinR [HexR MaxR]].
+        split; [right; exact HinR|].
+        split; [exact HexR|].
+        intros b' HinB' Hex.
+        destruct HinB' as [Hhd|HinT].
+        * (* need PriorityB r x *)
+          destruct r as [rb|] eqn:Er; cbn in Hbest; [|discriminate].
+          rewrite Er in Hbest.
+          destruct (betterB x rb) eqn:Eb; [discriminate|].
+          (* Either rb = x or PriorityB rb x by totality; Eb=false rules out PriorityB x rb *)
+          destruct (Nat.eq_dec rb x) as [->|Hneq]; [left; reflexivity|].
+          destruct PriorityB_strict_total as [_ [_ Tot]].
+          destruct (Tot rb x Hneq) as [Hrbx | Hxrb]; [right; exact Hrbx|].
+          exfalso. apply (proj2 (betterB_correct _ _)) in Hxrb. rewrite Hxrb in Eb. discriminate.
+        * (* b' in tail: delegate to MaxR *)
+          apply MaxR; assumption.
+    - (* x has no feasible ask; drop to tail *)
+      specialize (IH H) as [HinR [HexR MaxR]].
+      split; [right; exact HinR|].
+      split; [exact HexR|].
+      intros b' HinB' Hex.
+      destruct HinB' as [Hhd|HinT].
+      + (* contradiction: Hhas=false but b'=x has feasible *)
+        inversion Hex as [a' [Ina' Hm]].
+        clear - Hhas Ina' Hm.
+        revert Ina' Hm Hhas.
+        induction Ss as [|a0 ts IHs]; cbn; intros; [inversion Ina'|].
+        destruct Ina' as [->|Hin]; [rewrite (proj2 (feasibleb_correct _ _)) in *; congruence|].
+        destruct (feasibleb x a0); auto.
+      + apply MaxR; assumption.
   Qed.
 
 
@@ -383,6 +431,8 @@ Module Matching.
     assert (q<=q_s a) by (apply Nat.min_r; lia).
     lia.
   Qed.
+
+
 
   (* If a feasible pair exists, the best picker finds one *)
   Lemma pick_best_pair_exists :
