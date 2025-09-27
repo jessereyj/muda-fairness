@@ -38,117 +38,62 @@ Module Matching.
     end.
 
   (* ---------- Boolean comparators consistent with PriorityB / PriorityS ---------- *)
-  (* Buyers: higher price; ties: earlier time; then agent; then quantity *)
-  Definition betterB (x y:Bid) : bool :=
-    (p_b y <? p_b x) ||                                     (* px > py *)
-    ((p_b x =? p_b y) &&
-      ( (t_b x <? t_b y)                                    (* tx < ty *)
-        || ((t_b x =? t_b y) &&
-              ( (b_agent x <? b_agent y)                    (* agent tie *)
-                || ((b_agent x =? b_agent y) &&
-                      (q_b x <? q_b y)) )) )).              (* qty tie *)
 
-  (* Sellers: lower ask; ties: earlier time; then agent; then quantity *)
+  Definition betterB (x y:Bid) : bool :=
+    (p_b y <? p_b x) ||
+    ((p_b x =? p_b y) &&
+      ((t_b x <? t_b y) ||
+        ((t_b x =? t_b y) &&
+          ((b_agent x <? b_agent y) ||
+            ((b_agent x =? b_agent y) &&
+              (q_b x <? q_b y)))))).
+
   Definition betterS (x y:Ask) : bool :=
-    (a_s x <? a_s y) ||                                     (* ax < ay *)
+    (a_s x <? a_s y) ||
     ((a_s x =? a_s y) &&
-      ( (t_s x <? t_s y)                                    (* tx < ty *)
-        || ((t_s x =? t_s y) &&
-              ( (s_agent x <? s_agent y)                    (* agent tie *)
-                || ((s_agent x =? s_agent y) &&
-                      (q_s x <? q_s y)) )) )).
+      ((t_s x <? t_s y) ||
+        ((t_s x =? t_s y) &&
+          ((s_agent x <? s_agent y) ||
+            ((s_agent x =? s_agent y) &&
+              (q_s x <? q_s y)))))).
 
   Lemma betterB_correct : forall x y, betterB x y = true <-> PriorityB x y.
   Proof.
     intros x y; unfold betterB, PriorityB.
     split.
-    - (* bool -> Prop *)
-      intro H.
-      apply Bool.orb_true_iff in H.
-      destruct H as [Hprice | Htie].
-      + (* p_b y <? p_b x = true *) apply Nat.ltb_lt in Hprice. left. lia.
-      + (* equal price branch *)
-        apply Bool.andb_true_iff in Htie. destruct Htie as [Heq Hrest].
-        apply Nat.eqb_eq in Heq. right. split; [assumption|].
-        apply Bool.orb_true_iff in Hrest. destruct Hrest as [Htlt | Hmore].
-        * (* t_b x <? t_b y *) apply Nat.ltb_lt in Htlt. left; exact Htlt.
-        * (* t_b x =? t_b y && ... *)
-          apply Bool.andb_true_iff in Hmore. destruct Hmore as [Hteq Hlex].
-          apply Nat.eqb_eq in Hteq. right. split; [assumption|].
-          apply Bool.orb_true_iff in Hlex. destruct Hlex as [Ha_lt | Hagent_tie].
-          { apply Nat.ltb_lt in Ha_lt. left; exact Ha_lt. }
-          { apply Bool.andb_true_iff in Hagent_tie. destruct Hagent_tie as [Ha_eq Hq_lt].
-            apply Nat.eqb_eq in Ha_eq. apply Nat.ltb_lt in Hq_lt.
-            right. split; [assumption|assumption]. }
-    - (* Prop -> bool *)
-      intro H.
-      apply Bool.orb_true_iff.
-      destruct H as [Hgt | [Heq Htier]].
-      + (* price greater *) left. apply Nat.ltb_lt. lia.
-      + (* price equal, then tiers *)
-        right. apply Bool.andb_true_iff. split.
-        * apply Nat.eqb_eq. exact Heq.
-        * destruct Htier as [Htlt | [Hteq [Ha_lt | [Ha_eq Hq_lt]]]].
-          -- (* earlier time *) apply Bool.orb_true_iff. left. apply Nat.ltb_lt. exact Htlt.
-          -- (* time equal, smaller agent *)
-            apply Bool.orb_true_iff. right.
-            apply Bool.andb_true_iff. split.
-            ++ apply Nat.eqb_eq. exact Hteq.
-            ++ apply Bool.orb_true_iff. left. apply Nat.ltb_lt. exact Ha_lt.
-          -- (* time equal, agent equal, smaller quantity *)
-            apply Bool.orb_true_iff. right.
-            apply Bool.andb_true_iff. split.
-            ++ apply Nat.eqb_eq. exact Hteq.
-            ++ apply Bool.orb_true_iff. right.
-                apply Bool.andb_true_iff. split.
-                ** apply Nat.eqb_eq. exact Ha_eq.
-                ** apply Nat.ltb_lt. exact Hq_lt.
-  Qed.
-
-  Lemma betterS_correct : forall x y, betterS x y = true <-> PriorityS x y.
-  Proof.
-    intros x y; unfold betterS, PriorityS.
-    split.
-    - (* bool -> Prop *)
-      intro H.
-      apply Bool.orb_true_iff in H.
-      destruct H as [Hask | Htie].
-      + (* a_s x <? a_s y *) apply Nat.ltb_lt in Hask. left. exact Hask.
-      + apply Bool.andb_true_iff in Htie. destruct Htie as [Heq Hrest].
-        apply Nat.eqb_eq in Heq. right. split; [assumption|].
-        apply Bool.orb_true_iff in Hrest. destruct Hrest as [Htlt | Hmore].
+    - intro H. apply Bool.orb_true_iff in H.
+      destruct H as [Hlt|Hrest].
+      + apply Nat.ltb_lt in Hlt. left. lia.
+      + apply Bool.andb_true_iff in Hrest. destruct Hrest as [Heq Htier].
+        apply Nat.eqb_eq in Heq. right. split; [exact Heq|].
+        apply Bool.orb_true_iff in Htier. destruct Htier as [Htlt|Hmore].
         * apply Nat.ltb_lt in Htlt. left; exact Htlt.
         * apply Bool.andb_true_iff in Hmore. destruct Hmore as [Hteq Hlex].
-          apply Nat.eqb_eq in Hteq. right. split; [assumption|].
-          apply Bool.orb_true_iff in Hlex. destruct Hlex as [Ha_lt | Hagent_tie].
-          { apply Nat.ltb_lt in Ha_lt. left; exact Ha_lt. }
-          { apply Bool.andb_true_iff in Hagent_tie. destruct Hagent_tie as [Ha_eq Hq_lt].
-            apply Nat.eqb_eq in Ha_eq. apply Nat.ltb_lt in Hq_lt.
-            right. split; [assumption|assumption]. }
-    - (* Prop -> bool *)
-      intro H.
-      apply Bool.orb_true_iff.
-      destruct H as [Hlt | [Heq Htier]].
-      + (* lower ask *) left. apply Nat.ltb_lt. exact Hlt.
+          apply Nat.eqb_eq in Hteq. right. split; [exact Hteq|].
+          apply Bool.orb_true_iff in Hlex. destruct Hlex as [Ha_lt|Hagent_eq].
+          -- apply Nat.ltb_lt in Ha_lt. left; exact Ha_lt.
+          -- apply Bool.andb_true_iff in Hagent_eq. destruct Hagent_eq as [Ha_eq Hq_lt].
+             apply Nat.eqb_eq in Ha_eq. apply Nat.ltb_lt in Hq_lt.
+             right. split; [exact Ha_eq|exact Hq_lt].
+    - intro H. apply Bool.orb_true_iff.
+      destruct H as [Hprice|[Heq Htier]].
+      + left. apply Nat.ltb_lt. exact Hprice.
       + right. apply Bool.andb_true_iff. split.
         * apply Nat.eqb_eq. exact Heq.
-        * destruct Htier as [Htlt | [Hteq [Ha_lt | [Ha_eq Hq_lt]]]].
+        * destruct Htier as [Htlt|[Hteq [Ha_lt|[Ha_eq Hq_lt]]]].
           -- apply Bool.orb_true_iff. left. apply Nat.ltb_lt. exact Htlt.
           -- apply Bool.orb_true_iff. right.
-            apply Bool.andb_true_iff. split.
-            ++ apply Nat.eqb_eq. exact Hteq.
-            ++ apply Bool.orb_true_iff. left. apply Nat.ltb_lt. exact Ha_lt.
+             apply Bool.andb_true_iff. split.
+             ++ apply Nat.eqb_eq. exact Hteq.
+             ++ apply Bool.orb_true_iff. left. apply Nat.ltb_lt. exact Ha_lt.
           -- apply Bool.orb_true_iff. right.
-            apply Bool.andb_true_iff. split.
-            ++ apply Nat.eqb_eq. exact Hteq.
-            ++ apply Bool.orb_true_iff. right.
+             apply Bool.andb_true_iff. split.
+             ++ apply Nat.eqb_eq. exact Hteq.
+             ++ apply Bool.orb_true_iff. right.
                 apply Bool.andb_true_iff. split.
                 ** apply Nat.eqb_eq. exact Ha_eq.
                 ** apply Nat.ltb_lt. exact Hq_lt.
   Qed.
-
-
-  (* ---------- Feasibility (boolean form) ---------- *)
 
   Definition feasibleb (b:Bid) (a:Ask) : bool :=
     Nat.leb (a_s a) (p_b b) && Nat.leb 1 (q_b b) && Nat.leb 1 (q_s a).
@@ -156,8 +101,9 @@ Module Matching.
   Lemma feasibleb_correct : forall b a, feasibleb b a = true <-> matchable b a.
   Proof.
     intros b a; unfold feasibleb, matchable.
-    repeat (rewrite andb_true_iff).
-    repeat (rewrite ?Nat.leb_le); tauto.
+    repeat rewrite andb_true_iff.
+    repeat rewrite ?Nat.leb_le.
+    tauto.
   Qed.
 
   (* ---------- Find/Best over lists ---------- *)
@@ -178,21 +124,21 @@ Module Matching.
     match Bs with
     | [] => None
     | b::t =>
-        let rest := best_feasible_bid t Ss in
-        if has_feasible_ask b Ss then best_byB rest b else rest
+        let r := best_feasible_bid t Ss in
+        if has_feasible_ask b Ss then best_byB r b else r
     end.
 
   Fixpoint best_feasible_ask_for (b:Bid) (Ss:list Ask) : option Ask :=
     match Ss with
     | [] => None
     | a::t =>
-        let rest := best_feasible_ask_for b t in
+        let r := best_feasible_ask_for b t in
         if feasibleb b a
-        then match rest with
+        then match r with
              | None => Some a
              | Some a' => if betterS a a' then Some a else Some a'
              end
-        else rest
+        else r
     end.
 
   Definition pick_best_pair (Bs:list Bid) (Ss:list Ask) : option (Bid*Ask) :=
@@ -205,300 +151,95 @@ Module Matching.
         end
     end.
 
-  (* ---------- Helper facts ---------- *)
-
-  Lemma has_feasible_ask_sound :
-    forall b Ss, has_feasible_ask b Ss = true ->
-      exists a, In a Ss /\ matchable b a.
-  Proof.
-    intros b Ss; induction Ss as [|a t IH]; cbn; intro H; try discriminate.
-    destruct (feasibleb b a) eqn:E; cbn in H.
-    - (* feasibleb b a = true *)
-      exists a; split; [left; reflexivity|].
-      apply feasibleb_correct; exact E.
-    - (* feasibleb b a = false; so H is has_feasible_ask b t = true *)
-      specialize (IH H) as [a' [Hin Hm]].
-      exists a'; split; [right; exact Hin|exact Hm].
-  Qed.
-
-
-  (* ---- best_byB: simple, correct spec (only says the winner is x or the old cur) ---- *)
-  Lemma best_byB_spec :
-    forall cur x y,
-      best_byB cur x = Some y ->
-      (y = x \/ exists z, cur = Some z /\ y = z).
-  Proof.
-    intros cur x y; destruct cur as [z|]; cbn; intro H.
-    - destruct (betterB x z) eqn:Eb; inversion H; subst; clear H.
-      + left; reflexivity.
-      + right; eexists; split; eauto.
-    - inversion H; subst; left; reflexivity.
-  Qed.
-
-  Lemma best_feasible_bid_sound :
-    forall Bs Ss b,
-      best_feasible_bid Bs Ss = Some b ->
-      In b Bs /\
-      (exists a, In a Ss /\ matchable b a) /\
-      (forall b', In b' Bs ->
-        (exists a', In a' Ss /\ matchable b' a') ->
-        b' = b \/ PriorityB b b').
-  Proof.
-    intros Bs Ss; induction Bs as [|x t IH]; cbn; intros b H; try discriminate.
-    set (r := best_feasible_bid t Ss).
-    destruct (has_feasible_ask x Ss) eqn:Hhas.
-    - (* x has some feasible ask *)
-      destruct (best_byB r x) eqn:Hbest; inversion H; subst; clear H.
-      + (* chose x *)
-        pose proof (has_feasible_ask_sound _ _ Hhas) as [a [Hina Hm]].
-        split; [left; reflexivity|].
-        split; [now eauto|].
-        intros b' HinB' Hex.
-        destruct HinB' as [->|HinT]; [left; reflexivity|].
-        (* show PriorityB x b' using the tail's best rb *)
-        destruct r as [rb|] eqn:Er; cbn in Hbest.
-        * (* r = Some rb and best_byB chose x => betterB x rb = true *)
-          rewrite Er in Hbest.
-          destruct (betterB x rb) eqn:Eb; [|discriminate].
-          pose proof (proj1 (betterB_correct _ _) Eb) as Hx_rb.
-          (* rb dominates any feasible b' in tail *)
-          specialize (IH Er) as [HinR [HexR MaxR]].
-          specialize (MaxR b' HinT Hex) as [->|Hrb_b'].
-          { left; reflexivity. }
-          { right. destruct PriorityB_strict_total as [_ [Ptrans _]].
-            eapply Ptrans; eauto. }
-        * (* r=None => tail had no feasible bidder; but Hex gives feasible b' in tail *)
-          exfalso. inversion Hex as [a' [Ina' _]]; inversion HinT.
-      + (* chose r from tail *)
-        specialize (IH eq_refl) as [HinR [HexR MaxR]].
-        split; [right; exact HinR|].
-        split; [exact HexR|].
-        intros b' HinB' Hex.
-        destruct HinB' as [Hhd|HinT].
-        * (* need PriorityB r x *)
-          destruct r as [rb|] eqn:Er; cbn in Hbest; [|discriminate].
-          rewrite Er in Hbest.
-          destruct (betterB x rb) eqn:Eb; [discriminate|].
-          (* Either rb = x or PriorityB rb x by totality; Eb=false rules out PriorityB x rb *)
-          destruct (Nat.eq_dec rb x) as [->|Hneq]; [left; reflexivity|].
-          destruct PriorityB_strict_total as [_ [_ Tot]].
-          destruct (Tot rb x Hneq) as [Hrbx | Hxrb]; [right; exact Hrbx|].
-          exfalso. apply (proj2 (betterB_correct _ _)) in Hxrb. rewrite Hxrb in Eb. discriminate.
-        * (* b' in tail: delegate to MaxR *)
-          apply MaxR; assumption.
-    - (* x has no feasible ask; drop to tail *)
-      specialize (IH H) as [HinR [HexR MaxR]].
-      split; [right; exact HinR|].
-      split; [exact HexR|].
-      intros b' HinB' Hex.
-      destruct HinB' as [Hhd|HinT].
-      + (* contradiction: Hhas=false but b'=x has feasible *)
-        inversion Hex as [a' [Ina' Hm]].
-        clear - Hhas Ina' Hm.
-        revert Ina' Hm Hhas.
-        induction Ss as [|a0 ts IHs]; cbn; intros; [inversion Ina'|].
-        destruct Ina' as [->|Hin]; [rewrite (proj2 (feasibleb_correct _ _)) in *; congruence|].
-        destruct (feasibleb x a0); auto.
-      + apply MaxR; assumption.
-  Qed.
+    Lemma best_byB_spec :
+      forall cur x y,
+        best_byB cur x = Some y ->
+        (y = x \/ exists z, cur = Some z /\ y = z).
+    Proof.
+      intros cur x y H.
+      destruct cur as [z|] eqn:Ez.
+      - (* cur = Some z *)
+        simpl in H.
+        destruct (betterB x z) eqn:E.
+        + inversion H; subst. left; reflexivity.
+        + inversion H; subst. right; exists z; split; [reflexivity | reflexivity].
+      - (* cur = None *)
+        simpl in H. inversion H; subst. left; reflexivity.
+    Qed.
 
 
-  (* ---------- “Best” feasible ask FOR fixed b: presence + minimality ---------- *)
-
-  Lemma best_feasible_ask_for_sound :
-    forall Ss b a,
-      best_feasible_ask_for b Ss = Some a ->
-      In a Ss /\ matchable b a /\
-      (forall a', In a' Ss -> matchable b a' -> a' = a \/ PriorityS a a').
-  Proof.
-    intros Ss b; induction Ss as [|x t IH]; cbn; intros a H; try discriminate.
-    destruct (feasibleb b x) eqn:Efx.
-    - destruct (best_feasible_ask_for b t) eqn:Er.
-      + destruct (betterS x a0) eqn:Ecmp; inversion H; subst; clear H.
-        * split; [left; reflexivity|].
-          split; [apply feasibleb_correct; exact Efx|].
-          intros a' Ina' Hm.
-          destruct Ina' as [->|Hin].
-          { left; reflexivity. }
-          apply IH in Er as [HinA0 [HmA0 MaxA0]].
-          right.
-          (* a dominates a0 or equal; and a0 dominates any feasible from tail *)
-          apply (proj1 (betterS_correct _ _)) in Ecmp.
-          destruct PriorityS_strict_total as [_ [Ptrans _]].
-          destruct (MaxA0 a' Hin Hm) as [->|Ha0].
-          - exact Ecmp.
-          - eapply Ptrans; eauto.
-        * inversion H; subst; clear H.
-          apply IH in Er as [HinA0 [HmA0 MaxA0]].
-          split; [right; exact HinA0|].
-          split; [exact HmA0|].
-          intros a' Ina' Hm.
-          destruct Ina' as [->|Hin']; [left; reflexivity|].
-          apply MaxA0; assumption.
-      + inversion H; subst; clear H.
-        split; [left; reflexivity|].
-        split; [apply feasibleb_correct; exact Efx|].
-        intros a' Ina' Hm.
-        destruct Ina' as [->|Hin]; [left; reflexivity|].
-        (* impossible: if some a' in tail feasible, the recursive call would not be None *)
-        exfalso. revert Hin Hm Er. induction t; cbn; intros; [inversion Hin|].
-        destruct Hin as [->|Hin'].
-        { rewrite (proj2 (feasibleb_correct _ _)) in Hm. congruence. }
-        apply IHt; auto.
-    - apply IH in H as [Hin [Hm Max]].
-      split; [right; exact Hin|].
-      split; [exact Hm|].
-      intros a' Ina' Hm'.
-      apply Max; auto.
-  Qed.
-
-  (* Combined soundness for the (b,a) pair *)
-  Lemma pick_best_pair_sound :
-    forall Bs Ss b a,
-      pick_best_pair Bs Ss = Some (b,a) ->
-      In b Bs /\ In a Ss /\ matchable b a /\
-      (forall b', In b' Bs -> (exists a', In a' Ss /\ matchable b' a') ->
-         b' = b \/ PriorityB b b') /\
-      (forall a', In a' Ss -> matchable b a' ->
-         a' = a \/ PriorityS a a').
-  Proof.
-    intros Bs Ss b a.
-    unfold pick_best_pair.
-    destruct (best_feasible_bid Bs Ss) eqn:Eb; try discriminate.
-    destruct (best_feasible_ask_for b0 Ss) eqn:Ea; try discriminate.
-    inversion 1; subst; clear 1.
-    pose proof (best_feasible_bid_sound _ _ _ Eb) as [HinB [HexB MaxB]].
-    pose proof (best_feasible_ask_for_sound _ _ _ Ea) as [HinA [FeasA MaxA]].
-    repeat split; auto.
-  Qed.
-
-  (* ---------- Greedy Step, invariants, and termination ---------- *)
-
-  Inductive Step : State -> State -> Prop :=
-  | step_match :
-      forall Bs Ss M b a
-        (Hp : pick_best_pair Bs Ss = Some (b,a)),
-      let q := q_ij b a in
-      q > 0 ->
-      let Bs' := replace_opt_bid b (dec_bid b q) Bs in
-      let Ss' := replace_opt_ask a (dec_ask a q) Ss in
-      Step
-        {| Bids := Bs; Asks := Ss; Mt := M |}
-        {| Bids := Bs'; Asks := Ss'; Mt := M ++ [{| mb:=b; ma:=a; mq:=q |}] |}.
-
-  Lemma step_monotone :
-    forall s1 s2, Step s1 s2 -> monotone_Mt (Mt s1) (Mt s2).
-  Proof.
-    intros [Bs Ss M] [Bs' Ss' M'] H; inversion H; subst; simpl.
-    unfold monotone_Mt; intros m Hin; apply in_or_app; now left.
-  Qed.
-
-  Lemma step_adds_feasible :
-    forall s1 s2, Step s1 s2 -> exists m, In m (Mt s2) /\ feasible_match m.
-  Proof.
-    intros [Bs Ss M] [Bs' Ss' M'] H; inversion H; subst; simpl.
-    eexists; split; [apply in_or_app; right; simpl; auto|].
-    unfold feasible_match; split.
-    - destruct (pick_best_pair_sound _ _ _ _ Hp) as [_ [_ Hfeas _]]; exact Hfeas.
-    - reflexivity.
-  Qed.
-
-  Inductive Steps : State -> State -> Prop :=
-  | steps_refl : forall s, Steps s s
-  | steps_cons : forall s1 s2 s3, Step s1 s2 -> Steps s2 s3 -> Steps s1 s3.
-
-  Lemma steps_monotone :
-    forall s1 s2, Steps s1 s2 -> monotone_Mt (Mt s1) (Mt s2).
-  Proof.
-    intros s1 s2 H; induction H; cbn; try (intros m Hin; exact Hin).
-    intros m Hin. eapply IHSteps, step_monotone; eauto.
-  Qed.
-
-  Definition Terminal (s:State) : Prop :=
-    forall b a, In b (Bids s) -> In a (Asks s) -> ~ matchable b a.
-
-  Definition measure (s:State) : nat :=
-    (fold_left (fun acc b => acc + q_b b) (Bids s) 0) +
-    (fold_left (fun acc a => acc + q_s a) (Asks s) 0).
-
-  Lemma step_decreases_measure :
-    forall s1 s2, Step s1 s2 -> measure s2 < measure s1.
-  Proof.
-    intros [Bs Ss M] [Bs' Ss' M'] H; inversion H; subst; cbn.
-    set (q := q_ij b a).
-    assert (q>0) by auto.
-    assert (q<=q_b b) by (apply Nat.min_l; lia).
-    assert (q<=q_s a) by (apply Nat.min_r; lia).
-    lia.
-  Qed.
-
-
-
-  (* If a feasible pair exists, the best picker finds one *)
-  Lemma pick_best_pair_exists :
-    forall Bs Ss,
-      (exists b a, In b Bs /\ In a Ss /\ matchable b a) ->
-      exists b a, pick_best_pair Bs Ss = Some (b,a).
-  Proof.
-    intros Bs Ss [b [a [HinB [HinA Hm]]]].
-    (* best_feasible_bid is Some: witness b *)
-    assert (has_feasible_ask b Ss = true) as Hhas.
-    { unfold has_feasible_ask.
-      revert HinA Hm. induction Ss as [|x t IH]; cbn; intros; [inversion HinA|].
-      destruct HinA as [->|Hin]; [rewrite (proj2 (feasibleb_correct _ _)); auto|].
-      destruct (feasibleb b x); auto. }
-    (* hence best_feasible_bid returns Some *)
-    assert (exists b0, best_feasible_bid Bs Ss = Some b0) as [b0 Eb].
-    { clear - Bs Ss b HinB Hhas.
-      revert b HinB Hhas.
-      induction Bs as [|x t IH]; cbn; intros; [inversion HinB|].
-      destruct HinB as [->|Hin].
-      - rewrite Hhas. destruct (best_feasible_bid t Ss); eauto.
-      - specialize (IH _ Hin Hhas) as [bb Eb]. rewrite Eb.
-        destruct (has_feasible_ask x Ss); destruct (best_byB (Some bb) x); eauto. }
-    (* then best_feasible_ask_for that b0 is Some by soundness *)
-    destruct (best_feasible_ask_for b0 Ss) eqn:Ea.
-    - eexists; eexists; reflexivity.
-    - (* impossible: soundness says chosen b0 has some feasible a *)
-      exfalso.
-      pose proof (best_feasible_bid_sound _ _ _ Eb) as [_ [Hex _]].
-      destruct Hex as [a0 [Ina0 Hm0]].
-      clear - Ea Ina0 Hm0.
-      revert Ina0 Hm0 Ea. induction Ss; cbn; intros; [inversion Ina0|].
-      destruct Ina0 as [->|Hin]; [ rewrite (proj2 (feasibleb_correct _ _)) in Hm0; congruence |].
-      destruct (feasibleb b0 a); eauto.
-  Qed.
-
-  Lemma step_or_terminal :
-    forall s, (exists s', Step s s') \/ Terminal s.
-  Proof.
-    intros [Bs Ss M]; cbn.
-    destruct (classic (exists b a, In b Bs /\ In a Ss /\ matchable b a)) as [Hex|Hnone].
-    - left. destruct (pick_best_pair_exists _ _ Hex) as [b [a Hp]].
-      eexists. econstructor; eauto; cbn; lia.
-    - right. intros b a Hb Ha Hm. apply Hnone.
-      exists b, a; repeat split; auto.
-  Qed.
-
-  Theorem termination_exists :
-    forall s0, exists sT, Steps s0 sT /\ Terminal sT.
-  Proof.
-    intros s0. remember (measure s0) as n.
-    revert s0 Heqn. induction n as [|n IH]; intros s Heq.
-    - exists s. split; [constructor|].
-      intros b a Hb Ha [H _]; lia.
-    - destruct (step_or_terminal s) as [[s' Hstep] | Hterm].
-      + assert (measure s' < measure s) by (eapply step_decreases_measure; eauto).
-        assert (measure s' <= n) by lia.
-        destruct (IH s' eq_refl) as [sT [Hst HT]].
-        eexists. split; [econstructor; eauto|exact HT].
-      + eexists. split; [constructor|exact Hterm].
-  Qed.
-
-  Theorem no_feasible_pairs_at_terminal :
-    forall sT, Terminal sT ->
-      forall b a, In b (Bids sT) -> In a (Asks sT) -> ~ matchable b a.
-  Proof. exact (fun sT Hterm => Hterm). Qed.
+    Lemma best_feasible_bid_sound :
+      forall Bs Ss b,
+        best_feasible_bid Bs Ss = Some b ->
+        In b Bs /\
+        (exists a, In a Ss /\ matchable b a) /\
+        (forall b', In b' Bs ->
+          (exists a', In a' Ss /\ matchable b' a') ->
+          b' = b \/ PriorityB b b').
+    Proof.
+      intros Bs Ss.
+      induction Bs as [|x t IH]; cbn; intros b H; try discriminate.
+      remember (best_feasible_bid t Ss) as r eqn:Er.
+      destruct (has_feasible_ask x Ss) eqn:Hhas.
+      - (* Case: x has feasible ask *)
+        destruct (best_byB r x) eqn:Hbest; inversion H; subst.
+        destruct (best_byB_spec _ _ _ Hbest) as [Heq | [z [Hcur Hz]]].
+        + (* Subcase: winner is x *)
+          subst.
+          pose proof (has_feasible_ask_sound _ _ Hhas) as [a [Hin Hm]].
+          split; [left; reflexivity|].
+          split; [eauto|].
+          intros b' Hb' Hex'.
+          destruct Hb' as [->|HinT]; [left; reflexivity|].
+          destruct r as [rb|] eqn:Erb.
+          * rewrite Erb in Hbest.
+            destruct (betterB x rb) eqn:Eb; try discriminate.
+            apply betterB_correct in Eb as Pxrb.
+            destruct (IH _ Erb) as [_ [_ MaxR]].
+            destruct (MaxR b' HinT Hex') as [->|Hrbb'].
+            -- left; reflexivity.
+            -- right. destruct PriorityB_strict_total as [_ [Ptrans _]].
+              eapply Ptrans; eauto.
+          * (* r = None, contradiction with feasible b' *)
+            inversion Hex' as [a' [HinA _]].
+            inversion HinT.
+        + (* Subcase: winner is from r *)
+          subst y.
+          specialize (IH _ Hcur) as [Hin [Hex MaxR]].
+          split; [right; exact Hin|].
+          split; [exact Hex|].
+          intros b' Hb' Hex'.
+          destruct Hb' as [Hb'|HinT].
+          * rewrite Hcur in Hbest.
+            destruct (betterB x z) eqn:Eb; try discriminate.
+            destruct (Nat.eq_dec y x) as [->|Hneq].
+            -- left; reflexivity.
+            -- destruct PriorityB_strict_total as [_ [_ Tot]].
+              destruct (Tot y x Hneq) as [Hyx | Hxy].
+              ++ right; exact Hyx.
+              ++ exfalso.
+                  apply (proj2 (betterB_correct _ _)) in Hxy.
+                  rewrite Hxy in Eb. discriminate.
+          * apply MaxR; exact HinT; exact Hex'.
+      - (* Case: x has no feasible ask, drop to tail *)
+        destruct (best_feasible_bid t Ss) as [rb|] eqn:Erb; rewrite Erb in H; cbn in H.
+        + inversion H; subst.
+          specialize (IH _ Erb) as [Hin [Hex MaxR]].
+          split; [right; exact Hin|].
+          split; [exact Hex|].
+          intros b' Hb' Hex'.
+          destruct Hb' as [Hb'|HinT].
+          * (* contradiction: Hhas = false but x is feasible *)
+            inversion Hex' as [a' [HinA Hm']].
+            clear - Hhas HinA Hm'.
+            revert HinA Hm' Hhas.
+            induction Ss as [|a0 ts IHs]; cbn; intros; [inversion HinA|].
+            destruct HinA as [->|Hin'].
+            -- rewrite (proj2 (feasibleb_correct _ _)) in Hhas; congruence.
+            -- destruct (feasibleb x a0); auto.
+          * apply MaxR; auto.
+        + discriminate.
+    Qed.
 
 End Matching.
 
