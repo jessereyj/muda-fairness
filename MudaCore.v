@@ -1,114 +1,129 @@
-  From Coq Require Import List Arith Lia.
-  Import ListNotations.
+From Coq Require Import List Arith Lia.
+Import ListNotations.
 
-  Module Type CORE.
-    Parameter Buyer Seller : Type.
+(* Define Exhaustion OUTSIDE module to avoid signature issues *)
+Inductive Exhaustion : Type :=
+| BuyerExhausted : Exhaustion
+| SellerExhausted : Exhaustion
+| BothExhausted : Exhaustion.
 
-    Record Bid := {
-      b_agent : Buyer;
-      p_b : nat;  (* price (discretized) *)
-      q_b : nat;  (* quantity (N) *)
-      t_b : nat   (* timestamp (N) *)
-    }.
+Module Type CORE.
+  Parameter Buyer Seller : Type.
 
-    Record Ask := {
-      s_agent : Seller;
-      a_s : nat;  (* ask price (discretized) *)
-      q_s : nat;  (* quantity (N) *)
-      t_s : nat   (* timestamp (N) *)
-    }.
+  (* Bid tuple: (price, quantity, timestamp) - Definition 3.1.1 *)
+  Record Bid := {
+    b_agent : Buyer;
+    p_b : nat;
+    q_b : nat;
+    t_b : nat
+  }.
 
-    (* Feasibility (Def. 3.1.1) *)
-    Definition matchable (B:Bid) (A:Ask) : Prop :=
-      p_b B >= a_s A /\ q_b B > 0 /\ q_s A > 0.
+  (* Ask tuple: (price, quantity, timestamp) - Definition 3.1.1 *)
+  Record Ask := {
+    s_agent : Seller;
+    a_s : nat;
+    q_s : nat;
+    t_s : nat
+  }.
 
-    (* Matched quantity (Def. 3.1.2) *)
-    Definition q_ij (B:Bid) (A:Ask) : nat :=
-      Nat.min (q_b B) (q_s A).
+  (* Feasibility - Definition 3.1.1 *)
+  Definition matchable (B:Bid) (A:Ask) : Prop :=
+    p_b B >= a_s A /\ q_b B > 0 /\ q_s A > 0.
 
-    Record Match := {
-      mb : Bid;
-      ma : Ask;
-      mq : nat
-    }.
+  (* Trade quantity - Definition 3.1.2 *)
+  Definition q_ij (B:Bid) (A:Ask) : nat :=
+    Nat.min (q_b B) (q_s A).
 
-    (* Auction state = order books + executed matches Mt *)
-    Record State := {
-      Bids : list Bid;
-      Asks : list Ask;
-      Mt   : list Match
-    }.
+  (* Match record *)
+  Record Match := {
+    mb : Bid;
+    ma : Ask;
+    mq : nat
+  }.
 
-    (* Exact association: the match uses precisely these orders *)
-    Definition uses_bid_of (m:Match) (b:Bid) : Prop := mb m = b.
-    Definition uses_ask_of (m:Match) (a:Ask) : Prop := ma m = a.
+  (* Auction state with residual tracking *)
+  Record State := {
+    Bids : list Bid;
+    Asks : list Ask;
+    Mt   : list Match;
+    marginal_pair : option (Bid * Ask * Exhaustion);
+    step_number : nat
+  }.
 
-    (* Per-order logical bounds (Defs. 3.1.6–3.1.7) *)
-    Definition per_buyer_bound (M:list Match) : Prop :=
-      forall (b:Bid) (m:Match), In m M -> uses_bid_of m b -> mq m <= q_b b.
+  (* Initial state - Protocol Step P₁ *)
+  Definition init_state (bs:list Bid) (as_list:list Ask) : State :=
+    {| Bids := bs; Asks := as_list; Mt := []; 
+       marginal_pair := None; step_number := 0 |}.
 
-    Definition per_seller_bound (M:list Match) : Prop :=
-      forall (a:Ask) (m:Match), In m M -> uses_ask_of m a -> mq m <= q_s a.
+  (* Feasible match construction *)
+  Definition feasible_match (m:Match) : Prop :=
+    matchable (mb m) (ma m) /\ mq m = q_ij (mb m) (ma m).
 
-    (* Feasible match in Mt construction *)
-    Definition feasible_match (m:Match) : Prop :=
-      matchable (mb m) (ma m) /\ mq m = q_ij (mb m) (ma m).
+  (* Monotonicity - Definition 3.1.7 *)
+  Definition monotone_Mt (M N:list Match) : Prop :=
+    forall m, In m M -> In m N.
 
-    (* Monotonicity of the executed-match ledger *)
-    Definition monotone_Mt (M N:list Match) : Prop :=
-      forall m, In m M -> In m N.
-  End CORE.
+  (* Quantity bounds - Definition 3.1.5 *)
+  Definition per_buyer_bound (M:list Match) : Prop :=
+    forall (b:Bid) (m:Match), In m M -> mb m = b -> mq m <= q_b b.
 
-  Module Core <: CORE.
-    Definition Buyer := nat.
-    Definition Seller := nat.
+  Definition per_seller_bound (M:list Match) : Prop :=
+    forall (a:Ask) (m:Match), In m M -> ma m = a -> mq m <= q_s a.
+End CORE.
 
-    Record Bid := {
-      b_agent : Buyer;
-      p_b : nat;
-      q_b : nat;
-      t_b : nat
-    }.
+Module Core <: CORE.
+  Definition Buyer := nat.
+  Definition Seller := nat.
 
-    Record Ask := {
-      s_agent : Seller;
-      a_s : nat;
-      q_s : nat;
-      t_s : nat
-    }.
+  Record Bid := {
+    b_agent : Buyer;
+    p_b : nat;
+    q_b : nat;
+    t_b : nat
+  }.
 
-    Definition matchable (B:Bid) (A:Ask) : Prop :=
-      p_b B >= a_s A /\ q_b B > 0 /\ q_s A > 0.
+  Record Ask := {
+    s_agent : Seller;
+    a_s : nat;
+    q_s : nat;
+    t_s : nat
+  }.
 
-    Definition q_ij (B:Bid) (A:Ask) : nat :=
-      Nat.min (q_b B) (q_s A).
+  Definition matchable (B:Bid) (A:Ask) : Prop :=
+    p_b B >= a_s A /\ q_b B > 0 /\ q_s A > 0.
 
-    Record Match := {
-      mb : Bid;
-      ma : Ask;
-      mq : nat
-    }.
+  Definition q_ij (B:Bid) (A:Ask) : nat :=
+    Nat.min (q_b B) (q_s A).
 
-    Record State := {
-      Bids : list Bid;
-      Asks : list Ask;
-      Mt   : list Match
-    }.
+  Record Match := {
+    mb : Bid;
+    ma : Ask;
+    mq : nat
+  }.
 
-    Definition uses_bid_of (m:Match) (b:Bid) : Prop := mb m = b.
-    Definition uses_ask_of (m:Match) (a:Ask) : Prop := ma m = a.
+  Record State := {
+    Bids : list Bid;
+    Asks : list Ask;
+    Mt   : list Match;
+    marginal_pair : option (Bid * Ask * Exhaustion);
+    step_number : nat
+  }.
 
-    Definition per_buyer_bound (M:list Match) : Prop :=
-      forall (b:Bid) (m:Match), In m M -> uses_bid_of m b -> mq m <= q_b b.
+  Definition init_state (bs:list Bid) (as_list:list Ask) : State :=
+    {| Bids := bs; Asks := as_list; Mt := []; 
+       marginal_pair := None; step_number := 0 |}.
 
-    Definition per_seller_bound (M:list Match) : Prop :=
-      forall (a:Ask) (m:Match), In m M -> uses_ask_of m a -> mq m <= q_s a.
+  Definition feasible_match (m:Match) : Prop :=
+    matchable (mb m) (ma m) /\ mq m = q_ij (mb m) (ma m).
 
-    Definition feasible_match (m:Match) : Prop :=
-      matchable (mb m) (ma m) /\ mq m = q_ij (mb m) (ma m).
+  Definition monotone_Mt (M N:list Match) : Prop :=
+    forall m, In m M -> In m N.
 
-    Definition monotone_Mt (M N:list Match) : Prop :=
-      forall m, In m M -> In m N.
-  End Core.
+  Definition per_buyer_bound (M:list Match) : Prop :=
+    forall (b:Bid) (m:Match), In m M -> mb m = b -> mq m <= q_b b.
 
-  Export Core.
+  Definition per_seller_bound (M:list Match) : Prop :=
+    forall (a:Ask) (m:Match), In m M -> ma m = a -> mq m <= q_s a.
+End Core.
+
+Export Core.

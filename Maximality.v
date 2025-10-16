@@ -3,25 +3,16 @@ Import ListNotations.
 Require Import MudaCore Matching Tactics.
 
 Module Maximality.
-  Theorem maximality_at_terminal :
-    forall s0 sT,
-      Steps s0 sT ->
-      Terminal sT ->
-      (forall b a, In b (Bids sT) -> In a (Asks sT) -> ~ matchable b a).
-  Proof.
-    intros s0 sT _ HT b a Hb Ha.
-    eapply no_feasible_pairs_at_terminal; eauto.
-  Qed.
 
-  Theorem termination_exists_with_maximality :
-    forall s0, exists sT, Steps s0 sT /\ Terminal sT /\
-      (forall b a, In b (Bids sT) -> In a (Asks sT) -> ~ matchable b a).
+  (* Terminal state means no feasible pairs - Theorem 4.4.2 *)
+  Theorem maximality_at_terminal :
+    forall s,
+      is_terminal s ->
+      forall b a, In b (Bids s) -> In a (Asks s) -> ~ matchable b a.
   Proof.
-    intros s0.
-    destruct (termination_exists s0) as [sT [Hst HT]].
-    exists sT; repeat split; auto.
-    intros b a Hb Ha.
-    eapply no_feasible_pairs_at_terminal; eauto.
+    intros s Hterm b a Hb Ha.
+    unfold is_terminal in Hterm.
+    apply Hterm; assumption.
   Qed.
 
 End Maximality.

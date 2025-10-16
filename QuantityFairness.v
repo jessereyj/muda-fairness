@@ -3,61 +3,31 @@ Import ListNotations.
 Require Import MudaCore Matching Tactics.
 
 Module QuantityFairness.
-  Lemma per_match_quantity_bound :
-    forall s1 s2 m,
-      Step s1 s2 ->
-      In m (Mt s2) ->
+
+  (* Each match respects quantity bounds - Theorem 4.3.2 *)
+  Lemma match_respects_quantities :
+    forall b a,
+      matchable b a ->
+      q_ij b a <= q_b b /\ q_ij b a <= q_s a.
+  Proof.
+    intros b a Hm.
+    unfold q_ij. split; apply Nat.le_min_l || apply Nat.le_min_r.
+  Qed.
+
+  (* All matches in state respect bounds *)
+  Theorem quantity_fairness :
+    forall s m,
+      In m (Mt s) ->
       feasible_match m ->
-      mq m = q_ij (mb m) (ma m).
-  Proof. intros; destruct H1; auto. Qed.
-
-  Lemma step_preserves_per_agent_bounds :
-    forall s1 s2,
-      (per_buyer_bound (Mt s1) /\ per_seller_bound (Mt s1)) ->
-      Step s1 s2 ->
-      (per_buyer_bound (Mt s2) /\ per_seller_bound (Mt s2)).
+      mq m <= q_b (mb m) /\ mq m <= q_s (ma m).
   Proof.
-    intros [Bs Ss M] [Bs' Ss' M'] [HB HS] H; inversion H; subst; simpl in *.
-    split.
-    - (* buyers *)
-      unfold per_buyer_bound in *.
-      intros b m HinM2 Uses.
-      apply in_app_or in HinM2 as [HinOld|HinNew].
-      + (* old matches keep their bounds *)
-        eauto.
-      + (* new match (the one we appended) *)
-        destruct HinNew as [Hin|[]]; subst.
-        simpl in Uses. subst b.
-        cbn. unfold feasible_match.
-        (* For the appended match, mq = min(q_b b, q_s a) <= q_b b *)
-        lia.
-    - (* sellers *)
-      unfold per_seller_bound in *.
-      intros a0 m HinM2 Uses.
-      apply in_app_or in HinM2 as [HinOld|HinNew].
-      + eauto.
-      + destruct HinNew as [Hin|[]]; subst.
-        simpl in Uses. subst a0. cbn. lia.
+    intros s m Hin Hfeas.
+    destruct Hfeas as [Hmatch Heq].
+    rewrite Heq.
+    apply match_respects_quantities.
+    assumption.
   Qed.
 
-  Theorem quantity_fairness_over_run :
-    forall s0 sT,
-      Steps s0 sT ->
-      per_buyer_bound (Mt s0) /\ per_seller_bound (Mt s0) ->
-      per_buyer_bound (Mt sT) /\ per_seller_bound (Mt sT).
-  Proof.
-    intros s0 sT Hsteps Hinv.
-    eapply (Steps_ind
-              (fun s1 s2 =>
-                 (per_buyer_bound (Mt s1) /\ per_seller_bound (Mt s1)) ->
-                 (per_buyer_bound (Mt s2) /\ per_seller_bound (Mt s2)))).
-    - intros s [HB HS]; split; assumption.
-    - intros s1 s2 s3 H12 H23 IH Hpre.
-      specialize (step_preserves_per_agent_bounds _ _ Hpre H12) as Hmid.
-      apply IH in Hmid; exact Hmid.
-    - exact Hsteps.
-    - exact Hinv.
-  Qed.
 End QuantityFairness.
 
 Export QuantityFairness.

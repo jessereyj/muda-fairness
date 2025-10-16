@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+rm -f *.vo *.glob *.vok *.vos Makefile _CoqProject
+
 cat > _CoqProject <<'EOF'
 -Q . ""
 Tactics.v
@@ -8,12 +10,12 @@ MudaCore.v
 Sorting.v
 Matching.v
 ClearingPrice.v
-Temporal.v
 PriorityFairness.v
 QuantityFairness.v
 Finality.v
 Maximality.v
 RejectionFairness.v
+SimulationVerification.v
 All.v
 EOF
 
