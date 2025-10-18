@@ -1,13 +1,38 @@
--Q . ""
-Tactics.v
-MudaCore.v
-Sorting.v
-Matching.v
-ClearingPrice.v
-PriorityFairness.v
-QuantityFairness.v
-Finality.v
-Maximality.v
-RejectionFairness.v
-SimulationVerification.v
-All.v
+-R . MudaFairness
+
+# Base utilities
+Base/Prelude.v
+Base/Tactics.v
+Base/Finite.v
+
+# Logic framework
+#Logic/Semantics.v
+#Logic/Hoare.v
+#Logic/Meta/Consistency.v
+#Logic/Meta/Soundness.v
+#Logic/Meta/Completeness.v
+
+# MUDA model
+#Muda/Core.v
+#Muda/Sorting.v
+#Muda/Matching.v
+#Muda/ClearingPrice.v
+#Muda/Specs/MatchingSpec.v
+#Muda/Specs/ClearingPriceSpec.v
+
+# Core lemmas + fairness theorems
+#Proofs/CoreLemmas.v
+#Proofs/PriorityFairness.v
+#Proofs/QuantityFairness.v
+#Proofs/Finality.v
+#Proofs/Maximality.v
+#Proofs/RejectionFairness.v
+
+# Scenarios (Cases)
+#Cases/Scenarios.v
+#Cases/Verification.v
+
+# Aggregates
+#Aggregates/MUDAProgram.v
+#Aggregates/AllFairness.v
+#Aggregates/All.v
