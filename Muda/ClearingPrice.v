@@ -1,47 +1,53 @@
-From Coq Require Import List Arith Lia.
+(** * MUDA Clearing Price (Phase P4)
+    Uniform price determination.
+*)
+
+Require Import Coq.Lists.List.
+Require Import Coq.Arith.Arith.
+Require Import Coq.micromega.Lia.
+Require Import MUDA.MUDA.Types.
+Require Import MUDA.MUDA.State.
+Require Import MUDA.MUDA.Matching.
 Import ListNotations.
-Require Import MudaCore Matching Tactics.
 
-Module ClearingPrice.
+(* --- NEW: define marginal_pair here (latest match is at head) --- *)
+Definition marginal_pair (s : State) : option (Bid * Ask) :=
+  match matches s with
+  | [] => None
+  | m :: _ => Some (matched_bid m, matched_ask m)
+  end.
 
-  (* Clearing price - Definition 3.1.9 *)
-  Definition clearing_price (s:State) : option nat :=
-    match marginal_pair s with
-    | None => None
-    | Some (b, a, exhaustion) =>
-        match exhaustion with
-        | BuyerExhausted => Some (p_b b)    (* Buyer exhausted -> use bid *)
-        | SellerExhausted => Some (a_s a)   (* Seller exhausted -> use ask *)
-        | BothExhausted => Some (p_b b)     (* Both exhausted -> use bid *)
-        end
-    end.
+(* Uniform Price Rule *)
+Definition determine_clearing_price (s : State) : option nat :=
+  match marginal_pair s with
+  | None => None
+  | Some (b, a) =>
+      let eb := (residual_bid b (matches s) =? 0) in
+      let ea := (residual_ask a (matches s) =? 0) in
+      if eb && ea then Some (price b)
+      else if eb then Some (price b)
+      else if ea then Some (ask_price a)
+      else Some (price b) (* conservative; should not happen if pair is marginal *)
+  end.
 
-  (* Clearing price bounds - Lemma 4.2.4 *)
-  Lemma clearing_price_bounds :
-    forall s b a ex,
-      marginal_pair s = Some (b, a, ex) ->
-      matchable b a ->
-      match clearing_price s with
-      | Some c => a_s a <= c <= p_b b
-      | None => False
-      end.
-  Proof.
-    intros s b a ex Hmarg Hfeas.
-    unfold clearing_price. rewrite Hmarg.
-    destruct ex; simpl; destruct Hfeas as [Hge _]; lia.
-  Qed.
+(* Phase P4 transition *)
+Definition do_clearing_price (s : State) : State :=
+  {| bids := bids s
+   ; asks := asks s
+   ; matches := matches s
+   ; clearing_price := determine_clearing_price s
+   ; phase := P5 |}.
 
-  (* Clearing price uniqueness *)
-  Lemma clearing_price_unique :
-    forall s c1 c2,
-      clearing_price s = Some c1 ->
-      clearing_price s = Some c2 ->
-      c1 = c2.
-  Proof.
-    intros s c1 c2 H1 H2.
-    rewrite H1 in H2. inversion H2. reflexivity.
-  Qed.
-
-End ClearingPrice.
-
-Export ClearingPrice.
+(* Bounds: a(s*) ≤ c ≤ p(b*) *)
+Lemma clearing_price_bounds : forall s b a c,
+  marginal_pair s = Some (b, a) ->
+  determine_clearing_price s = Some c ->
+  ask_price a <= c <= price b.
+Proof.
+  intros s b a c Hm Hc.
+  unfold determine_clearing_price in Hc; rewrite Hm in Hc.
+  remember (residual_bid b (matches s) =? 0) as eb.
+  remember (residual_ask a (matches s) =? 0) as ea.
+  (* All branches set c to either price b or ask_price a. *)
+  destruct eb, ea; inversion Hc; subst; simpl; lia.
+Qed.
