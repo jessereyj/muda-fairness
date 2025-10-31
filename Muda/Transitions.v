@@ -1,6 +1,5 @@
-(** * MUDA Transitions
-    
-    Complete state transition system.
+(** * MUDA/Transitions.v
+     Complete state transition system.
 *)
 From Stdlib Require Import List Lia.
 Import ListNotations.

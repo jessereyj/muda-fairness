@@ -1,3 +1,4 @@
+(*  MUDA/Eqb.v *)
 From Stdlib Require Export Arith List Bool.
 Local Open Scope bool_scope.
 

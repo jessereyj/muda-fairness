@@ -1,4 +1,4 @@
-(** * MUDA Clearing Price (Phase P4)
+(** * MUDA/ClearingPrice.v (Phase P4)
     Uniform price determination.*)
 
 From Stdlib Require Import Arith List Lia.
