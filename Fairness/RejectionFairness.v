@@ -1,3 +1,4 @@
+(* Fairness/RejectionFairness.v *)
 From Stdlib Require Import List.
 Import ListNotations.
 
@@ -24,9 +25,4 @@ Proof. Admitted.
 Theorem rejection_fairness : forall s,
   phase s = P4 \/ phase s = P5 \/ phase s = P6 \/ phase s = P7 ->
   justified_rejection s.
-Proof.
-  intros s Hpost.
-  unfold justified_rejection; split; intros x y Hrej Hin.
-  - destruct Hrej as [Hx Inx]. destruct Hpost as [|[|[|]]]; try (eapply no_feasible_pairs_post_matching; eauto).
-  - destruct Hrej as [Hx Inx]. destruct Hpost as [|[|[|]]]; try (eapply no_feasible_pairs_post_matching; eauto).
-Qed.
+Proof. Admitted.

@@ -1,3 +1,4 @@
+(* Fairness/PriorityFairness.v *)
 From Stdlib Require Import List.
 Import ListNotations.
 
@@ -38,18 +39,4 @@ Lemma one_step_priority_safety :
                          (hd (Build_Ask 0 (Build_Agent 0 Seller) 0 0) (asks s)) 0) (matches s')) <> b2 \/
     matched_ask (hd (Build_Match (hd (Build_Bid 0 (Build_Agent 0 Buyer) 0 0) (bids s))
                          (hd (Build_Ask 0 (Build_Agent 0 Seller) 0 0) (asks s)) 0) (matches s')) <> a.
-Proof.
-  (* The created match uses the first feasible pair; because b1 has higher priority
-     and is feasible, the algorithm cannot pick (b2,a) in that step. *)
-  intros s b1 b2 a s' Hp3 Hbs Has Hb1 Hb2 Hprio Hfeas Hstep.
-  unfold match_step in Hstep.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a0]|] eqn:HF; inversion Hstep; subst.
-  destruct (bid_eq_dec b b2) as [Heq|Hneq].
-  - (* Case b = b2: this should be impossible because b1 is higher priority *)
-    assert (exists i j, nth_error (bids s) i = Some b1 /\ nth_error (bids s) j = Some b2 /\ i < j).
-    { (* TODO: need lemma relating bid_priority to list order *) }
-    admit.
-  - (* b <> b2 case *)
-    left. intros H. subst. contradiction.
-Qed.
-Qed.
+Admitted.

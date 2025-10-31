@@ -5,6 +5,7 @@
 From Stdlib Require Import List Lia.
 Import ListNotations.
 
+From LTL Require Import Semantics.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
 (** ** Phase Transitions *)
@@ -65,8 +66,6 @@ Lemma step_monotone_matches : forall s,
 Admitted.
 
 (** ** Stuttering Extension for LTL *)
-
-Require Import LTL.Semantics.
 
 (* Convert finite execution to infinite trace with stuttering *)
 CoFixpoint stutter (s : State) : trace :=

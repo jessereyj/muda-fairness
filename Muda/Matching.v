@@ -1,5 +1,4 @@
-From Stdlib Require Import Arith List Bool Lia PeanoNat.
-From Stdlib Require Import Bool Lia.
+From Stdlib Require Import Arith List Bool PeanoNat Bool Lia.
 From MUDA Require Import Eqb Types State.
 Import ListNotations.
 Local Open Scope nat_scope.
