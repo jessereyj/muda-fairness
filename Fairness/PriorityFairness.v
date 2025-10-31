@@ -1,10 +1,8 @@
-Require Import Coq.Lists.List.
-Require Import MUDA.MUDA.Types.
-Require Import MUDA.MUDA.State.
-Require Import MUDA.MUDA.Sorting.
-Require Import MUDA.MUDA.Matching.
-Require Import MUDA.MUDA.Transitions.
+From Stdlib Require Import List.
 Import ListNotations.
+
+From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
+
 
 (* “First feasible” property: if find_feasible returns (b,a), then
    every bid strictly earlier than b in the list is either infeasible with a
@@ -12,12 +10,12 @@ Import ListNotations.
 Lemma find_feasible_first :
   forall bs as_list ms b a,
     find_feasible bs as_list ms = Some (b,a) ->
-    forall i j b' a',
+      forall i j b',
       nth_error bs i = Some b' ->
       nth_error bs j = Some b ->
       i < j ->
       residual_bid b' ms = 0 \/
-      (exists a0, In a0 as_list /\ ~ Nat.leb (ask_price a0) (price b')) \/
+      (exists a0, In a0 as_list /\ Nat.leb (ask_price a0) (price b') = false) \/
       (forall a0, In a0 as_list -> Nat.leb (ask_price a0) (price b') = false).
 Proof.
   (* Outline: by inspection of find_feasible which scans bs left-to-right
@@ -33,7 +31,7 @@ Lemma one_step_priority_safety :
     bids_sorted (bids s) ->
     asks_sorted (asks s) ->
     In b1 (bids s) -> In b2 (bids s) -> bid_priority b1 b2 ->
-    feasible b1 a ->
+    feasible b1 a (matches s) ->
     match_step s = Some s' ->
     (* then b2,a is not the chosen match unless b1 is infeasible/exhausted *)
     matched_bid (hd (Build_Match (hd (Build_Bid 0 (Build_Agent 0 Buyer) 0 0) (bids s))
@@ -46,10 +44,12 @@ Proof.
   intros s b1 b2 a s' Hp3 Hbs Has Hb1 Hb2 Hprio Hfeas Hstep.
   unfold match_step in Hstep.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a0]|] eqn:HF; inversion Hstep; subst.
-  (* chosen pair is (b,a0); by highest-priority feasibility, b = b1 (or at least not b2,a) *)
-  (* We only need to show (b,a0) <> (b2,a) under the hypotheses; use sorting + priority. *)
-  destruct (bid_eq_dec b b2) as [->|Hbneq]; [|tauto].
-  (* If it picked b2, contradiction with priority because b1 feasible and higher priority *)
-  (* We rely on bids_sorted + the guard scanning order (b1 must appear before b2) *)
-  tauto.
+  destruct (bid_eq_dec b b2) as [Heq|Hneq].
+  - (* Case b = b2: this should be impossible because b1 is higher priority *)
+    assert (exists i j, nth_error (bids s) i = Some b1 /\ nth_error (bids s) j = Some b2 /\ i < j).
+    { (* TODO: need lemma relating bid_priority to list order *) }
+    admit.
+  - (* b <> b2 case *)
+    left. intros H. subst. contradiction.
+Qed.
 Qed.

@@ -1,14 +1,13 @@
 (** * MUDA Clearing Price (Phase P4)
-    Uniform price determination.
-*)
+    Uniform price determination.*)
 
-Require Import Coq.Lists.List.
-Require Import Coq.Arith.Arith.
-Require Import Coq.micromega.Lia.
-Require Import MUDA.MUDA.Types.
-Require Import MUDA.MUDA.State.
-Require Import MUDA.MUDA.Matching.
+From Stdlib Require Import Arith List Lia.
 Import ListNotations.
+
+From MUDA Require Import Eqb Types State Matching.
+
+Local Open Scope nat_scope.
+
 
 (* --- NEW: define marginal_pair here (latest match is at head) --- *)
 Definition marginal_pair (s : State) : option (Bid * Ask) :=
@@ -38,7 +37,7 @@ Definition do_clearing_price (s : State) : State :=
    ; clearing_price := determine_clearing_price s
    ; phase := P5 |}.
 
-(* Bounds: a(s*) ≤ c ≤ p(b*) *)
+(* Bounds *)
 Lemma clearing_price_bounds : forall s b a c,
   marginal_pair s = Some (b, a) ->
   determine_clearing_price s = Some c ->
@@ -48,6 +47,10 @@ Proof.
   unfold determine_clearing_price in Hc; rewrite Hm in Hc.
   remember (residual_bid b (matches s) =? 0) as eb.
   remember (residual_ask a (matches s) =? 0) as ea.
-  (* All branches set c to either price b or ask_price a. *)
-  destruct eb, ea; inversion Hc; subst; simpl; lia.
+  destruct eb, ea; inversion Hc; subst; clear Hc.
+  all: unfold marginal_pair in Hm;
+      destruct (matches s) as [|m ms']; try discriminate;
+      inversion Hm; subst; clear Hm.
+  all: split; auto;
+      apply (feasible_price_bounds m).
 Qed.

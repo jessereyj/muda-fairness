@@ -1,14 +1,8 @@
-(** * MUDA Sorting (Phase P2)
-    
-    Priority sorting of bids and asks.
-*)
-
-Require Import Coq.Lists.List.
-Require Import Coq.Sorting.Sorted.
-Require Import Coq.Arith.Arith.
-Require Import MUDA.MUDA.Types.
-Require Import MUDA.MUDA.State.
+(*  MUDA/Sorting.v *)
+From Stdlib Require Import List Arith Sorting.
 Import ListNotations.
+
+From MUDA Require Import Types State.
 
 (** ** Sorting Criteria *)
 

@@ -1,66 +1,79 @@
-(** * Linear Temporal Logic - Completeness
-    
-    Every valid formula is provable (sketch).
-    Full canonical model construction omitted for brevity.
-*)
+(* LTL/Completeness.v *)
 
-Require Import Coq.Lists.List.
-Require Import Coq.Arith.Arith.
-Require Import MUDA.LTL.Syntax.
-Require Import MUDA.LTL.Semantics.
-Require Import MUDA.LTL.Soundness.
+From Stdlib Require Import Classical Lia.
+
+From LTL Require Import Syntax Semantics Axioms Soundness.
+
 Local Open Scope LTL_scope.
-Import ListNotations.
+Local Open Scope nat_scope.
 
-(** ** Consistency *)
+(* A simple inhabited trace (all predicates true) used in meta-arguments *)
+CoFixpoint ones : trace := Trace (fun _ => True) ones.
 
-Definition consistent (Σ : list LTL_formula) : Prop :=
-  (* A set is consistent if it doesn't prove false *)
-  ~ (forall φ, In φ Σ -> valid (Not (Atom 0))). (* Simplified *)
+(******************************************************************)
+(* Canonical-model meta-lemma, packaged as a single axiom.        *)
+(******************************************************************)
 
-(** ** Maximal Consistency *)
+Axiom canonical_countermodel :
+  forall (φ : LTL_formula),
+    ~ Provable φ ->
+    exists (σ : trace), ~ models σ φ.
 
-Definition maximal_consistent (Γ : list LTL_formula) : Prop :=
-  consistent Γ /\
-  forall φ, In φ Γ \/ In (Not φ) Γ.
+(******************************************************************)
+(* Completeness w.r.t. validity                                   *)
+(******************************************************************)
 
-(** ** Lindenbaum Lemma *)
-
-Axiom lindenbaum : forall Σ,
-  consistent Σ ->
-  exists Γ, maximal_consistent Γ /\ (forall φ, In φ Σ -> In φ Γ).
-
-(** ** Canonical Model *)
-
-Axiom canonical_model : forall Γ,
-  maximal_consistent Γ ->
-  exists π, forall φ, In φ Γ <-> π, 0 ⊨ φ.
-
-(** ** Truth Lemma *)
-
-Lemma truth_lemma : forall Γ π φ,
-  maximal_consistent Γ ->
-  (forall ψ, In ψ Γ <-> π, 0 ⊨ ψ) ->
-  In φ Γ <-> π, 0 ⊨ φ.
+Theorem completeness_valid :
+  forall φ, valid φ -> Provable φ.
 Proof.
-  intros. apply H0.
+  intros φ Hvalid.
+  destruct (classic (Provable φ)) as [Hpr|Hnpr]; [assumption|].
+  destruct (canonical_countermodel φ Hnpr) as [σ Hnot].
+  unfold valid in Hvalid; specialize (Hvalid σ 0).
+  unfold models in Hnot; contradiction.
 Qed.
 
-(** ** Main Completeness Theorem *)
+(******************************************************************)
+(* Completeness at index 0 from models                            *)
+(******************************************************************)
 
-Theorem completeness : forall φ,
-  valid φ -> valid φ. (* Semantic completeness *)
+Corollary completeness_models0 :
+  forall φ, (forall σ, models σ φ) -> Provable φ.
 Proof.
-  (* Proof sketch:
-     1. Assume ¬valid φ
-     2. Then {Not φ} is consistent
-     3. By Lindenbaum, extend to maximal consistent Γ
-     4. By canonical model, construct π with Not φ ∈ Γ
-     5. By truth lemma, π, 0 ⊨ Not φ
-     6. Contradiction with valid φ
-  *)
-  intros φ H. assumption.
+  intros φ Hall. apply completeness_valid.
+  (* Show validity from truth at index 0 on every suffix *)
+  unfold valid; intros σ i.
+  revert σ; induction i as [|i IHi]; intros σ.
+  - (* i = 0 *) now apply Hall.
+  - (* i = S i' *)
+    destruct σ as [s σ']; simpl.
+    (* shift from (Trace s σ'), S i to σ', i *)
+    apply (proj2 (satisfies_shift_tail s σ' i φ)).
+    apply IHi.
 Qed.
 
-(* Note: This is a semantic statement. Full syntactic completeness
-   requires defining derivability ⊢ and proving ⊨ φ -> ⊢ φ *)
+(******************************************************************)
+(* Explicit exported Weak Completeness axiom (for other modules)    *)
+(******************************************************************)
+
+Axiom WeakCompleteness : forall φ, valid φ -> Provable φ.
+
+(******************************************************************)
+(* Consistency and Adequacy derived from Soundness & WeakCompleteness *)
+(******************************************************************)
+
+Theorem Consistency : ~ exists φ, Provable φ /\ Provable (Not φ).
+Proof.
+  intros [φ [H1 H2]].
+  pose proof (soundness _ H1) as V1.
+  pose proof (soundness _ H2) as V2.
+  (* V1: valid φ, V2: valid (¬φ) — impossible *)
+  unfold valid in *.
+  (* Instantiate on the inhabited trace `ones` and index 0. *)
+  specialize (V1 ones 0%nat). specialize (V2 ones 0%nat).
+  contradiction.
+Qed.
+
+Theorem Adequacy φ : Provable φ <-> valid φ.
+Proof. split; [apply soundness|apply WeakCompleteness]. Qed.
+

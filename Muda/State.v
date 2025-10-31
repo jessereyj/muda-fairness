@@ -1,12 +1,8 @@
-(** * MUDA State
-    
-    State structure and phases.
-*)
-
-Require Import Coq.Lists.List.
-Require Import Coq.Arith.Arith.
-Require Import MUDA.MUDA.Types.
+(*  MUDA/State.v *)
+From Stdlib Require Import List Arith.
 Import ListNotations.
+
+From MUDA Require Export Types.
 
 (** ** Phases *)
 

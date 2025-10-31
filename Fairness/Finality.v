@@ -1,8 +1,7 @@
-Require Import Coq.Lists.List.
-Require Import MUDA.MUDA.State.
-Require Import MUDA.MUDA.Matching.
-Require Import MUDA.MUDA.Transitions.
+From Stdlib Require Import List.
 Import ListNotations.
+
+From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
 
 Lemma matches_monotone : forall s m,
   In m (matches s) -> In m (matches (step s)).
