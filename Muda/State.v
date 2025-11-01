@@ -77,3 +77,12 @@ Definition residual_ask (a : Ask) (ms : list Match) : nat :=
 Definition allocOK (s : State) : Prop :=
   (forall b, In b (bids s) -> allocated_bid b (matches s) <= quantity b) /\
   (forall a, In a (asks s) -> allocated_ask a (matches s) <= ask_quantity a).
+
+(* Feasibility & availability per §3.1.1 *)
+Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
+  price b >= ask_price a
+  /\ residual_bid b ms > 0
+  /\ residual_ask a ms > 0.
+
+Definition has_feasible (s:State) : Prop :=
+  exists b a, In b (bids s) /\ In a (asks s) /\ feasible_pair b a (matches s).
