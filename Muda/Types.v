@@ -120,24 +120,57 @@ Proof.
     + apply (proj2 (agent_eq_spec ag2 ag2)); reflexivity.
 Qed.
 
+Lemma build_ask_eq :
+  forall id1 s1 p1 q1 id2 s2 p2 q2,
+    id1 = id2 -> s1 = s2 -> p1 = p2 -> q1 = q2 ->
+    {| ask_id := id1; seller := s1; ask_price := p1; ask_quantity := q1 |} =
+    {| ask_id := id2; seller := s2; ask_price := p2; ask_quantity := q2 |}.
+Proof. intros; subst; reflexivity. Qed.
 
 Lemma ask_eq_spec : forall a1 a2,
   ask_eq a1 a2 = true <-> a1 = a2.
 Proof.
   intros [id1 s1 p1 q1] [id2 s2 p2 q2]; simpl.
-  repeat rewrite andb_true_iff.
-  repeat rewrite Nat.eqb_eq.
-  admit.
-Admitted.
+  split.
+  - intros H.
+    apply Bool.andb_true_iff in H as [H12 Hs].
+    apply Bool.andb_true_iff in H12 as [H1 Hq].
+    apply Bool.andb_true_iff in H1 as [Hid Hp].
+    apply Nat.eqb_eq in Hid, Hp, Hq.
+    apply agent_eq_spec in Hs.
+    now apply build_ask_eq.
+  - intros Heq; inversion Heq; subst; simpl.
+    apply Bool.andb_true_iff; split.
+    + apply Bool.andb_true_iff; split.
+      * apply Bool.andb_true_iff; split; apply Nat.eqb_refl.
+      * apply Nat.eqb_refl.
+    + apply (proj2 (agent_eq_spec s2 s2)); reflexivity.
+Qed.
+
+Lemma build_match_eq :
+  forall b1 a1 q1 b2 a2 q2,
+    b1 = b2 -> a1 = a2 -> q1 = q2 ->
+    {| matched_bid := b1; matched_ask := a1; match_quantity := q1 |} =
+    {| matched_bid := b2; matched_ask := a2; match_quantity := q2 |}.
+Proof. intros; subst; reflexivity. Qed.
 
 Lemma match_eq_spec : forall m1 m2,
   match_eq m1 m2 = true <-> m1 = m2.
 Proof.
   intros [b1 a1 q1] [b2 a2 q2]; simpl.
-  repeat rewrite andb_true_iff.
-  repeat rewrite Nat.eqb_eq.
-  admit.
-Admitted.
+  split.
+  - intros H.
+    apply Bool.andb_true_iff in H as [H12 Hq].
+    apply Bool.andb_true_iff in H12 as [Hb Ha].
+    apply bid_eq_spec in Hb.
+    apply ask_eq_spec in Ha.
+    apply Nat.eqb_eq in Hq.
+    now apply build_match_eq.
+  - intros Heq; inversion Heq; subst; simpl.
+    apply Bool.andb_true_iff; split.
+    + apply Bool.andb_true_iff; split; [apply bid_eq_spec | apply ask_eq_spec]; reflexivity.
+    + apply Nat.eqb_refl.
+Qed.
 
 #[export] Instance bid_eqb_spec : EqbSpec Bid := { eqb_eq := bid_eq_spec }.
 #[export] Instance ask_eqb_spec : EqbSpec Ask := { eqb_eq := ask_eq_spec }.
