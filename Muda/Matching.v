@@ -5,58 +5,8 @@ Import ListNotations.
 Local Open Scope nat_scope.
 Local Open Scope bool_scope.
 
-(* ---------- Quantity functions ---------- *)
-
-Fixpoint matched_quantities (b : Bid) (ms : list Match) : nat :=
-  match ms with
-  | [] => 0
-  | m :: ms' =>
-      if matched_bid m =? b 
-      then match_quantity m + matched_quantities b ms'
-      else matched_quantities b ms'
-  end.
-
-Fixpoint matched_quantities_ask (a : Ask) (ms : list Match) : nat :=
-  match ms with
-  | [] => 0
-  | m :: ms' =>
-      if matched_ask m =? a 
-      then match_quantity m + matched_quantities_ask a ms'
-      else matched_quantities_ask a ms'
-  end.
-
-Definition residual_bid (b : Bid) (ms : list Match) : nat :=
-  quantity b - matched_quantities b ms.
-
-Definition residual_ask (a : Ask) (ms : list Match) : nat :=
-  ask_quantity a - matched_quantities_ask a ms.
-
-Lemma residual_bid_pos :
-  forall (b : Bid) (ms : list Match),
-    1 <= residual_bid b ms.
-Proof.
-  intros b ms.
-  unfold residual_bid.
-  generalize (quantity b) as q.
-  generalize (matched_quantities b ms) as mq.
-  intros mq q.
-  admit.
-Admitted.
-
-Lemma residual_ask_pos :
-  forall (a : Ask) (ms : list Match),
-    1 <= residual_ask a ms.
-Proof.
-  intros a ms.
-  unfold residual_ask.
-  generalize (ask_quantity a) as q.
-  generalize (matched_quantities_ask a ms) as mq.
-  intros mq q.
-  admit.
-Admitted.
-
 (* ---------- Match finding ---------- *)
-
+(* Check if a bid-ask pair is feasible given current matches *)
 Definition is_feasible (b : Bid) (a : Ask) (ms : list Match) : bool :=
   Nat.leb (ask_price a) (price b)
   && Nat.leb 1 (residual_bid b ms)
@@ -139,42 +89,6 @@ Proof.
   apply Nat.min_glb; assumption.
 Qed.
 
-(* ---------- Match properties ---------- *)
-
-Lemma match_price_bounds : forall s b a,
-  find_feasible (bids s) (asks s) (matches s) = Some (b, a) ->
-  ask_price a <= price b.
-Proof.
-  intros s b a H.
-  apply find_feasible_spec in H.
-  unfold is_feasible in H.
-  rewrite !Bool.andb_true_iff in H.
-  destruct H as [[Hp _] _].
-  apply Nat.leb_le in Hp.
-  assumption.
-Qed.
-
-Lemma feasible_price_bounds : forall m : Match,
-  ask_price (matched_ask m) <= price (matched_bid m).
-Proof.
-  intros m.
-  destruct m as [b a q].
-  (* Build state to invoke match_price_bounds *)
-  pose (s := {|
-    bids := [b];
-    asks := [a];
-    matches := [];
-    clearing_price := None;
-    phase := P3
-  |}).
-  simpl.
-  unfold pick_ask.
-  simpl.
-  unfold is_feasible.
-  simpl.
-  (* Assume matches are always formed from feasible pairs *)
-Admitted.
-
 (* ---------- Match step function and monotonicity ---------- *)
 
 Definition match_step (s : State) : option State :=
@@ -200,3 +114,102 @@ Proof.
   inversion H; subst; clear H.
   simpl. unfold incl. intros x Hx. right. exact Hx.
 Qed.
+(* ---------- Feasibility checking ---------- *)
+
+
+Fixpoint matched_quantities (b : Bid) (ms : list Match) : nat :=
+  match ms with
+  | [] => 0
+  | m :: ms' =>
+      if matched_bid m =? b 
+      then match_quantity m + matched_quantities b ms'
+      else matched_quantities b ms'
+  end.
+
+Fixpoint matched_quantities_ask (a : Ask) (ms : list Match) : nat :=
+  match ms with
+  | [] => 0
+  | m :: ms' =>
+      if matched_ask m =? a 
+      then match_quantity m + matched_quantities_ask a ms'
+      else matched_quantities_ask a ms'
+  end.
+
+Lemma feasible_implies_pos :
+  forall b a ms,
+    is_feasible b a ms = true ->
+    1 <= residual_bid b ms /\ 1 <= residual_ask a ms.
+Proof.
+  intros b a ms Hf. unfold is_feasible in Hf.
+  repeat rewrite Bool.andb_true_iff in Hf.
+  destruct Hf as [[Hprice Hrb] Hra].
+  split; apply Nat.leb_le; assumption.
+Qed.
+
+
+Lemma residual_ask_pos :
+  forall (a : Ask) (ms : list Match),
+    1 <= residual_ask a ms.
+Proof.
+  intros a ms.
+  unfold residual_ask.
+  generalize (ask_quantity a) as q.
+  generalize (matched_quantities_ask a ms) as mq.
+  intros mq q.
+  admit.
+Admitted.
+
+
+
+
+(* ---------- Match properties ---------- *)
+
+Lemma match_price_bounds : forall s b a,
+  find_feasible (bids s) (asks s) (matches s) = Some (b, a) ->
+  ask_price a <= price b.
+Proof.
+  intros s b a H.
+  apply find_feasible_spec in H.
+  unfold is_feasible in H.
+  rewrite !Bool.andb_true_iff in H.
+  destruct H as [[Hp _] _].
+  apply Nat.leb_le in Hp.
+  assumption.
+Qed.
+
+Lemma match_step_head_price_bounds :
+  forall s s' b a,
+    match_step s = Some s' ->
+    matches s' = create_match b a (matches s) :: matches s ->
+    ask_price a <= price b.
+Proof.
+  intros s s' b a Hstep Hhd.
+  unfold match_step in Hstep.
+  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b0 a0]|] eqn:Hf; try discriminate.
+  inversion Hstep; subst; clear Hstep. simpl in Hhd.
+  inversion Hhd; subst; clear Hhd.
+  eapply match_price_bounds.
+  now rewrite Hf.
+Qed.
+
+Lemma feasible_price_bounds : forall m : Match,
+  ask_price (matched_ask m) <= price (matched_bid m).
+Proof.
+  intros m.
+  destruct m as [b a q].
+  (* Build state to invoke match_price_bounds *)
+  pose (s := {|
+    bids := [b];
+    asks := [a];
+    matches := [];
+    clearing_price := None;
+    phase := P3
+  |}).
+  simpl.
+  unfold pick_ask.
+  simpl.
+  unfold is_feasible.
+  simpl.
+  (* Assume matches are always formed from feasible pairs *)
+Admitted.
+

@@ -1,8 +1,8 @@
-(*  MUDA/State.v *)
+(**  MUDA/State.v **)
 From Stdlib Require Import List Arith.
 Import ListNotations.
 
-From MUDA Require Export Types.
+From MUDA Require Import Types.
 
 (** ** Phases *)
 

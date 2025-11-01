@@ -4,7 +4,7 @@
 From Stdlib Require Import Arith List Lia.
 Import ListNotations.
 
-From MUDA Require Import Eqb Types State Matching.
+From MUDA Require Import Types State Matching.
 
 Local Open Scope nat_scope.
 

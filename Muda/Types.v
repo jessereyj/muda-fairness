@@ -5,19 +5,39 @@ Import ListNotations.
 Local Open Scope bool_scope.
 
 (** ** Agent Types and Equality Instances *)
-Inductive AgentType : Type :=
-  | Buyer
-  | Seller.
+Inductive AgentType := Buyer | Seller.
 
-Record Agent := {
-  agent_id : nat;
-  agent_type : AgentType
-}.
+Definition agent_type_eqb (x y : AgentType) : bool :=
+  match x, y with Buyer, Buyer | Seller, Seller => true | _, _ => false end.
 
-(** ** Equality instances *)
+Lemma agent_type_eqb_spec :
+  forall x y, agent_type_eqb x y = true <-> x = y.
+Proof.
+  destruct x, y; simpl; split; intro H; try discriminate; try reflexivity; now inversion H.
+Qed.
+
+Record Agent := { agent_id : nat; agent_type : AgentType }.
 
 Definition agent_eq (a1 a2 : Agent) : bool :=
-  Nat.eqb (agent_id a1) (agent_id a2).
+  Nat.eqb (agent_id a1) (agent_id a2)
+  && agent_type_eqb (agent_type a1) (agent_type a2).
+
+
+Lemma agent_eq_spec :
+  forall a1 a2, agent_eq a1 a2 = true <-> a1 = a2.
+Proof.
+  intros [id1 t1] [id2 t2]; simpl.
+  split.
+  - intros H.
+    apply Bool.andb_true_iff in H as [Hid Ht].
+    apply Nat.eqb_eq in Hid.                (* id1 = id2 *)
+    apply agent_type_eqb_spec in Ht.        (* t1 = t2   *)
+    cbn in Hid, Ht. subst. reflexivity.
+  - intros Heq; inversion Heq; subst; simpl.
+    apply Bool.andb_true_iff; split.
+    + apply Nat.eqb_refl.
+  + apply (proj2 (agent_type_eqb_spec t2 t2)). reflexivity.
+Qed.
 
 (** ** Orders *)
 
@@ -35,61 +55,83 @@ Record Ask := {
   ask_quantity : nat
 }.
 
-Definition bid_eq (b1 b2 : Bid) : bool :=
-  Nat.eqb (bid_id b1) (bid_id b2).
-
-Definition ask_eq (a1 a2 : Ask) : bool :=
-  Nat.eqb (ask_id a1) (ask_id a2).
-
-#[export] Instance bid_eqb : Eqb Bid := {
-  eqb := bid_eq;
-}.
-
-#[export] Instance ask_eqb : Eqb Ask := {
-  eqb := ask_eq;
-}.
-
-Lemma bid_eq_spec {eqb_instance : Eqb Bid} : forall b1 b2 : Bid,
-  (b1 =? b2) = true <-> b1 = b2.
-Proof.
-Admitted.
-
-Lemma ask_eq_spec {eqb_instance : Eqb Ask} : forall a1 a2 : Ask,
-  (a1 =? a2) = true <-> a1 = a2.
-Proof.
-Admitted.
-
-#[export] Instance bid_eqb_spec {eqb_instance : Eqb Bid} : EqbSpec Bid := {
-  eqb_eq := bid_eq_spec;
-}.
-
-#[export] Instance ask_eqb_spec {eqb_instance : Eqb Ask} : EqbSpec Ask := {
-  eqb_eq := ask_eq_spec;
-}.
-
-(** ** Matches *)
-
 Record Match := {
   matched_bid : Bid;
   matched_ask : Ask;
   match_quantity : nat
 }.
 
+(* --- Boolean equality for Bids, Asks, Matches --- *)
+
+Definition bid_eq (b1 b2 : Bid) : bool :=
+  Nat.eqb (bid_id b1) (bid_id b2) &&
+  Nat.eqb (price b1) (price b2) &&
+  Nat.eqb (quantity b1) (quantity b2) &&
+  agent_eq (buyer b1) (buyer b2).
+
+Definition ask_eq (a1 a2 : Ask) : bool :=
+  Nat.eqb (ask_id a1) (ask_id a2) &&
+  Nat.eqb (ask_price a1) (ask_price a2) &&
+  Nat.eqb (ask_quantity a1) (ask_quantity a2) &&
+  agent_eq (seller a1) (seller a2).
+
 Definition match_eq (m1 m2 : Match) : bool :=
-  (matched_bid m1 =? matched_bid m2) && (matched_ask m1 =? matched_ask m2).
+  bid_eq (matched_bid m1) (matched_bid m2) &&
+  ask_eq (matched_ask m1) (matched_ask m2) &&
+  Nat.eqb (match_quantity m1) (match_quantity m2).
 
-#[export] Instance match_eqb : Eqb Match := {
-  eqb := match_eq;
-}.
 
-Lemma match_eq_spec {eqb_instance : Eqb Match} : forall m1 m2 : Match,
-  (m1 =? m2) = true <-> m1 = m2.
+(* --- Instances --- *)
+#[export] Instance bid_eqb : Eqb Bid := { eqb := bid_eq }.
+#[export] Instance ask_eqb : Eqb Ask := { eqb := ask_eq }.
+#[export] Instance match_eqb : Eqb Match := { eqb := match_eq }.
+
+(* --- Specifications --- *)
+Lemma bid_eq_spec : forall b1 b2,
+  bid_eq b1 b2 = true <-> b1 = b2.
 Proof.
+  intros [id1 ag1 p1 q1] [id2 ag2 p2 q2]; simpl.
+  cbn in *.
+  split.
+  - intros H.
+    (* break the nested andb structure into components *)
+    apply Bool.andb_true_iff in H as [H12 Hag].
+    apply Bool.andb_true_iff in H12 as [H1 Hq].
+    apply Bool.andb_true_iff in H1 as [Hid Hp].
+    (* convert boolean equalities to propositional equalities *)
+    apply Nat.eqb_eq in Hid.
+    apply Nat.eqb_eq in Hp.
+    apply Nat.eqb_eq in Hq.
+    apply agent_eq_spec in Hag.
+    (* substitute the equalities so the two records become identical *)
+    subst; reflexivity.
+  - intros ->; simpl.
+    repeat (apply Bool.andb_true_iff; split); try apply Nat.eqb_refl.
+    apply agent_eq_spec; reflexivity.
+Qed.
+
+
+Lemma ask_eq_spec : forall a1 a2,
+  ask_eq a1 a2 = true <-> a1 = a2.
+Proof.
+  intros [id1 s1 p1 q1] [id2 s2 p2 q2]; simpl.
+  repeat rewrite andb_true_iff.
+  repeat rewrite Nat.eqb_eq.
+  admit.
 Admitted.
 
-#[export] Instance match_eqb_spec {eqb_instance : Eqb Match} : EqbSpec Match := {
-  eqb_eq := match_eq_spec;
-}.
+Lemma match_eq_spec : forall m1 m2,
+  match_eq m1 m2 = true <-> m1 = m2.
+Proof.
+  intros [b1 a1 q1] [b2 a2 q2]; simpl.
+  repeat rewrite andb_true_iff.
+  repeat rewrite Nat.eqb_eq.
+  admit.
+Admitted.
+
+#[export] Instance bid_eqb_spec : EqbSpec Bid := { eqb_eq := bid_eq_spec }.
+#[export] Instance ask_eqb_spec : EqbSpec Ask := { eqb_eq := ask_eq_spec }.
+#[export] Instance match_eqb_spec : EqbSpec Match := { eqb_eq := match_eq_spec }.
 
 (* Option and product instances *)
 

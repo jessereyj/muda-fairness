@@ -27,6 +27,7 @@ MUDA/Sorting.v
 MUDA/Matching.v
 MUDA/ClearingPrice.v
 MUDA/Transitions.v
+#MUDA/Atoms.v
 MUDA/MUDA.v
 
 # ===== Fairness Verification (Layer 3) =====

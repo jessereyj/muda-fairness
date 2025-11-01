@@ -66,16 +66,15 @@ LTL/Completeness.v
 LTL/LTL.v
 
 # ===== MUDA Protocol (Layer 2) =====
-
-MUDA/Eqb.v             # 1.  Boolean equality type class and EqbSpec
-MUDA/Types.v           # 2.  Basic datatypes (Agent, Bid, Ask, Match) + Eqb instances
-MUDA/State.v           # 3.  State record, phases, allocation, residuals
-MUDA/Sorting.v         # 4.  Priority ordering and sorting rules (P2)
-MUDA/Matching.v        # 5.  Feasibility tests, greedy matching step (P3)
-MUDA/ClearingPrice.v   # 6.  Uniform price computation (P4)
-MUDA/Transitions.v     # 7.  Deterministic transition system, finite execution (P1–P7)
-MUDA/Atoms.v           # 8.  Bridge to LTL: state encoder ⟦·⟧ and ω-run stuttering
-MUDA/MUDA.v            # 9.  Master export module (re-exports all of the above)
+MUDA/Eqb.v
+MUDA/Types.v
+MUDA/State.v
+MUDA/Sorting.v
+MUDA/Matching.v
+MUDA/ClearingPrice.v
+MUDA/Transitions.v
+#MUDA/Atoms.v
+MUDA/MUDA.v
 
 # ===== Fairness Verification (Layer 3) =====
 Fairness/PriorityFairness.v
