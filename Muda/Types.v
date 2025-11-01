@@ -45,14 +45,16 @@ Record Bid := {
   bid_id : nat;
   buyer : Agent;
   price : nat;
-  quantity : nat
+  quantity : nat;
+  ts : nat
 }.
 
 Record Ask := {
   ask_id : nat;
   seller : Agent;
   ask_price : nat;
-  ask_quantity : nat
+  ask_quantity : nat;
+  ask_ts : nat
 }.
 
 Record Match := {
@@ -67,19 +69,20 @@ Definition bid_eq (b1 b2 : Bid) : bool :=
   Nat.eqb (bid_id b1) (bid_id b2) &&
   Nat.eqb (price b1) (price b2) &&
   Nat.eqb (quantity b1) (quantity b2) &&
+  Nat.eqb (ts b1) (ts b2) &&
   agent_eq (buyer b1) (buyer b2).
 
 Definition ask_eq (a1 a2 : Ask) : bool :=
   Nat.eqb (ask_id a1) (ask_id a2) &&
   Nat.eqb (ask_price a1) (ask_price a2) &&
   Nat.eqb (ask_quantity a1) (ask_quantity a2) &&
+  Nat.eqb (ask_ts a1) (ask_ts a2) &&
   agent_eq (seller a1) (seller a2).
 
 Definition match_eq (m1 m2 : Match) : bool :=
   bid_eq (matched_bid m1) (matched_bid m2) &&
   ask_eq (matched_ask m1) (matched_ask m2) &&
   Nat.eqb (match_quantity m1) (match_quantity m2).
-
 
 (* --- Instances --- *)
 #[export] Instance bid_eqb : Eqb Bid := { eqb := bid_eq }.
@@ -89,62 +92,83 @@ Definition match_eq (m1 m2 : Match) : bool :=
 (* --- Specifications --- *)
 (* helper: build equality of bids from equal components *)
 Lemma build_bid_eq :
-  forall id1 ag1 p1 q1 id2 ag2 p2 q2,
-    id1 = id2 -> ag1 = ag2 -> p1 = p2 -> q1 = q2 ->
-    {| bid_id := id1; buyer := ag1; price := p1; quantity := q1 |} =
-    {| bid_id := id2; buyer := ag2; price := p2; quantity := q2 |}.
+  forall id1 ag1 p1 q1 ts1 id2 ag2 p2 q2 ts2,
+    id1 = id2 -> ag1 = ag2 -> p1 = p2 -> q1 = q2 -> ts1 = ts2 ->
+    {| bid_id := id1; buyer := ag1; price := p1; quantity := q1; ts := ts1; |} =
+    {| bid_id := id2; buyer := ag2; price := p2; quantity := q2; ts := ts2; |}.
 Proof. intros; subst; reflexivity. Qed.
 
 Lemma bid_eq_spec : forall b1 b2,
   bid_eq b1 b2 = true <-> b1 = b2.
 Proof.
-  intros [id1 ag1 p1 q1] [id2 ag2 p2 q2]; simpl.
+  intros [id1 ag1 p1 q1 ts1] [id2 ag2 p2 q2 ts2]; simpl.
   split.
-  - intros H.
-    apply Bool.andb_true_iff in H as [H12 Hag].
-    apply Bool.andb_true_iff in H12 as [H1 Hq].
-    apply Bool.andb_true_iff in H1 as [Hid Hp].
+  - (* -> *)
+    intros H.
+    (* ((((id && price) && qty) && ts) && agent) = true *)
+    apply Bool.andb_true_iff in H as [H1234 Hag].
+    apply Bool.andb_true_iff in H1234 as [H123 Ht].
+    apply Bool.andb_true_iff in H123 as [H12 Hq].
+    apply Bool.andb_true_iff in H12  as [Hid Hp].
     apply Nat.eqb_eq in Hid.
     apply Nat.eqb_eq in Hp.
     apply Nat.eqb_eq in Hq.
+    apply Nat.eqb_eq in Ht.
     apply agent_eq_spec in Hag.
+    (* id1=id2, ag1=ag2, p1=p2, q1=q2, ts1=ts2 *)
     now apply build_bid_eq.
-  - intros Heq; inversion Heq; subst; simpl.
-    (* goal: ((id2 =? id2) && (p2 =? p2) && (q2 =? q2)) && agent_eq ag2 ag2 = true *)
+  - (* <- *)
+    intros Heq; inversion Heq; subst; simpl.
+    (* build ((((id && price) && qty) && ts) && agent) = true *)
     apply Bool.andb_true_iff; split.
     + apply Bool.andb_true_iff; split.
       * apply Bool.andb_true_iff; split.
-        -- apply Nat.eqb_refl.
-        -- apply Nat.eqb_refl.
-      * apply Nat.eqb_refl.
-    + apply (proj2 (agent_eq_spec ag2 ag2)); reflexivity.
+        -- apply Bool.andb_true_iff; split.
+           ** apply Nat.eqb_refl.   (* id *)
+           ** apply Nat.eqb_refl.   (* price *)
+        -- apply Nat.eqb_refl.      (* qty *)
+      * apply Nat.eqb_refl.        (* ts *)
+    + apply agent_eq_spec; reflexivity.
 Qed.
 
+
 Lemma build_ask_eq :
-  forall id1 s1 p1 q1 id2 s2 p2 q2,
-    id1 = id2 -> s1 = s2 -> p1 = p2 -> q1 = q2 ->
-    {| ask_id := id1; seller := s1; ask_price := p1; ask_quantity := q1 |} =
-    {| ask_id := id2; seller := s2; ask_price := p2; ask_quantity := q2 |}.
+  forall id1 s1 p1 q1 ts1 id2 s2 p2 q2 ts2,
+    id1 = id2 -> s1 = s2 -> p1 = p2 -> q1 = q2 -> ts1 = ts2 ->
+    {| ask_id := id1; seller := s1; ask_price := p1; ask_quantity := q1; ask_ts := ts1 |} =
+    {| ask_id := id2; seller := s2; ask_price := p2; ask_quantity := q2; ask_ts := ts2 |}.
 Proof. intros; subst; reflexivity. Qed.
 
 Lemma ask_eq_spec : forall a1 a2,
   ask_eq a1 a2 = true <-> a1 = a2.
 Proof.
-  intros [id1 s1 p1 q1] [id2 s2 p2 q2]; simpl.
+  intros [id1 s1 p1 q1 ts1] [id2 s2 p2 q2 ts2]; simpl.
   split.
-  - intros H.
-    apply Bool.andb_true_iff in H as [H12 Hs].
-    apply Bool.andb_true_iff in H12 as [H1 Hq].
-    apply Bool.andb_true_iff in H1 as [Hid Hp].
-    apply Nat.eqb_eq in Hid, Hp, Hq.
+  - (* -> *)
+    intros H.
+    (* ((((id && price) && qty) && ts) && agent) = true *)
+    apply Bool.andb_true_iff in H as [H1234 Hs].
+    apply Bool.andb_true_iff in H1234 as [H123 Ht].
+    apply Bool.andb_true_iff in H123  as [H12 Hq].
+    apply Bool.andb_true_iff in H12   as [Hid Hp].
+    apply Nat.eqb_eq in Hid.
+    apply Nat.eqb_eq in Hp.
+    apply Nat.eqb_eq in Hq.
+    apply Nat.eqb_eq in Ht.
     apply agent_eq_spec in Hs.
     now apply build_ask_eq.
-  - intros Heq; inversion Heq; subst; simpl.
+  - (* <- *)
+    intros Heq; inversion Heq; subst; simpl.
+    (* build ((((id && price) && qty) && ts) && agent) = true *)
     apply Bool.andb_true_iff; split.
     + apply Bool.andb_true_iff; split.
-      * apply Bool.andb_true_iff; split; apply Nat.eqb_refl.
-      * apply Nat.eqb_refl.
-    + apply (proj2 (agent_eq_spec s2 s2)); reflexivity.
+      * apply Bool.andb_true_iff; split.
+        -- apply Bool.andb_true_iff; split.
+           ** apply Nat.eqb_refl.   (* id  *)
+           ** apply Nat.eqb_refl.   (* price *)
+        -- apply Nat.eqb_refl.      (* qty *)
+      * apply Nat.eqb_refl.         (* ts *)
+    + apply agent_eq_spec; reflexivity.
 Qed.
 
 Lemma build_match_eq :
