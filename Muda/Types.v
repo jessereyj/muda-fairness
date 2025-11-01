@@ -87,27 +87,37 @@ Definition match_eq (m1 m2 : Match) : bool :=
 #[export] Instance match_eqb : Eqb Match := { eqb := match_eq }.
 
 (* --- Specifications --- *)
+(* helper: build equality of bids from equal components *)
+Lemma build_bid_eq :
+  forall id1 ag1 p1 q1 id2 ag2 p2 q2,
+    id1 = id2 -> ag1 = ag2 -> p1 = p2 -> q1 = q2 ->
+    {| bid_id := id1; buyer := ag1; price := p1; quantity := q1 |} =
+    {| bid_id := id2; buyer := ag2; price := p2; quantity := q2 |}.
+Proof. intros; subst; reflexivity. Qed.
+
 Lemma bid_eq_spec : forall b1 b2,
   bid_eq b1 b2 = true <-> b1 = b2.
 Proof.
   intros [id1 ag1 p1 q1] [id2 ag2 p2 q2]; simpl.
-  cbn in *.
   split.
   - intros H.
-    (* break the nested andb structure into components *)
     apply Bool.andb_true_iff in H as [H12 Hag].
     apply Bool.andb_true_iff in H12 as [H1 Hq].
     apply Bool.andb_true_iff in H1 as [Hid Hp].
-    (* convert boolean equalities to propositional equalities *)
     apply Nat.eqb_eq in Hid.
     apply Nat.eqb_eq in Hp.
     apply Nat.eqb_eq in Hq.
     apply agent_eq_spec in Hag.
-    (* substitute the equalities so the two records become identical *)
-    subst; reflexivity.
-  - intros ->; simpl.
-    repeat (apply Bool.andb_true_iff; split); try apply Nat.eqb_refl.
-    apply agent_eq_spec; reflexivity.
+    now apply build_bid_eq.
+  - intros Heq; inversion Heq; subst; simpl.
+    (* goal: ((id2 =? id2) && (p2 =? p2) && (q2 =? q2)) && agent_eq ag2 ag2 = true *)
+    apply Bool.andb_true_iff; split.
+    + apply Bool.andb_true_iff; split.
+      * apply Bool.andb_true_iff; split.
+        -- apply Nat.eqb_refl.
+        -- apply Nat.eqb_refl.
+      * apply Nat.eqb_refl.
+    + apply (proj2 (agent_eq_spec ag2 ag2)); reflexivity.
 Qed.
 
 
