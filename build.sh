@@ -79,7 +79,7 @@ MUDA/MUDA.v
 # ===== Fairness Verification (Layer 3) =====
 Fairness/PriorityFairness.v
 Fairness/QuantityFairness.v
-#Fairness/MatchFinality.v
+Fairness/MatchFinality.v
 #Fairness/Maximality.v
 #Fairness/RejectionFairness.v
 #Fairness/All.v
