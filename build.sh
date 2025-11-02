@@ -72,7 +72,7 @@ MUDA/State.v
 MUDA/Sorting.v
 MUDA/Matching.v
 MUDA/ClearingPrice.v
-#MUDA/Transitions.v
+MUDA/Transitions.v
 #MUDA/Atoms.v
 #MUDA/MUDA.v
 
