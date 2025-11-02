@@ -200,46 +200,6 @@ Qed.
 #[export] Instance ask_eqb_spec : EqbSpec Ask := { eqb_eq := ask_eq_spec }.
 #[export] Instance match_eqb_spec : EqbSpec Match := { eqb_eq := match_eq_spec }.
 
-(* Option and product instances *)
-
-Definition option_eq {A} `{Eqb A} (x y : option A) : bool :=
-  match x, y with
-  | None, None => true
-  | Some x', Some y' => x' =? y'
-  | _, _ => false
-  end.
-
-Definition prod_eq {A B} `{Eqb A} `{Eqb B} (p1 p2 : A * B) : bool :=
-  let (x1, y1) := p1 in
-  let (x2, y2) := p2 in
-  eqb x1 x2 && eqb y1 y2.
-
-#[export] Instance option_eqb {A} `{Eqb A} : Eqb (option A) := {
-  eqb := option_eq;
-}.
-
-#[export] Instance prod_eqb {A B} `{Eqb A} `{Eqb B} : Eqb (A * B) := {
-  eqb := prod_eq;
-}.
-
-Lemma option_eq_spec {A} `{EqbSpec A} : forall x y : option A,
-  option_eq x y = true <-> x = y.
-Proof.
-Admitted.
-
-Lemma prod_eq_spec {A B} `{EqbSpec A} `{EqbSpec B} : forall x y : A * B,
-  prod_eq x y = true <-> x = y.
-Proof.
-Admitted.
-
-#[export] Instance option_eqb_spec {A} `{EqbSpec A} : EqbSpec (option A) := {
-  eqb_eq := option_eq_spec;
-}.
-
-#[export] Instance prod_eqb_spec {A B} `{EqbSpec A} `{EqbSpec B} : EqbSpec (A * B) := {
-  eqb_eq := prod_eq_spec;
-}.
-
 (* Decidable equality helpers *)
 
 Definition agent_type_eq_dec (x y : AgentType) : {x = y} + {x <> y}.

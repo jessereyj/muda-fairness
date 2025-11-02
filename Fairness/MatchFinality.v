@@ -1,4 +1,4 @@
-(* Fairness/Finality.v *)
+(* Fairness/MatchFinality.v *)
 From Stdlib Require Import List.
 Import ListNotations.
 
