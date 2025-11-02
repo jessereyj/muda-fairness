@@ -76,7 +76,7 @@ Proof.
   destruct ms as [|m ms']; try discriminate.
   inversion Hm; subst b a; clear Hm.
   (* Build In m (matches s) using Hms, then apply the invariant *)
-  assert (Hin : In m (matches s)) by (rewrite Hms; simpl; left; reflexivity).
+  assert (Hin : In m (matches s)) by (rewrite <- Hms; simpl; left; reflexivity).
   specialize (Hwf m Hin).
   exact Hwf.
 Qed.
@@ -124,7 +124,13 @@ Proof.
   intros s b a c Hwf Hm Hc.
   pose proof (marginal_pair_price_bound s b a Hwf Hm) as Hab.
   unfold determine_clearing_price in Hc; rewrite Hm in Hc.
-  set (eb := residual_bid b (matches s) =? 0).
-  set (ea := residual_ask a (matches s) =? 0).
-  destruct eb, ea; inversion Hc; subst; clear Hc; split; auto.
+  remember (residual_bid b (matches s) =? 0) as eb eqn:Heb.
+  remember (residual_ask a (matches s) =? 0) as ea eqn:Hea.
+  destruct eb, ea;
+    simpl in Hc;
+    inversion Hc; subst; clear Hc.
+  - split; [exact Hab | apply le_n].
+  - split; [exact Hab | apply le_n].
+  - split; [apply le_n | exact Hab].
+  - split; [exact Hab | apply le_n].
 Qed.

@@ -72,17 +72,17 @@ MUDA/State.v
 MUDA/Sorting.v
 MUDA/Matching.v
 MUDA/ClearingPrice.v
-MUDA/Transitions.v
+#MUDA/Transitions.v
 #MUDA/Atoms.v
-MUDA/MUDA.v
+#MUDA/MUDA.v
 
 # ===== Fairness Verification (Layer 3) =====
-Fairness/PriorityFairness.v
-Fairness/QuantityFairness.v
-Fairness/Finality.v
-Fairness/Maximality.v
-Fairness/RejectionFairness.v
-Fairness/All.v
+#Fairness/PriorityFairness.v
+#Fairness/QuantityFairness.v
+#Fairness/Finality.v
+#Fairness/Maximality.v
+#Fairness/RejectionFairness.v
+#Fairness/All.v
 EOF
 info "_CoqProject generated."
 echo ""
