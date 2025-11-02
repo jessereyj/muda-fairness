@@ -80,7 +80,7 @@ MUDA/MUDA.v
 Fairness/PriorityFairness.v
 Fairness/QuantityFairness.v
 Fairness/MatchFinality.v
-#Fairness/Maximality.v
+Fairness/Maximality.v
 #Fairness/RejectionFairness.v
 #Fairness/All.v
 EOF
