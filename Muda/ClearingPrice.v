@@ -32,25 +32,27 @@ Lemma wf_state_preserved_by_match_step :
     wf_state s'.
 Proof.
   intros s s' Hwf Hstep.
-  unfold wf_state.                      (* expose ∀ m, In m (matches s') → … *)
-  intros m Hin.                         (* now Hin exists *)
+  unfold wf_state.                     (* goal: forall m, In m (matches s') -> ... *)
+  intros m Hin.                        (* now Hin exists *)
   unfold match_step in Hstep.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf;
     try discriminate.
-  inversion Hstep; subst; clear Hstep.
+  inversion Hstep; subst s'; clear Hstep.
   simpl in Hin.
-  destruct Hin as [Hin|Hin].
-  - (* head: new match created from a feasible pair *)
-    inversion Hin; subst; clear Hin.
-    apply find_feasible_spec in Hf.     (* is_feasible b a (matches s) = true *)
+  destruct Hin as [Hin | Hin].
+  - (* head: the newly created match *)
+    subst m.
+    (* find_feasible -> is_feasible -> price guard *)
+    apply find_feasible_spec in Hf.      (* is_feasible b a (matches s) = true *)
     unfold is_feasible in Hf.
     repeat rewrite Bool.andb_true_iff in Hf.
     destruct Hf as [[Hp _] _].
-    now apply Nat.leb_le in Hp.
+    apply Nat.leb_le in Hp.
+    simpl.                               (* matched_ask/create_match = a, matched_bid = b *)
+    exact Hp.
   - (* tail: inherited from s *)
     exact (Hwf m Hin).
 Qed.
-
 
 (* ------------------------------------------------------------------------- *)
 (* Marginal pair: newest match is at head (added by match_step).             *)
@@ -70,17 +72,22 @@ Lemma marginal_pair_price_bound :
 Proof.
   intros s b a Hwf Hm.
   unfold marginal_pair in Hm.
-  destruct (matches s) as [|m ms]; try discriminate.
+  remember (matches s) as ms eqn:Hms.
+  destruct ms as [|m ms']; try discriminate.
   inversion Hm; subst b a; clear Hm.
-  apply Hwf; simpl; left; reflexivity.
+  (* Build In m (matches s) using Hms, then apply the invariant *)
+  assert (Hin : In m (matches s)) by (rewrite Hms; simpl; left; reflexivity).
+  specialize (Hwf m Hin).
+  exact Hwf.
 Qed.
+
 
 (* ------------------------------------------------------------------------- *)
 (* Uniform Price Rule (Section 3/4).                                         *)
 (* If both sides are fully satisfied at the marginal pair: price(b).         *)
 (* If only bid side is exhausted: price(b).                                  *)
 (* If only ask  side is exhausted: ask_price(a).                              *)
-(* The "else" branch should not occur for a true marginal, but is harmless.  *)
+(* The "else" branch shouldn't occur for a true marginal, but stays bounded. *)
 (* ------------------------------------------------------------------------- *)
 
 Definition determine_clearing_price (s : State) : option nat :=
@@ -92,7 +99,7 @@ Definition determine_clearing_price (s : State) : option nat :=
       if eb && ea then Some (price b)
       else if eb then Some (price b)
       else if ea then Some (ask_price a)
-      else Some (price b) (* fallback: non-marginal edge, stays within bounds by wf_state *)
+      else Some (price b) (* fallback: stays within bounds by wf_state *)
   end.
 
 (* Phase P4 transition *)
