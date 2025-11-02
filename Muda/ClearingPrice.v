@@ -1,22 +1,88 @@
 (** * MUDA/ClearingPrice.v (Phase P4)
-    Uniform price determination.*)
+    Uniform price determination. *)
 
-From Stdlib Require Import Arith List Lia.
+From Stdlib Require Import Arith List.
 Import ListNotations.
 
 From MUDA Require Import Types State Matching.
 
 Local Open Scope nat_scope.
 
+(* ------------------------------------------------------------------------- *)
+(* Well-formedness: every stored match respects the feasibility price guard. *)
+(* Section 3 creates matches only via feasibility, so this holds from P3 on. *)
+(* ------------------------------------------------------------------------- *)
 
-(* --- NEW: define marginal_pair here (latest match is at head) --- *)
+Definition wf_state (s : State) : Prop :=
+  forall m, In m (matches s) ->
+    ask_price (matched_ask m) <= price (matched_bid m).
+
+Lemma wf_state_empty :
+  forall bs asx,
+    wf_state {| bids := bs; asks := asx; matches := [];
+                clearing_price := None; phase := P3 |}.
+Proof.
+  intros bs asx m Hin. inversion Hin.
+Qed.
+
+Lemma wf_state_preserved_by_match_step :
+  forall s s',
+    wf_state s ->
+    match_step s = Some s' ->
+    wf_state s'.
+Proof.
+  intros s s' Hwf Hstep.
+  unfold wf_state.                      (* expose ∀ m, In m (matches s') → … *)
+  intros m Hin.                         (* now Hin exists *)
+  unfold match_step in Hstep.
+  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf;
+    try discriminate.
+  inversion Hstep; subst; clear Hstep.
+  simpl in Hin.
+  destruct Hin as [Hin|Hin].
+  - (* head: new match created from a feasible pair *)
+    inversion Hin; subst; clear Hin.
+    apply find_feasible_spec in Hf.     (* is_feasible b a (matches s) = true *)
+    unfold is_feasible in Hf.
+    repeat rewrite Bool.andb_true_iff in Hf.
+    destruct Hf as [[Hp _] _].
+    now apply Nat.leb_le in Hp.
+  - (* tail: inherited from s *)
+    exact (Hwf m Hin).
+Qed.
+
+
+(* ------------------------------------------------------------------------- *)
+(* Marginal pair: newest match is at head (added by match_step).             *)
+(* ------------------------------------------------------------------------- *)
+
 Definition marginal_pair (s : State) : option (Bid * Ask) :=
   match matches s with
   | [] => None
   | m :: _ => Some (matched_bid m, matched_ask m)
   end.
 
-(* Uniform Price Rule *)
+Lemma marginal_pair_price_bound :
+  forall s b a,
+    wf_state s ->
+    marginal_pair s = Some (b,a) ->
+    ask_price a <= price b.
+Proof.
+  intros s b a Hwf Hm.
+  unfold marginal_pair in Hm.
+  destruct (matches s) as [|m ms]; try discriminate.
+  inversion Hm; subst b a; clear Hm.
+  apply Hwf; simpl; left; reflexivity.
+Qed.
+
+(* ------------------------------------------------------------------------- *)
+(* Uniform Price Rule (Section 3/4).                                         *)
+(* If both sides are fully satisfied at the marginal pair: price(b).         *)
+(* If only bid side is exhausted: price(b).                                  *)
+(* If only ask  side is exhausted: ask_price(a).                              *)
+(* The "else" branch should not occur for a true marginal, but is harmless.  *)
+(* ------------------------------------------------------------------------- *)
+
 Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
@@ -26,7 +92,7 @@ Definition determine_clearing_price (s : State) : option nat :=
       if eb && ea then Some (price b)
       else if eb then Some (price b)
       else if ea then Some (ask_price a)
-      else Some (price b) (* conservative; should not happen if pair is marginal *)
+      else Some (price b) (* fallback: non-marginal edge, stays within bounds by wf_state *)
   end.
 
 (* Phase P4 transition *)
@@ -37,20 +103,21 @@ Definition do_clearing_price (s : State) : State :=
    ; clearing_price := determine_clearing_price s
    ; phase := P5 |}.
 
-(* Bounds *)
-Lemma clearing_price_bounds : forall s b a c,
-  marginal_pair s = Some (b, a) ->
-  determine_clearing_price s = Some c ->
-  ask_price a <= c <= price b.
+(* ------------------------------------------------------------------------- *)
+(* Bounds: chosen clearing price lies between ask and bid of marginal pair.  *)
+(* ------------------------------------------------------------------------- *)
+
+Lemma clearing_price_bounds :
+  forall s b a c,
+    wf_state s ->
+    marginal_pair s = Some (b, a) ->
+    determine_clearing_price s = Some c ->
+    ask_price a <= c /\ c <= price b.
 Proof.
-  intros s b a c Hm Hc.
+  intros s b a c Hwf Hm Hc.
+  pose proof (marginal_pair_price_bound s b a Hwf Hm) as Hab.
   unfold determine_clearing_price in Hc; rewrite Hm in Hc.
-  remember (residual_bid b (matches s) =? 0) as eb.
-  remember (residual_ask a (matches s) =? 0) as ea.
-  destruct eb, ea; inversion Hc; subst; clear Hc.
-  all: unfold marginal_pair in Hm;
-      destruct (matches s) as [|m ms']; try discriminate;
-      inversion Hm; subst; clear Hm.
-  all: split; auto;
-      apply (feasible_price_bounds m).
+  set (eb := residual_bid b (matches s) =? 0).
+  set (ea := residual_ask a (matches s) =? 0).
+  destruct eb, ea; inversion Hc; subst; clear Hc; split; auto.
 Qed.

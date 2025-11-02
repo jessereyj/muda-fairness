@@ -64,12 +64,9 @@ Proof.
 Qed.
 
 (* ---------- Match creation ---------- *)
-
 Definition create_match (b : Bid) (a : Ask) (ms : list Match) : Match :=
   let q := Nat.min (residual_bid b ms) (residual_ask a ms) in
-  {| matched_bid := b;
-     matched_ask := a;
-     match_quantity := q |}.
+  {| matched_bid := b; matched_ask := a; match_quantity := q |}.
 
 Lemma match_quantity_pos :
   forall s b a,
@@ -77,16 +74,15 @@ Lemma match_quantity_pos :
     0 < match_quantity (create_match b a (matches s)).
 Proof.
   intros s b a Hf.
-  unfold create_match.
-  simpl.
+  unfold create_match. simpl.
   apply find_feasible_spec in Hf.
   unfold is_feasible in Hf.
   repeat rewrite Bool.andb_true_iff in Hf.
-  destruct Hf as [[H_price H_res_bid] H_res_ask].
-  apply Nat.leb_le in H_price.
-  apply Nat.leb_le in H_res_bid.
-  apply Nat.leb_le in H_res_ask.
-  apply Nat.min_glb; assumption.
+  destruct Hf as [[_ Hb] Ha].
+  apply Nat.leb_le in Hb.
+  apply Nat.leb_le in Ha.
+  (* min of two naturals >=1 is >=1, i.e., strictly positive *)
+  apply Nat.min_glb_lt; lia.
 Qed.
 
 (* ---------- Match step function and monotonicity ---------- *)
@@ -114,9 +110,8 @@ Proof.
   inversion H; subst; clear H.
   simpl. unfold incl. intros x Hx. right. exact Hx.
 Qed.
+
 (* ---------- Feasibility checking ---------- *)
-
-
 Fixpoint matched_quantities (b : Bid) (ms : list Match) : nat :=
   match ms with
   | [] => 0
@@ -135,6 +130,7 @@ Fixpoint matched_quantities_ask (a : Ask) (ms : list Match) : nat :=
       else matched_quantities_ask a ms'
   end.
 
+(* ---------- Feasibility: keep positivity guarded ---------- *)
 Lemma feasible_implies_pos :
   forall b a ms,
     is_feasible b a ms = true ->
@@ -147,20 +143,31 @@ Proof.
 Qed.
 
 
-Lemma residual_ask_pos :
-  forall (a : Ask) (ms : list Match),
-    1 <= residual_ask a ms.
+(* ---------- Price bounds, stated only for feasible pairs ---------- *)
+Lemma pick_ask_price_bound :
+  forall b as_list ms a,
+    pick_ask b as_list ms = Some a ->
+    ask_price a <= price b.
 Proof.
-  intros a ms.
-  unfold residual_ask.
-  generalize (ask_quantity a) as q.
-  generalize (matched_quantities_ask a ms) as mq.
-  intros mq q.
-  admit.
-Admitted.
+  intros b as_list ms a H.
+  apply pick_ask_spec in H.
+  unfold is_feasible in H.
+  repeat rewrite Bool.andb_true_iff in H.
+  destruct H as [[Hp _] _]. now apply Nat.leb_le in Hp.
+Qed.
 
-
-
+Lemma find_feasible_price_bound :
+  forall bs as_list ms b a,
+    find_feasible bs as_list ms = Some (b,a) ->
+    ask_price a <= price b.
+Proof.
+  intros bs as_list ms b a H.
+  (* You already proved the feasibility spec. *)
+  apply find_feasible_spec in H.
+  unfold is_feasible in H.
+  repeat rewrite Bool.andb_true_iff in H.
+  destruct H as [[Hp _] _]. now apply Nat.leb_le in Hp.
+Qed.
 
 (* ---------- Match properties ---------- *)
 
@@ -192,24 +199,38 @@ Proof.
   now rewrite Hf.
 Qed.
 
-Lemma feasible_price_bounds : forall m : Match,
-  ask_price (matched_ask m) <= price (matched_bid m).
+(* 1) From feasibility directly *)
+Lemma feasible_price_bounds :
+  forall ms b a,
+    is_feasible b a ms = true ->
+    ask_price a <= price b.
 Proof.
-  intros m.
-  destruct m as [b a q].
-  (* Build state to invoke match_price_bounds *)
-  pose (s := {|
-    bids := [b];
-    asks := [a];
-    matches := [];
-    clearing_price := None;
-    phase := P3
-  |}).
-  simpl.
-  unfold pick_ask.
-  simpl.
-  unfold is_feasible.
-  simpl.
-  (* Assume matches are always formed from feasible pairs *)
-Admitted.
+  intros ms b a Hf.
+  unfold is_feasible in Hf.
+  repeat rewrite Bool.andb_true_iff in Hf.
+  destruct Hf as [[Hp _] _].
+  now apply Nat.leb_le in Hp.
+Qed.
+
+(* 2) From find_feasible (state-level) *)
+Lemma find_feasible_price_bounds :
+  forall s b a,
+    find_feasible (bids s) (asks s) (matches s) = Some (b,a) ->
+    ask_price a <= price b.
+Proof.
+  intros s b a H.
+  apply find_feasible_spec in H.
+  eapply feasible_price_bounds; eauto.
+Qed.
+
+(* 3) For a match constructed from a feasible pair *)
+Lemma create_match_price_bounds :
+  forall ms b a,
+    is_feasible b a ms = true ->
+    ask_price a <= price b.
+Proof.
+  (* identical to (1); separated for readability/use sites *)
+  apply feasible_price_bounds.
+Qed.
+
 
