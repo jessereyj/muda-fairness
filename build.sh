@@ -81,8 +81,8 @@ Fairness/PriorityFairness.v
 Fairness/QuantityFairness.v
 Fairness/MatchFinality.v
 Fairness/Maximality.v
-#Fairness/RejectionFairness.v
-#Fairness/All.v
+Fairness/RejectionFairness.v
+Fairness/All.v
 EOF
 info "_CoqProject generated."
 echo ""
