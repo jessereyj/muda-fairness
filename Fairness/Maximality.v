@@ -27,58 +27,75 @@ Proof.
   unfold step. rewrite Hp. simpl. rewrite Hnone. reflexivity.
 Qed.
 
-(* Inversion for one step to P4 (keep admitted for now, per your plan). *)
+(* Match-step keeps the phase (constructed state sets phase := phase s). *)
+Lemma match_step_phase_invariant :
+  forall s s', match_step s = Some s' -> phase s' = phase s.
+Proof.
+  intros s s' H.
+  unfold match_step in H.
+  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:?; try discriminate.
+  inversion H; subst; reflexivity.
+Qed.
+
 Lemma step_P4_inversion : forall s,
   phase (step s) = P4 ->
   phase s = P3 /\ match_step s = None.
-Admitted.
+Proof.
+  intros s H.
+  (* Prove each part separately before any destructing *)
+  assert (Hphase : phase s = P3).
+  { unfold step in H.
+    destruct (phase s) eqn:E; simpl in H.
+    all: try discriminate H.
+    all: try (rewrite E in H; discriminate H).
+    reflexivity. }
+  assert (Hmatch : match_step s = None).
+  { unfold step in H. rewrite Hphase in H. simpl in H.
+    destruct (match_step s) as [s'|] eqn:E.
+    - (* H : phase s' = P4, E : match_step s = Some s' *)
+      (* This case is impossible *)
+      exfalso.
+      (* Unfold match_step in E to see its structure *)
+      unfold match_step in E.
+      destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:HF; try discriminate E.
+      (* Now E : Some {| ...; phase := phase s; ... |} = Some s' *)
+      injection E as Heq_state.
+      (* Heq_state : {| bids := bids s; ...; phase := phase s |} = s' *)
+      (* Extract phase equality using f_equal *)
+      assert (Hphase_eq : phase s' = phase s) by (rewrite <- Heq_state; reflexivity).
+      rewrite Hphase_eq in H.
+      rewrite Hphase in H.
+      discriminate H.
+    - reflexivity. }
+  (* Now construct the final result *)
+  split; [exact Hphase | exact Hmatch].
+Qed.
 
-(* A small helper: the defining equation of execute. *)
+
 Lemma execute_S : forall n s, execute (S n) s = execute n (step s).
 Proof. reflexivity. Qed.
-
-(* --- Multi-step “last P3 predecessor” without commuting step past execute - *)
-(* This is what you were trying to use step_P4_inversion on; instead, do an  *)
-(* induction on n and rewrite with execute_S at each step.                   *)
 
 Lemma last_P3_predecessor :
   forall s n,
     phase (execute (S n) s) = P4 ->
-    exists t,
-      t = execute n s
-      /\ phase t = P3
-      /\ match_step t = None.
+    exists t, t = execute n s /\ phase t = P3 /\ match_step t = None.
 Proof.
   intros s n H.
-  (* We proceed by induction on n, not by commuting step past execute. *)
   induction n as [|n IH] in s, H |- *.
-  - (* n = 0: execute (S 0) s = step s *)
-    simpl in H. (* H : phase (step s) = P4 *)
-    destruct (step_P4_inversion s H) as [Hp3 Hnone].
+  - simpl in H. destruct (step_P4_inversion s H) as [Hp3 Hnone].
     exists s. repeat split; auto.
-  - (* n = S n: execute (S (S n)) s = execute (S n) (step s) *)
-    rewrite execute_S in H. (* H : phase (execute (S n) (step s)) = P4 *)
-    (* Apply IH to s' := step s *)
-    specialize (IH (step s) H) as [t [Ht_eq [Hp3 Hnone]]].
-    (* We need t = execute (S n) s. By the defn, execute (S n) s = execute n (step s) *)
-    exists (execute (S n) s).
-    split.
-    + reflexivity.
-    + (* transport phase/match_step facts along definitional equalities *)
-      (* From Ht_eq : t = execute n (step s) and execute (S n) s = execute n (step s) *)
-      (* we can rewrite Hp3 and Hnone directly. *)
-      (* replace t by execute n (step s) in Hp3/Hnone using Ht_eq *)
-      subst t.
-      split; [assumption | assumption].
+  - rewrite execute_S in H.
+    specialize (IH (step s) H) as [t [Ht [Hp3 Hnone]]].
+    exists (execute (S n) s). split; [reflexivity|].
+    subst t. split; assumption.
 Qed.
 
-(* A convenient corollary that states just the properties, without the witness. *)
 Lemma no_feasible_when_P4_reached :
   forall s n,
     phase (execute (S n) s) = P4 ->
     phase (execute n s) = P3 /\ match_step (execute n s) = None.
 Proof.
-  intros s n H.
-  destruct (last_P3_predecessor s n H) as [t [-> [Hp3 Hnone]]].
+  intros s n H. destruct (last_P3_predecessor s n H) as [t [-> [Hp3 Hnone]]].
   split; assumption.
 Qed.
+

@@ -128,7 +128,6 @@ info "Building with $NPROC parallel jobs..."
 echo ""
 
 # Step 7 (Rocq): Build using a tiny Makefile that respects _CoqProject selection
-# Read only uncommented .v files and build *only those* .vo targets
 ENABLED_VFILES=$(grep -E '^[[:space:]]*[^#-].*\.v[[:space:]]*$' _CoqProject | tr -d '\r' | xargs || true)
 [[ -n "${ENABLED_VFILES}" ]] || error "No .v files enabled in _CoqProject. Uncomment entries to build."
 
