@@ -1,11 +1,9 @@
 (* Fairness/PriorityFairness.v *)
 From Stdlib Require Import List.
 Import ListNotations.
-
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
 
 (** Core, provable hooks for Priority Fairness (Section 3 & 4) *)
-
 (* 1) If find_feasible returns (b,a), then (a) the pair is feasible,
       (b) b ∈ bids, and (c) a ∈ asks. *)
 Lemma find_feasible_in_lists :

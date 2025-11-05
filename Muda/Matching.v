@@ -86,7 +86,6 @@ Proof.
 Qed.
 
 (* ---------- Match step function and monotonicity ---------- *)
-
 Definition match_step (s : State) : option State :=
   match find_feasible (bids s) (asks s) (matches s) with
   | Some (b,a) =>
@@ -142,7 +141,6 @@ Proof.
   split; apply Nat.leb_le; assumption.
 Qed.
 
-
 (* ---------- Price bounds, stated only for feasible pairs ---------- *)
 Lemma pick_ask_price_bound :
   forall b as_list ms a,
@@ -170,7 +168,6 @@ Proof.
 Qed.
 
 (* ---------- Match properties ---------- *)
-
 Lemma match_price_bounds : forall s b a,
   find_feasible (bids s) (asks s) (matches s) = Some (b, a) ->
   ask_price a <= price b.
@@ -232,5 +229,3 @@ Proof.
   (* identical to (1); separated for readability/use sites *)
   apply feasible_price_bounds.
 Qed.
-
-

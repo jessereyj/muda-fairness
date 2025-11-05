@@ -1,10 +1,7 @@
 (**  MUDA/State.v **)
 From Stdlib Require Import List Arith.
 Import ListNotations.
-
 From MUDA Require Import Types.
-
-(** ** Phases *)
 
 Inductive Phase : Type :=
   | P1  (* Order submission *)
@@ -18,8 +15,6 @@ Inductive Phase : Type :=
 Lemma phase_eq_dec : forall (p1 p2 : Phase), {p1 = p2} + {p1 <> p2}.
 Proof. decide equality. Defined.
 
-(** ** State *)
-
 Record State := {
   bids : list Bid;
   asks : list Ask;
@@ -27,8 +22,6 @@ Record State := {
   clearing_price : option nat;
   phase : Phase
 }.
-
-(** ** Initial State *)
 
 Definition initial_state (bs : list Bid) (as_list : list Ask) : State :=
   {| bids := bs;
@@ -46,7 +39,6 @@ Definition no_matches (s : State) : Prop :=
   matches s = [].
 
 (** ** Residual Quantities *)
-
 (* Calculate how much of a bid has been allocated *)
 Fixpoint allocated_bid (b : Bid) (ms : list Match) : nat :=
   match ms with
@@ -73,7 +65,6 @@ Definition residual_ask (a : Ask) (ms : list Match) : nat :=
   ask_quantity a - allocated_ask a ms.
 
 (** ** Allocation Constraint *)
-
 Definition allocOK (s : State) : Prop :=
   (forall b, In b (bids s) -> allocated_bid b (matches s) <= quantity b) /\
   (forall a, In a (asks s) -> allocated_ask a (matches s) <= ask_quantity a).

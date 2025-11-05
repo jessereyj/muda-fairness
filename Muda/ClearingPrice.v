@@ -1,9 +1,6 @@
-(** * MUDA/ClearingPrice.v (Phase P4)
-    Uniform price determination. *)
-
+(** * MUDA/ClearingPrice.v*)
 From Stdlib Require Import Arith List.
 Import ListNotations.
-
 From MUDA Require Import Types State Matching.
 
 Local Open Scope nat_scope.
@@ -12,7 +9,6 @@ Local Open Scope nat_scope.
 (* Well-formedness: every stored match respects the feasibility price guard. *)
 (* Section 3 creates matches only via feasibility, so this holds from P3 on. *)
 (* ------------------------------------------------------------------------- *)
-
 Definition wf_state (s : State) : Prop :=
   forall m, In m (matches s) ->
     ask_price (matched_ask m) <= price (matched_bid m).
@@ -57,7 +53,6 @@ Qed.
 (* ------------------------------------------------------------------------- *)
 (* Marginal pair: newest match is at head (added by match_step).             *)
 (* ------------------------------------------------------------------------- *)
-
 Definition marginal_pair (s : State) : option (Bid * Ask) :=
   match matches s with
   | [] => None
@@ -89,7 +84,6 @@ Qed.
 (* If only ask  side is exhausted: ask_price(a).                              *)
 (* The "else" branch shouldn't occur for a true marginal, but stays bounded. *)
 (* ------------------------------------------------------------------------- *)
-
 Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
@@ -113,7 +107,6 @@ Definition do_clearing_price (s : State) : State :=
 (* ------------------------------------------------------------------------- *)
 (* Bounds: chosen clearing price lies between ask and bid of marginal pair.  *)
 (* ------------------------------------------------------------------------- *)
-
 Lemma clearing_price_bounds :
   forall s b a c,
     wf_state s ->

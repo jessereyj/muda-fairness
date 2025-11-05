@@ -1,10 +1,7 @@
 (*  MUDA/Sorting.v *)
 From Stdlib Require Import List Lia Arith Sorting Permutation Sorted.
 Import ListNotations.
-
 From MUDA Require Import Types State.
-
-(** ** Sorting Criteria (Section 3: price then earliest timestamp) *)
 
 (* Bids: price ↓, then ts ↑, then id ↑ *)
 Definition bid_priority (b1 b2 : Bid) : Prop :=
@@ -21,7 +18,6 @@ Definition ask_priority (a1 a2 : Ask) : Prop :=
       (ask_ts a1 = ask_ts a2 /\ ask_id a1 < ask_id a2))).
 
 (** ** Basic order facts (useful in P2 invariants) *)
-
 Lemma bid_priority_irrefl : forall b, ~ bid_priority b b.
 Proof.
   intros b; unfold bid_priority; intros [Hgt|[Heq [Hlt|[Heqt Hid]]]]; try lia.
@@ -58,7 +54,6 @@ Definition asks_sorted (as_list : list Ask) : Prop :=
     ask_priority a1 a2.
 
 (** ** StronglySorted variants (sometimes easier for inductive proofs) *)
-
 Definition bids_strongly_sorted (bs : list Bid) : Prop :=
   StronglySorted bid_priority bs.
 
@@ -93,7 +88,6 @@ Axiom sort_bids_perm : forall bs, Permutation (sort_bids bs) bs.
 Axiom sort_asks_perm : forall asx, Permutation (sort_asks asx) asx.
 
 (** ** Phase P2 Transition (Section 3 pipeline) *)
-
 Definition do_sorting (s : State) : State :=
   {| bids := sort_bids (bids s);
      asks := sort_asks (asks s);

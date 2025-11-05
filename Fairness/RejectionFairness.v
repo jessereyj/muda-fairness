@@ -1,11 +1,9 @@
 (* Fairness/RejectionFairness.v *)
 From Stdlib Require Import List.
 Import ListNotations.
-
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
 
 (* ---------- Rejection predicates ---------- *)
-
 Definition rejected_bid (b : Bid) (s : State) : Prop :=
   In b (bids s) /\ residual_bid b (matches s) > 0.
 
@@ -24,7 +22,6 @@ Definition justified_rejection (s : State) : Prop :=
       residual_bid b (matches s) = 0 \/ is_feasible b aa (matches s) = false).
 
 (* ---------- Core list-scanning facts ---------- *)
-
 (* If pick_ask returns None, then b is infeasible with every ask in the list. *)
 Lemma pick_ask_None_all_false :
   forall (b : Bid) (as_list : list Ask) (ms : list Match),

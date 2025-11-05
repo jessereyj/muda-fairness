@@ -1,11 +1,8 @@
 (** * MUDA/Transitions.v*)
 From Stdlib Require Import List Lia.
 Import ListNotations.
-
 From LTL Require Import Semantics.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.
-
-(** ** Phase Transitions *)
 
 (* When matching finishes (no feasible pair), transition to P4 and set clearing price *)
 Definition finish_matching (s : State) : State :=
@@ -43,7 +40,6 @@ Definition step (s : State) : State :=
   end.
 
 (** ** Traces *)
-
 (* Finite execution trace *)
 Fixpoint execute (fuel : nat) (s : State) : State :=
   match fuel with
@@ -52,7 +48,6 @@ Fixpoint execute (fuel : nat) (s : State) : State :=
   end.
 
 (** ** Properties *)
-
 Lemma step_preserves_bids_asks : forall s,
   phase s <> P2 ->
   bids (step s) = bids s /\ asks (step s) = asks s.

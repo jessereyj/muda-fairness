@@ -1,8 +1,6 @@
 (* LTL/Soundness.v *)
-
 From Stdlib Require Import Arith List Lia Classical.
 Import ListNotations.
-
 From LTL Require Import Syntax Semantics Axioms.
 
 Local Open Scope LTL_scope.
@@ -30,7 +28,6 @@ Proof.
     exact HU.
   - left; exact HnU.
 Qed.
-
 
 Lemma Ax3_valid : forall φ, valid (Ax3 φ).
 Proof.

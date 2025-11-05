@@ -1,5 +1,4 @@
 (* LTL/Axioms.v *)
-
 From Stdlib Require Import List.
 From LTL Require Import Syntax.
 

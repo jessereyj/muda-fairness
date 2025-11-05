@@ -1,11 +1,9 @@
 (* LTL/Semantics.v *)
-
 From Stdlib Require Import List Bool Arith.
 From Stdlib Require Import Lia.
 Import List.ListNotations.
 
 From LTL Require Import Syntax.    (* was MUDA.LTL or LTL.Syntax *)
-
 
 Local Open Scope LTL_scope.
 Local Open Scope nat_scope.
@@ -178,6 +176,3 @@ Proof.
   specialize (Hseg0 k' Hrange).
         apply (proj2 (IH1 s0 σ0 k')) in Hseg0. exact Hseg0.
 Qed.
-
-
-

@@ -1,11 +1,9 @@
 (* Fairness/Maximality.v *)
 From Stdlib Require Import Arith List.
 Import ListNotations.
-
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
 
 (* --- Local progress/exit at P3 ------------------------------------------- *)
-
 Lemma step_P3_progress_or_exit : forall s,
   phase s = P3 ->
   (exists s', match_step s = Some s') \/ (match_step s = None).
@@ -70,7 +68,6 @@ Proof.
   (* Now construct the final result *)
   split; [exact Hphase | exact Hmatch].
 Qed.
-
 
 Lemma execute_S : forall n s, execute (S n) s = execute n (step s).
 Proof. reflexivity. Qed.

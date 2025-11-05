@@ -1,9 +1,6 @@
 (* LTL/Syntax.v *)
-
 From Stdlib Require Import List Bool.
 Import List.ListNotations.
-
-(* ---- LTL syntax ---- *)
 
 Definition predicate := nat.
 

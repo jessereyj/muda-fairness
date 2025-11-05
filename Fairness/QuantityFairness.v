@@ -1,11 +1,9 @@
 (* Fairness/QuantityFairness.v *)
 From Stdlib Require Import Arith List Lia Sorting Permutation.
 Import ListNotations.
-
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
 
 (* =============== Initial state =============== *)
-
 Theorem quantity_fairness_initial : forall bs as_list,
   allocOK (initial_state bs as_list).
 Proof.
@@ -13,7 +11,6 @@ Proof.
 Qed.
 
 (* =============== Small membership helpers for find_feasible =============== *)
-
 Lemma pick_ask_in :
   forall b as_list ms a,
     pick_ask b as_list ms = Some a -> In a as_list.
@@ -38,7 +35,6 @@ Proof.
 Qed.
 
 (* =============== Core preservation lemmas =============== *)
-
 (* Adding one match preserves allocation bounds.
    Shape: on success, match_step conses m = create_match b a ms at the head. *)
 Lemma allocOK_after_match :
@@ -122,7 +118,6 @@ Proof.
       * eapply Hask; exact Ha'in.
 Qed.
 
-
 (* Sorting only reorders bids/asks; matches are unchanged. *)
 Lemma allocOK_after_sorting :
   forall s,
@@ -146,7 +141,6 @@ Proof.
 Qed.
 
 (* =============== One-step preservation across the pipeline =============== *)
-
 Theorem quantity_fairness_step :
   forall s, allocOK s -> allocOK (step s).
 Proof.

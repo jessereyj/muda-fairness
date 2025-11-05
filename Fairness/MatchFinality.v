@@ -1,7 +1,6 @@
 (* Fairness/MatchFinality.v *)
 From Stdlib Require Import List.
 Import ListNotations.
-
 From LTL Require Import Syntax Semantics Axioms.
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
 

@@ -1,7 +1,5 @@
 (* LTL/Completeness.v *)
-
 From Stdlib Require Import Classical Lia.
-
 From LTL Require Import Syntax Semantics Axioms Soundness.
 
 Local Open Scope LTL_scope.
@@ -13,7 +11,6 @@ CoFixpoint ones : trace := Trace (fun _ => True) ones.
 (******************************************************************)
 (* Canonical-model meta-lemma, packaged as a single axiom.        *)
 (******************************************************************)
-
 Axiom canonical_countermodel :
   forall (φ : LTL_formula),
     ~ Provable φ ->
@@ -22,7 +19,6 @@ Axiom canonical_countermodel :
 (******************************************************************)
 (* Completeness w.r.t. validity                                   *)
 (******************************************************************)
-
 Theorem completeness_valid :
   forall φ, valid φ -> Provable φ.
 Proof.
@@ -36,7 +32,6 @@ Qed.
 (******************************************************************)
 (* Completeness at index 0 from models                            *)
 (******************************************************************)
-
 Corollary completeness_models0 :
   forall φ, (forall σ, models σ φ) -> Provable φ.
 Proof.
@@ -55,13 +50,11 @@ Qed.
 (******************************************************************)
 (* Explicit exported Weak Completeness axiom (for other modules)    *)
 (******************************************************************)
-
 Axiom WeakCompleteness : forall φ, valid φ -> Provable φ.
 
 (******************************************************************)
 (* Consistency and Adequacy derived from Soundness & WeakCompleteness *)
 (******************************************************************)
-
 Theorem Consistency : ~ exists φ, Provable φ /\ Provable (Not φ).
 Proof.
   intros [φ [H1 H2]].
