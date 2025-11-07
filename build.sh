@@ -77,6 +77,7 @@ MUDA/Atoms.v
 MUDA/MUDA.v
 
 # ===== Fairness Verification (Layer 3) =====
+Fairness/Interpretation.v
 Fairness/PriorityFairness.v
 Fairness/QuantityFairness.v
 Fairness/MatchFinality.v

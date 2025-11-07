@@ -1,7 +1,8 @@
 (* Fairness/Maximality.v *)
 From Stdlib Require Import Arith List.
 Import ListNotations.
-From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
+From LTL  Require Import LTL.           (* re-export module *)
+From MUDA Require Import MUDA. 
 
 (* --- Local progress/exit at P3 ------------------------------------------- *)
 Lemma step_P3_progress_or_exit : forall s,

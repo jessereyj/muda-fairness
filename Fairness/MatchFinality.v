@@ -1,8 +1,8 @@
 (* Fairness/MatchFinality.v *)
 From Stdlib Require Import List.
 Import ListNotations.
-From LTL Require Import Syntax Semantics Axioms.
-From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
+From LTL  Require Import LTL.           (* re-export module *)
+From MUDA Require Import MUDA. 
 
 (* One-step: every existing match persists after step. *)
 Lemma matches_monotone : forall s m,

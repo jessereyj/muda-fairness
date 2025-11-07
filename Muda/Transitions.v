@@ -1,7 +1,6 @@
 (** * MUDA/Transitions.v*)
 From Stdlib Require Import List Lia.
 Import ListNotations.
-From LTL Require Import Semantics.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
 (* When matching finishes (no feasible pair), transition to P4 and set clearing price *)
@@ -89,9 +88,3 @@ Proof.
     + (* None -> finish_matching, no change *)
       lia.
 Qed.
-
-(** ** Stuttering Extension for LTL *)
-
-(* Convert finite execution to infinite trace with stuttering *)
-CoFixpoint stutter (s : State) : trace :=
-  Trace (fun p => False) (stutter s).

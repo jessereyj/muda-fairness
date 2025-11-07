@@ -1,7 +1,8 @@
 (* Fairness/QuantityFairness.v *)
 From Stdlib Require Import Arith List Lia Sorting Permutation.
 Import ListNotations.
-From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
+From LTL  Require Import LTL.           (* re-export module *)
+From MUDA Require Import MUDA. 
 
 (* =============== Initial state =============== *)
 Theorem quantity_fairness_initial : forall bs as_list,

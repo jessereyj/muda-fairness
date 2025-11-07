@@ -1,7 +1,8 @@
 (* Fairness/RejectionFairness.v *)
 From Stdlib Require Import List.
 Import ListNotations.
-From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions.
+From LTL  Require Import LTL.           (* re-export module *)
+From MUDA Require Import MUDA. 
 
 (* ---------- Rejection predicates ---------- *)
 Definition rejected_bid (b : Bid) (s : State) : Prop :=
