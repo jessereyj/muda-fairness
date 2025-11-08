@@ -52,3 +52,7 @@ Proof.
   induction n as [|n IH]; intros s H; simpl; [exact H|].
   apply IH, quantity_fairness_step, H.
 Qed.
+
+(* Relate the i-th state of mu_trace to execute i s. *)
+(* (Optional Section 4 lifting to traces can be added here once the general
+   mu_trace-to-execute bridge is established.) *)

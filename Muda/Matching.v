@@ -26,6 +26,7 @@ Fixpoint pick_ask (b : Bid) (as_list : list Ask) (ms : list Match)
       else pick_ask b as' ms
   end.
 
+
 Fixpoint find_feasible (bs : list Bid) (as_list : list Ask) (ms : list Match)
   : option (Bid * Ask) :=
   match bs with
@@ -36,6 +37,7 @@ Fixpoint find_feasible (bs : list Bid) (as_list : list Ask) (ms : list Match)
       | None => find_feasible bs' as_list ms
       end
   end.
+
 
 Lemma pick_ask_spec :
   forall b as_list ms a,
@@ -50,6 +52,40 @@ Proof.
     + apply IH. exact H.
 Qed.
 
+(* If pick_ask fails, no ask in the list is feasible with b. *)
+Lemma pick_ask_None_forall :
+  forall b as_list ms,
+    pick_ask b as_list ms = None ->
+    forall a, In a as_list -> is_feasible b a ms = false.
+Proof.
+  intros b as_list ms Hnone a Hin.
+  induction as_list as [|ah asx IH]; simpl in *.
+  - contradiction.
+  - destruct (is_feasible b ah ms) eqn:Hf.
+    + discriminate Hnone.
+    + destruct Hin as [Hin0|HinRest].
+      * subst; exact Hf.
+      * apply IH; assumption.
+Qed.
+
+(* Auxiliary version for reuse: same content with a stable name *)
+Lemma pick_ask_None_all_false :
+  forall b as_list ms,
+    pick_ask b as_list ms = None ->
+    forall a, In a as_list -> is_feasible b a ms = false.
+Proof.
+  intros b as_list ms Hnone a Hin.
+  revert a Hin.
+  induction as_list as [|ah asx IH]; simpl in *; intros a Hin; try contradiction.
+  destruct (is_feasible b ah ms) eqn:Hf.
+  - discriminate Hnone.
+  - destruct Hin as [Hin0|HinRest].
+    + subst; exact Hf.
+    + eapply IH.
+      * exact Hnone.
+      * exact HinRest.
+Qed.
+
 Lemma find_feasible_spec :
   forall bs as_list ms b a,
     find_feasible bs as_list ms = Some (b,a) ->
@@ -61,6 +97,23 @@ Proof.
     + inversion H; subst b a. clear H.
       apply (pick_ask_spec b0 as_list ms a0). exact Hpick.
     + apply (IH as_list ms b a). exact H.
+Qed.
+
+(* If find_feasible fails, no feasible pair exists among provided lists. *)
+Lemma find_feasible_None_forall :
+  forall bs as_list ms,
+    find_feasible bs as_list ms = None ->
+    forall b a, In b bs -> In a as_list -> is_feasible b a ms = false.
+Proof.
+  induction bs as [|b0 bs IH]; intros as_list ms Hnone b a Hb Ha.
+  - contradiction.
+  - simpl in Hnone.
+    destruct (pick_ask b0 as_list ms) as [a0|] eqn:Hpick.
+    + discriminate Hnone.
+    + (* In this branch Hpick = None, and Hnone simplifies to find_feasible bs as_list ms = None *)
+      destruct Hb as [Hb0|HbRest].
+      * subst b. eapply pick_ask_None_all_false; eauto.
+      * eapply IH; eauto.
 Qed.
 
 (* ---------- Match creation ---------- *)

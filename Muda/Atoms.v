@@ -34,6 +34,24 @@ Definition final_prop       (s : State) : Prop := True.
 Definition maximal_prop     (s : State) : Prop := True.
 Definition rejectionOK_prop (s : State) : Prop := True.
 
+(* Rejection fairness building blocks (Section 4.3.6) *)
+Definition rejected_bid_prop (b : Bid) (s : State) : Prop :=
+  In b (bids s) /\ residual_bid b (matches s) > 0.
+
+Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
+  In a (asks s) /\ residual_ask a (matches s) > 0.
+
+(* Global justification predicate: for any remaining counterparty, either that
+   side is exhausted or the pair is infeasible under current matches. *)
+Definition rejection_justified_prop (s : State) : Prop :=
+  (forall (b : Bid) (aa : Ask),
+      rejected_bid_prop b s -> In aa (asks s) ->
+      residual_ask aa (matches s) = 0 \/ is_feasible b aa (matches s) = false)
+  /\
+  (forall (aa : Ask) (b : Bid),
+      rejected_ask_prop aa s -> In b (bids s) ->
+      residual_bid b (matches s) = 0 \/ is_feasible b aa (matches s) = false).
+
 Definition priorityB_step_ok_prop (s: State) : Prop :=
   phase s = P3 ->
   forall b1 b2 a,

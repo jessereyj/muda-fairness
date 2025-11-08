@@ -1,6 +1,6 @@
 # Auto-generated minimal Rocq makefile (portable)
 PROJECT := _CoqProject
-VFILES := LTL/Syntax.v LTL/Semantics.v LTL/Axioms.v LTL/Soundness.v LTL/Completeness.v LTL/LTL.v MUDA/Eqb.v MUDA/Types.v MUDA/State.v MUDA/Sorting.v MUDA/Matching.v MUDA/ClearingPrice.v MUDA/Transitions.v MUDA/Atoms.v MUDA/MUDA.v Fairness/Interpretation.v Fairness/PriorityFairness.v Fairness/QuantityFairness.v Fairness/MatchFinality.v Fairness/Maximality.v Fairness/RejectionFairness.v Fairness/Fairness.v
+VFILES := LTL/Syntax.v LTL/Semantics.v LTL/Axioms.v LTL/Soundness.v LTL/Completeness.v LTL/LTL.v MUDA/Eqb.v MUDA/Types.v MUDA/State.v MUDA/Sorting.v MUDA/Matching.v MUDA/ClearingPrice.v MUDA/Transitions.v MUDA/Atoms.v MUDA/MUDA.v Fairness/Interpretation.v Fairness/PriorityFairness.v Fairness/QuantityFairness.v Fairness/MatchFinality.v Fairness/Maximality.v Fairness/RejectionFairness.v Fairness/All.v Examples/CloudMarket.v
 VOFILES := $(VFILES:.v=.vo)
 ROOT_FLAGS := -R LTL LTL -R MUDA MUDA -R Fairness Fairness
 

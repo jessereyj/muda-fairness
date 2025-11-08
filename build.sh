@@ -83,7 +83,10 @@ Fairness/QuantityFairness.v
 Fairness/MatchFinality.v
 Fairness/Maximality.v
 Fairness/RejectionFairness.v
-Fairness/Fairness.v
+Fairness/All.v
+
+# ===== Simulation (Layer 4) =====
+Examples/CloudMarket.v
 EOF
 info "_CoqProject generated."
 echo ""

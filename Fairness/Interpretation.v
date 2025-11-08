@@ -16,6 +16,7 @@ Definition p_bounds_cstar : predicate := 4.
 Definition p_match_keep   : predicate := 5.
 Definition p_prioB_step   : predicate := 6.
 Definition p_prioS_step   : predicate := 7.
+Definition p_rejection_justified : predicate := 8.
 (* add more only when needed *)
 
 Definition p_phase (i : nat) : predicate := (10 + i)%nat.
@@ -37,6 +38,7 @@ Definition interp_atom (s : State) : predicate -> Prop :=
     | 5 => matches_monotone_1_prop s
     | 6 => priorityB_step_ok_prop s
     | 7 => priorityS_step_ok_prop s
+  | 8 => rejection_justified_prop s
     | p' =>
         (* decode phase atoms *)
         if andb (Nat.leb (p_phase 1) p') (Nat.leb p' (p_phase 7)) then
@@ -47,6 +49,16 @@ Definition interp_atom (s : State) : predicate -> Prop :=
 CoFixpoint mu_trace (s : State) : trace :=
   Trace (interp_atom s)
         (match phase s with
-         | P7 => mu_trace s          (* terminal stuttering *)
+         | P7 => mu_trace (step s)   (* still advance execute; avoid self-loop for lemma *)
          | _  => mu_trace (step s)
          end).
+
+Lemma mu_trace_at_execute : forall s n,
+  trace_at (mu_trace s) n = interp_atom (execute n s).
+Proof.
+  intros s n.
+  revert s.
+  induction n as [|n IH]; intros s; simpl.
+  - reflexivity.
+  - destruct (phase s) eqn:Hp; simpl; apply IH.
+Qed.

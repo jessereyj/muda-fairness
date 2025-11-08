@@ -2,7 +2,21 @@
 From Stdlib Require Import List.
 Import ListNotations.
 From LTL  Require Import LTL.           (* re-export module *)
-From MUDA Require Import MUDA. 
+From MUDA Require Import MUDA.
+From Fairness Require Import Interpretation. (* for p_terminal, p_match_keep *)
+
+Local Open Scope LTL_scope.
+
+(* LTL formula: eventual terminal phase (market closed) *)
+Definition final : LTL_formula := Atom p_terminal.
+
+(* LTL formula: global match persistence (no match deletion). *)
+Definition finalityOK : LTL_formula := G (Atom p_match_keep).
+
+(* A pointwise version of matches_monotone_1_prop from the global lemma *)
+(* Aligning with Section 4.3.4: we keep the operational monotonicity lemma.
+   A future enhancement can prove the full LTL lifting once an execute/trace
+   correspondence lemma is stabilized (similar to quantity fairness). *)
 
 (* One-step: every existing match persists after step. *)
 Lemma matches_monotone : forall s m,
