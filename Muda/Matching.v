@@ -1,6 +1,6 @@
 (*  MUDA/Matching.v *)
 From Stdlib Require Import Arith List Bool PeanoNat Bool Lia.
-From MUDA Require Import Eqb Types State.
+From MUDA Require Import Eqb Types State Sorting.
 Import ListNotations.
 Local Open Scope nat_scope.
 Local Open Scope bool_scope.
@@ -286,4 +286,109 @@ Proof.
   unfold is_feasible in Hf.
   repeat rewrite Bool.andb_true_iff in Hf.
   destruct Hf as [[Hp _] _]. now apply Nat.leb_le in Hp.
+Qed.
+
+Lemma allocOK_after_match :
+  forall s s',
+    allocOK s ->
+    match_step s = Some s' ->
+    allocOK s'.
+Proof.
+  intros s s' [Hbid Hask] Hstep.
+  unfold match_step in Hstep.
+  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
+  inversion Hstep; subst s'; clear Hstep.
+  set (ms := matches s).
+  set (m := create_match b a ms).
+  (* membership facts for b and a, needed to reuse Hbid/Hask bounds *)
+  (* Use earlier lemma find_feasible_in_lists (membership + feasibility) *)
+  pose proof (find_feasible_in_lists (bids s) (asks s) ms b a Hf) as [Hfeas [Hb_in Ha_in]].
+  split.
+  - (* bids side *)
+    intros b' Hb'in. simpl.
+    destruct (bid_eq_dec (matched_bid m) b') as [Eeq|Eneq].
+    + (* affected bid: matched_bid m = b' ; but matched_bid m = b *)
+      symmetry in Eeq; assert (b' = b) as ->.
+      { unfold m, create_match in Eeq; simpl in Eeq. exact Eeq. }
+      (* Now the "then" branch is selected; simplify *)
+      simpl.
+      (* abbreviations *)
+      set (A := allocated_bid b ms).
+      set (Q := quantity b).
+      set (q := Nat.min (residual_bid b ms) (residual_ask a ms)).
+      (* old bound *)
+      assert (Hbound : A <= Q) by (eapply Hbid; eauto).
+      (* q <= residual_bid b ms = Q - A *)
+      assert (Hq_le_res : q <= residual_bid b ms).
+      { unfold q.
+        apply Nat.le_min_l. }
+      unfold residual_bid, A, Q, q in *.
+      (* show match_quantity m + allocated_bid b ms <= quantity b *)
+      simpl.
+      unfold match_quantity, create_match; simpl.
+      (* Now: Nat.min ... + allocated_bid b ms <= quantity b *)
+      (* We have: Nat.min ... <= quantity b - allocated_bid b ms *)
+      (* and allocated_bid b ms <= quantity b *)
+      destruct (bid_eq_dec b b) as [_|]; [|congruence].
+      apply PeanoNat.Nat.add_le_mono_r with (p := allocated_bid b ms) in Hq_le_res.
+      rewrite PeanoNat.Nat.sub_add in Hq_le_res by exact Hbound.
+      exact Hq_le_res.
+    + (* unaffected bid: allocation unchanged; reuse old bound *)
+      simpl. destruct (bid_eq_dec (matched_bid m) b') as [|Hneq']; [congruence|].
+      destruct (bid_eq_dec b b') as [Heqb|Hneqb].
+      * (* b = b' contradicts Eneq: matched_bid m <> b' and matched_bid m = b *)
+        unfold m, create_match in Eneq; simpl in Eneq.
+        subst b'. congruence.
+      * eapply Hbid; exact Hb'in.
+  - (* asks side *)
+    intros a' Ha'in. simpl.
+    destruct (ask_eq_dec (matched_ask m) a') as [Eeq|Eneq].
+    + (* affected ask: matched_ask m = a' ; matched_ask m = a *)
+      symmetry in Eeq; assert (a' = a) as ->.
+      { unfold m, create_match in Eeq; simpl in Eeq. exact Eeq. }
+      simpl.
+      set (A := allocated_ask a ms).
+      set (Q := ask_quantity a).
+      set (q := Nat.min (residual_bid b ms) (residual_ask a ms)).
+      assert (Hbound : A <= Q) by (eapply Hask; eauto).
+      assert (Hq_le_res : q <= residual_ask a ms).
+      { unfold q.
+        apply Nat.le_min_r. }
+      unfold residual_ask, A, Q, q in *.
+      simpl.
+      unfold match_quantity, create_match; simpl.
+      destruct (ask_eq_dec a a) as [_|]; [|congruence].
+      apply PeanoNat.Nat.add_le_mono_r with (p := allocated_ask a ms) in Hq_le_res.
+      rewrite PeanoNat.Nat.sub_add in Hq_le_res by exact Hbound.
+      exact Hq_le_res.
+    + (* unaffected ask *)
+      simpl. destruct (ask_eq_dec (matched_ask m) a') as [|Hneq']; [congruence|].
+      destruct (ask_eq_dec a a') as [Heqa|Hneqa].
+      * (* a = a' contradicts Eneq: matched_ask m <> a' and matched_ask m = a *)
+        unfold m, create_match in Eneq; simpl in Eneq.
+        subst a'. congruence.
+      * eapply Hask; exact Ha'in.
+Qed.
+
+Lemma pick_ask_in :
+  forall b as_list ms a,
+    pick_ask b as_list ms = Some a -> In a as_list.
+Proof.
+  intros b as_list ms a H.
+  induction as_list as [|ah asx IH]; simpl in H; try discriminate.
+  destruct (is_feasible b ah ms) eqn:Hf.
+  - inversion H; subst; now left.
+  - right; eauto.
+Qed.
+
+Lemma find_feasible_in :
+  forall bs as_list ms b a,
+    find_feasible bs as_list ms = Some (b,a) ->
+    In b bs /\ In a as_list.
+Proof.
+  induction bs as [|b0 bs IH]; simpl; intros as_list ms b a H; try discriminate.
+  destruct (pick_ask b0 as_list ms) as [a0|] eqn:Hpick.
+  - inversion H; subst; split; [now left |].
+    apply pick_ask_in in Hpick; exact Hpick.
+  - apply IH in H; destruct H as [Hb Ha]; split; [right; exact Hb | exact Ha].
 Qed.

@@ -1,5 +1,5 @@
 (** * MUDA/Transitions.v*)
-From Stdlib Require Import List Lia.
+From Stdlib Require Import List Lia Sorting Permutation.
 Import ListNotations.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
@@ -37,6 +37,26 @@ Definition step (s : State) : State :=
              phase := P7 |}
   | P7 => s (* Terminal state *)
   end.
+
+(* Sorting only reorders bids/asks; matches are unchanged and constraints hold. *)
+Lemma allocOK_after_sorting :
+  forall s,
+    phase s = P2 ->
+    allocOK s ->
+    allocOK (step s).
+Proof.
+  intros s Hp2 [Hbid Hask].
+  unfold step; rewrite Hp2; unfold do_sorting; simpl.
+  split.
+  - intros b Hb_in_sorted.
+    pose proof (sort_bids_perm (bids s)) as Hperm.
+    assert (In b (bids s)) by (now apply (Permutation_in b Hperm)).
+    exact (Hbid b H).
+  - intros a Ha_in_sorted.
+    pose proof (sort_asks_perm (asks s)) as Hperm.
+    assert (In a (asks s)) by (now apply (Permutation_in a Hperm)).
+    exact (Hask a H).
+Qed.
 
 (** ** Traces *)
 (* Finite execution trace *)

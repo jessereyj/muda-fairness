@@ -1,7 +1,11 @@
 (*  MUDA/Sorting.v *)
 From Stdlib Require Import List Lia Arith Sorting Permutation Sorted.
 Import ListNotations.
-From MUDA Require Import Types State.
+From MUDA Require Import Eqb Types State.
+
+(** * Sorting Bids and Asks (Phase P2) *)
+
+(** ** Priority Orders *)
 
 (* Definition 3.1.3: lexicographic order *)
 Definition prioB (b1 b2 : Bid) : Prop :=
@@ -103,3 +107,9 @@ Definition do_sorting (s : State) : State :=
      matches := matches s;
      clearing_price := clearing_price s;
      phase := P3 |}.
+
+
+(* Sorting only reorders bids/asks; matches are unchanged. *)
+(* Moved allocOK_after_sorting lemma to Transitions.v to avoid a circular
+   dependency (Sorting.v used step from Transitions.v while Transitions.v
+   depends on do_sorting here). *)
