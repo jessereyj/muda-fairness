@@ -1,7 +1,7 @@
 (* MUDA/Atoms.v *)
 From Stdlib Require Import List Arith Bool.
 Import ListNotations.
-From MUDA Require Import Types State Matching ClearingPrice Transitions.
+From MUDA Require Import Types State Sorting Matching ClearingPrice Transitions.
 
 (* Allocation bounds, Section 3 *)
 Definition allocOK_prop (s : State) : Prop :=
@@ -33,3 +33,17 @@ Definition priorityOK_prop  (s : State) : Prop := True.
 Definition final_prop       (s : State) : Prop := True.
 Definition maximal_prop     (s : State) : Prop := True.
 Definition rejectionOK_prop (s : State) : Prop := True.
+
+Definition priorityB_step_ok_prop (s: State) : Prop :=
+  phase s = P3 ->
+  forall b1 b2 a,
+    prioB b1 b2 ->
+    feasible b1 a (matches s) ->
+    find_feasible (bids s) (asks s) (matches s) <> Some (b2, a).
+
+Definition priorityS_step_ok_prop (s: State) : Prop :=
+  phase s = P3 ->
+  forall a1 a2 b,
+    prioS a1 a2 ->
+    feasible b a1 (matches s) ->
+    find_feasible (bids s) (asks s) (matches s) <> Some (b, a2).

@@ -2,6 +2,9 @@
 From Stdlib Require Import List Bool.
 Import List.ListNotations.
 
+Declare Scope LTL_scope.
+Delimit Scope LTL_scope with LTL.
+
 Definition predicate := nat.
 
 Inductive LTL_formula : Type :=
@@ -15,8 +18,8 @@ Inductive LTL_formula : Type :=
   | Eventually : LTL_formula -> LTL_formula
   | Until      : LTL_formula -> LTL_formula -> LTL_formula.
 
-Declare Scope LTL_scope.
-Delimit Scope LTL_scope with LTL.
+Definition top : LTL_formula := Or (Atom 0) (Not (Atom 0)).
+
 
 Notation "¬ φ"     := (Not φ)                   (at level 75, right associativity) : LTL_scope.
 Notation "φ ∧ ψ"   := (And φ ψ)                 (at level 80, right associativity) : LTL_scope.

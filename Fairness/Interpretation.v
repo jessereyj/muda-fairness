@@ -1,18 +1,30 @@
 (* Fairness/Interpretation.v *)
-From Stdlib Require Import List.
+From Stdlib Require Import List Bool PeanoNat.
 From LTL  Require Import Syntax Semantics.
 From MUDA Require Import State Transitions Atoms.
 
 Local Open Scope LTL_scope.
+Local Open Scope bool_scope.  
 
 (* Fixed indices for atoms used in Section 4 *)
-Local Notation p_allocOK      := 0.
-Local Notation p_terminal     := 1.
-Local Notation p_no_feasible  := 2.
-Local Notation p_has_cprice   := 3.
-Local Notation p_bounds_cstar := 4.
-Local Notation p_match_keep   := 5.
+(* indices *)
+Definition p_allocOK      : predicate := 0.
+Definition p_terminal     : predicate := 1.
+Definition p_no_feasible  : predicate := 2.
+Definition p_has_cprice   : predicate := 3.
+Definition p_bounds_cstar : predicate := 4.
+Definition p_match_keep   : predicate := 5.
+Definition p_prioB_step   : predicate := 6.
+Definition p_prioS_step   : predicate := 7.
 (* add more only when needed *)
+
+Definition p_phase (i : nat) : predicate := (10 + i)%nat.
+
+Definition nth_phase (i : nat) : Phase :=
+  match i with
+  | 1 => P1 | 2 => P2 | 3 => P3 | 4 => P4
+  | 5 => P5 | 6 => P6 | _ => P7
+  end.
 
 Definition interp_atom (s : State) : predicate -> Prop :=
   fun p =>
@@ -23,12 +35,18 @@ Definition interp_atom (s : State) : predicate -> Prop :=
     | 3 => has_clearing_price_prop s
     | 4 => bounds_cstar_prop s
     | 5 => matches_monotone_1_prop s
-    | _ => False
+    | 6 => priorityB_step_ok_prop s
+    | 7 => priorityS_step_ok_prop s
+    | p' =>
+        (* decode phase atoms *)
+        if andb (Nat.leb (p_phase 1) p') (Nat.leb p' (p_phase 7)) then
+          let i := (p' - 10)%nat in phase s = nth_phase i
+        else False
     end.
 
 CoFixpoint mu_trace (s : State) : trace :=
   Trace (interp_atom s)
         (match phase s with
-         | P7 => mu_trace s
+         | P7 => mu_trace s          (* terminal stuttering *)
          | _  => mu_trace (step s)
          end).

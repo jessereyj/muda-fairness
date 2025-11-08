@@ -1,6 +1,5 @@
 (* LTL/Semantics.v *)
-From Stdlib Require Import List Bool Arith.
-From Stdlib Require Import Lia.
+From Stdlib Require Import List Bool Arith Lia.
 Import List.ListNotations.
 
 From LTL Require Import Syntax.    (* was MUDA.LTL or LTL.Syntax *)

@@ -3,6 +3,15 @@ From Stdlib Require Import List Lia Arith Sorting Permutation Sorted.
 Import ListNotations.
 From MUDA Require Import Types State.
 
+(* Definition 3.1.3: lexicographic order *)
+Definition prioB (b1 b2 : Bid) : Prop :=
+  price b1 > price b2 \/
+  (price b1 = price b2 /\ ts b1 < ts b2).
+
+Definition prioS (a1 a2 : Ask) : Prop :=
+  ask_price a1 < ask_price a2 \/
+  (ask_price a1 = ask_price a2 /\ ask_ts a1 < ask_ts a2).
+
 (* Bids: price ↓, then ts ↑, then id ↑ *)
 Definition bid_priority (b1 b2 : Bid) : Prop :=
   price b1 > price b2 \/
