@@ -122,7 +122,7 @@ Lemma residual_ask_unchanged : forall s s' b a0 a,
   a <> a0 ->
   residual_ask a (matches s') = residual_ask a (matches s).
 Proof.
-  intros s s' b a0 a Hstep Hf Haneq.
+  intros s s' b a0 a Hstep Hf Hneq.
   unfold match_step in Hstep; rewrite Hf in Hstep; inversion Hstep; subst s'; clear Hstep.
   set (ms := matches s).
   set (m := create_match b a0 ms).
@@ -133,30 +133,139 @@ Proof.
   - reflexivity.
 Qed.
 
+(* Membership of the chosen bid in the bid list. *)
+Lemma find_feasible_In_b : forall bs as_list ms b a,
+  find_feasible bs as_list ms = Some (b,a) -> In b bs.
+Proof.
+  induction bs as [|b0 bs IH]; intros as_list ms b a H; simpl in H.
+  - discriminate.
+  - destruct (pick_ask b0 as_list ms) as [a0|] eqn:Hpick.
+    + inversion H; subst b a. left; reflexivity.
+    + right. eauto.
+Qed.
+
+(* Membership of the chosen ask in the ask list. *)
+Lemma find_feasible_In_a : forall bs as_list ms b a,
+  find_feasible bs as_list ms = Some (b,a) -> In a as_list.
+Proof.
+  induction bs as [|b0 bs IH]; intros as_list ms b a H; simpl in H.
+  - discriminate.
+  - destruct (pick_ask b0 as_list ms) as [a0|] eqn:Hpick.
+    + inversion H; subst b a.
+      (* Now we need to show pick_ask implies membership *)
+      clear IH H. revert b0 ms a0 Hpick.
+      induction as_list as [|ah asx IHas]; intros b0 ms a0 Hpick; simpl in Hpick.
+      * discriminate.
+      * destruct (is_feasible b0 ah ms) eqn:Hf.
+        -- injection Hpick as <-. left; reflexivity.
+        -- right. apply IHas with b0 ms. exact Hpick.
+    + eapply IH. exact H.
+Qed.
+
+(* Helper: match_step preserves bids *)
+Lemma match_step_bids_unchanged : forall s s',
+  match_step s = Some s' -> bids s' = bids s.
+Proof.
+  intros s s' H.
+  unfold match_step in H.
+  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|]; try discriminate.
+  inversion H; reflexivity.
+Qed.
+
+(* Helper: match_step preserves asks *)
+Lemma match_step_asks_unchanged : forall s s',
+  match_step s = Some s' -> asks s' = asks s.
+Proof.
+  intros s s' H.
+  unfold match_step in H.
+  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|]; try discriminate.
+  inversion H; reflexivity.
+Qed.
+
+
+(* Pointwise-to-sum lemmas (specialized, no fold_right rewrite needed) *)
+
+(* Pointwise-to-sum lemmas specialized to our sum definitions *)
+Lemma sum_residual_bids_pointwise_le : forall bs ms ms',
+  (forall x, In x bs -> residual_bid x ms' <= residual_bid x ms) ->
+  sum_residual_bids bs ms' <= sum_residual_bids bs ms.
+Proof.
+  intros bs ms ms' Hle.
+  induction bs as [|b bs IH]; simpl; [lia|].
+  assert (Hb_le : residual_bid b ms' <= residual_bid b ms) by (apply Hle; left; reflexivity).
+  assert (Htail_le : sum_residual_bids bs ms' <= sum_residual_bids bs ms).
+  { apply IH. intros x Hx. apply Hle. right; exact Hx. }
+  lia.
+Qed.
+
+Lemma sum_residual_bids_pointwise_strict : forall bs ms ms' b,
+  In b bs ->
+  (forall x, In x bs -> residual_bid x ms' <= residual_bid x ms) ->
+  residual_bid b ms' < residual_bid b ms ->
+  sum_residual_bids bs ms' < sum_residual_bids bs ms.
+Proof.
+  intros bs ms ms' b Hin Hle Hlt.
+  induction bs as [|x xs IH]; simpl in *; [contradiction|].
+  destruct Hin as [Hx|HinTail].
+  - subst x.
+    assert (Htail_le: sum_residual_bids xs ms' <= sum_residual_bids xs ms).
+    { apply sum_residual_bids_pointwise_le. intros y Hy. apply Hle. right; exact Hy. }
+    apply Nat.add_lt_le_mono; [exact Hlt|exact Htail_le].
+  - assert (Hx_le: residual_bid x ms' <= residual_bid x ms) by (apply Hle; left; reflexivity).
+    assert (Htail_strict: sum_residual_bids xs ms' < sum_residual_bids xs ms).
+    { apply IH; [assumption|]. intros y Hy. apply Hle. right; exact Hy. all:assumption. }
+    apply Nat.add_le_lt_mono; [exact Hx_le|exact Htail_strict].
+Qed.
+
+Lemma sum_residual_asks_pointwise_le : forall asx ms ms',
+  (forall x, In x asx -> residual_ask x ms' <= residual_ask x ms) ->
+  sum_residual_asks asx ms' <= sum_residual_asks asx ms.
+Proof.
+  intros asx ms ms' Hle.
+  induction asx as [|a asx IH]; simpl; [lia|].
+  assert (Ha_le : residual_ask a ms' <= residual_ask a ms) by (apply Hle; left; reflexivity).
+  assert (Htail_le : sum_residual_asks asx ms' <= sum_residual_asks asx ms).
+  { apply IH. intros x Hx. apply Hle. right; exact Hx. }
+  lia.
+Qed.
+
+Lemma sum_residual_asks_pointwise_strict : forall asx ms ms' a,
+  In a asx ->
+  (forall x, In x asx -> residual_ask x ms' <= residual_ask x ms) ->
+  residual_ask a ms' < residual_ask a ms ->
+  sum_residual_asks asx ms' < sum_residual_asks asx ms.
+Proof.
+  intros asx ms ms' a Hin Hle Hlt.
+  induction asx as [|x xs IH]; simpl in *; [contradiction|].
+  destruct Hin as [Hx|HinTail].
+  - subst x.
+    assert (Htail_le: sum_residual_asks xs ms' <= sum_residual_asks xs ms).
+    { apply sum_residual_asks_pointwise_le. intros y Hy. apply Hle. right; exact Hy. }
+    apply Nat.add_lt_le_mono; [exact Hlt|exact Htail_le].
+  - assert (Hx_le: residual_ask x ms' <= residual_ask x ms) by (apply Hle; left; reflexivity).
+    assert (Htail_strict: sum_residual_asks xs ms' < sum_residual_asks xs ms).
+    { apply IH; [assumption|]. intros y Hy. apply Hle. right; exact Hy. all:assumption. }
+    apply Nat.add_le_lt_mono; [exact Hx_le|exact Htail_strict].
+Qed.
+
 Lemma sum_residual_bids_drop : forall s s' b a,
   match_step s = Some s' ->
   find_feasible (bids s) (asks s) (matches s) = Some (b,a) ->
   sum_residual_bids (bids s') (matches s') < sum_residual_bids (bids s) (matches s).
 Proof.
   intros s s' b a Hstep Hf.
-  unfold match_step in Hstep; rewrite Hf in Hstep; inversion Hstep; subst s'; clear Hstep.
-  set (ms := matches s).
-  set (m := create_match b a ms).
-  simpl.
-  (* Split sum: matched bid strictly drops; others unchanged. *)
-  assert (Hd: residual_bid b (m :: ms) < residual_bid b ms) by
-    (apply residual_bid_drop with (a:=a); auto; unfold match_step; rewrite Hf; reflexivity).
-  (* Rewrite list fold as explicit recursion we already have (sum_residual_bids) *)
-  induction (bids s) as [|b' bs IH]; simpl.
-  - inversion Hf.
-  - destruct (bid_eq_dec b' b) as [->|Hneq].
-  + simpl. lia.
-    + simpl.
-      assert (Hunch: residual_bid b' (m :: ms) = residual_bid b' ms) by
-        (apply residual_bid_unchanged with (b0:=b) (a:=a); auto; unfold match_step; rewrite Hf; reflexivity).
-      rewrite Hunch.
-      apply IH.
+  pose proof (match_step_bids_unchanged s s' Hstep) as Hbids.
+  pose proof (residual_bid_drop s s' b a Hstep Hf) as Hstrict_b.
+  pose proof (find_feasible_In_b (bids s) (asks s) (matches s) b a Hf) as Hin_b.
+  (* Pointwise: matched bid strictly drops; others unchanged (hence <=). *)
+  assert (Hpoint: forall x, In x (bids s) -> residual_bid x (matches s') <= residual_bid x (matches s)) by
+    (intros x Hx; destruct (bid_eq_dec x b) as [->|Hneq]; [apply Nat.lt_le_incl; exact Hstrict_b|
+       rewrite (residual_bid_unchanged s s' b a x Hstep Hf Hneq); lia]).
+  rewrite Hbids.
+  (* Apply specialized sum lemma without converting to fold_right *)
+  eapply sum_residual_bids_pointwise_strict; eauto.
 Qed.
+
 
 Lemma sum_residual_asks_drop : forall s s' b a,
   match_step s = Some s' ->
@@ -164,21 +273,14 @@ Lemma sum_residual_asks_drop : forall s s' b a,
   sum_residual_asks (asks s') (matches s') < sum_residual_asks (asks s) (matches s).
 Proof.
   intros s s' b a Hstep Hf.
-  unfold match_step in Hstep; rewrite Hf in Hstep; inversion Hstep; subst s'; clear Hstep.
-  set (ms := matches s).
-  set (m := create_match b a ms).
-  simpl.
-  assert (Hd: residual_ask a (m :: ms) < residual_ask a ms) by
-      (apply residual_ask_drop with (b:=b); auto; unfold match_step; rewrite Hf; reflexivity).
-  induction (asks s) as [|a' asx IH]; simpl.
-  - inversion Hf.
-  - destruct (ask_eq_dec a' a) as [->|Hneq].
-    + simpl. lia.
-    + simpl.
-      assert (Hunch: residual_ask a' (m :: ms) = residual_ask a' ms) by
-        (apply residual_ask_unchanged with (b:=b) (a0:=a); auto; unfold match_step; rewrite Hf; reflexivity).
-      rewrite Hunch.
-      apply IH.
+  pose proof (match_step_asks_unchanged s s' Hstep) as Hasks.
+  pose proof (residual_ask_drop s s' b a Hstep Hf) as Hstrict_a.
+  pose proof (find_feasible_In_a (bids s) (asks s) (matches s) b a Hf) as Hin_a.
+  assert (Hpoint: forall x, In x (asks s) -> residual_ask x (matches s') <= residual_ask x (matches s)) by
+    (intros x Hx; destruct (ask_eq_dec x a) as [->|Hneq]; [apply Nat.lt_le_incl; exact Hstrict_a|
+       rewrite (residual_ask_unchanged s s' b a x Hstep Hf Hneq); lia]).
+  rewrite Hasks.
+  eapply sum_residual_asks_pointwise_strict; eauto.
 Qed.
 
 Lemma mu_decreases_on_match : forall s s',
@@ -187,7 +289,9 @@ Proof.
   intros s s' Hp Hstep.
   unfold mu.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf;
-    [|discriminate Hstep].
+    [|
+     (* Impossible: match_step s = Some s' but find_feasible returned None *)
+     unfold match_step in Hstep; rewrite Hf in Hstep; discriminate].
   (* Use previously proven sum-drop lemmas directly on s -> s' *)
   assert (Hsumb_strict: sum_residual_bids (bids s') (matches s') < sum_residual_bids (bids s) (matches s))
     by (eapply sum_residual_bids_drop; eauto).
@@ -204,7 +308,7 @@ Proof.
   intros s Hp.
   unfold match_step.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:HF.
-  - left. eexists; reflexivity.
+  - left. eexists. reflexivity.
   - right. reflexivity.
 Qed.
 
@@ -265,29 +369,24 @@ Qed.
 Lemma execute_S : forall n s, execute (S n) s = execute n (step s).
 Proof. reflexivity. Qed.
 
-Lemma last_P3_predecessor :
-  forall s n,
-    phase (execute (S n) s) = P4 ->
-    exists t, t = execute n s /\ phase t = P3 /\ match_step t = None.
+Lemma step_execute_comm : forall n s, step (execute n s) = execute n (step s).
 Proof.
-  intros s n H.
-  induction n as [|n IH] in s, H |- *.
-  - simpl in H. destruct (step_P4_inversion s H) as [Hp3 Hnone].
-    exists s. repeat split; auto.
-  - rewrite execute_S in H.
-    specialize (IH (step s) H) as [t [Ht [Hp3 Hnone]]].
-    exists (execute (S n) s). split; [reflexivity|].
-    subst t. split; assumption.
+  induction n as [|n IH]; intros s.
+  - reflexivity.
+  - (* inductive case: goal step (execute (S n) s) = execute (S n) (step s) *)
+    rewrite execute_S. rewrite execute_S.
+    (* goal: step (execute n (step s)) = execute n (step (step s)) *)
+    rewrite IH. reflexivity.
 Qed.
 
-Lemma no_feasible_when_P4_reached :
-  forall s n,
-    phase (execute (S n) s) = P4 ->
-    phase (execute n s) = P3 /\ match_step (execute n s) = None.
+Lemma execute_step_after : forall n s, execute (S n) s = step (execute n s).
 Proof.
-  intros s n H. destruct (last_P3_predecessor s n H) as [t [-> [Hp3 Hnone]]].
-  split; assumption.
+  intros n s. rewrite execute_S. symmetry. apply step_execute_comm.
 Qed.
+
+(* We no longer need an explicit predecessor enumeration lemma; we derive
+   predecessor state properties on demand using execute_step_after and
+   step_P4_inversion. *)
 
 (* If match_step fails, there is no feasible pair in the current state. *)
 Lemma no_feasible_from_None : forall s,
@@ -302,56 +401,6 @@ Proof.
 Qed.
 
 (* Eventual exit from P3 using measure descent. *)
-Lemma eventually_P4_from_P3 : forall s,
-  phase s = P3 -> exists n, phase (execute n s) = P4.
-Proof.
-  intros s Hp3.
-  remember (mu s) as k.
-  revert s Hp3 Heqk.
-  induction k as [|k IH]; intros s Hp3 Hk.
-  - (* No residual capacity left: cannot match; next step must be P4. *)
-    exists 1. simpl. unfold step; rewrite Hp3.
-    destruct (match_step s) as [s'|] eqn:Hm.
-    + exfalso. pose proof (mu_decreases_on_match s s' Hp3 Hm) as Hlt.
-      rewrite Hk in Hlt. lia.
-    + reflexivity.
-  - destruct (match_step s) as [s'|] eqn:Hm.
-    + (* Successful match: decrease measure and continue. *)
-  assert (Hlt : mu s' < mu s) by (apply mu_decreases_on_match; assumption).
-      rewrite Hk in Hlt. assert (mu s' <= k) by lia.
-      specialize (IH (mu s')) as IH'.
-      assert (Hp3' : phase s' = P3).
-      { unfold match_step in Hm.
-        destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:?; try discriminate.
-        inversion Hm; subst; reflexivity. }
-      apply IH' in Hp3'. 2: reflexivity.
-      destruct Hp3' as [n Hn]. exists (S n). simpl. exact Hn.
-    + (* None: go to P4 next. *)
-      exists 1. simpl. unfold step; rewrite Hp3, Hm. reflexivity.
-Qed.
-
-(* No feasible pair persists to the P4 state at entry. *)
-Lemma no_feasible_at_P4_index : forall s n,
-  phase (execute (S n) s) = P4 -> no_feasible_prop (execute (S n) s).
-Proof.
-  intros s n H.
-  destruct (no_feasible_when_P4_reached s n H) as [Hp3 Hnone].
-  (* predecessor t := execute n s has match_step None; step preserves bids/asks/matches when entering P4 *)
-  unfold no_feasible_prop.
-  intros b a Hb Ha.
-  (* Use find_feasible_None_forall on t, then transport to step t *)
-  (* t = execute n s *)
-  pose (t := execute n s).
-  assert (Ht_none : match_step t = None) by exact Hnone.
-  (* In step t, bids/asks/matches are same lists; so infeasibility persists *)
-  (* show by contradiction: if feasible at step t, then feasible at t *)
-  (* Here we just reuse the fact that find_feasible returned None at t, which implies no feasible pair in t *)
-  eapply find_feasible_None_forall.
-  - (* find_feasible (bids t) (asks t) (matches t) = None *)
-    unfold match_step in Ht_none.
-    destruct (find_feasible (bids t) (asks t) (matches t)) as [[bb aa]|] eqn:Hf; [discriminate|]. exact Hf.
-  - all: assumption.
-Qed.
 
 Lemma no_feasible_step_from_None : forall t,
   phase t = P3 -> match_step t = None -> no_feasible_prop (step t).
@@ -361,45 +410,61 @@ Proof.
   (* step t = finish_matching t; lists unchanged *)
   unfold no_feasible_prop; simpl; intros b a Hb Ha.
   (* Reduce to the property on t itself, which follows from None *)
-  apply find_feasible_None_forall with (bs := bids t) (as_list := asks t) (ms := matches t).
-  - (* show find_feasible ... = None on t *)
-    unfold match_step in Hnone.
-    destruct (find_feasible (bids t) (asks t) (matches t)) as [[bb aa]|] eqn:Hf; [discriminate|assumption].
-  - all: assumption.
+  unfold match_step in Hnone.
+  destruct (find_feasible (bids t) (asks t) (matches t)) as [[bb aa]|] eqn:Hf; [discriminate|].
+  eapply find_feasible_None_forall; eauto.
+Qed.
+
+(* No feasible pair persists to the P4 state at entry. *)
+Lemma no_feasible_at_P4_index : forall s n,
+  phase (execute (S n) s) = P4 -> no_feasible_prop (execute (S n) s).
+Proof.
+  intros s n H.
+  (* Infer predecessor phase and None using step_P4_inversion *)
+  set (t := execute n s).
+  assert (phase (step t) = P4) as HstepP4.
+  { subst t. pose proof H as H'. rewrite (execute_step_after n s) in H'. exact H'. }
+  destruct (step_P4_inversion t HstepP4) as [Hp3 Hnone].
+  subst t.
+  (* Produce no_feasible on step (execute n s) then rewrite into goal form *)
+  pose proof (no_feasible_step_from_None (execute n s) Hp3 Hnone) as Hnf.
+  rewrite <- (execute_step_after n s) in Hnf.
+  exact Hnf.
 Qed.
 
 Lemma eventually_P4_with_None : forall s,
   phase s = P3 -> exists n, phase (execute (S n) s) = P4 /\ match_step (execute n s) = None.
 Proof.
   intros s Hp3.
-  remember (mu s) as k; revert s Hp3 Heqk.
-  induction k as [|k IH]; intros s Hp3 Hk.
-  - (* No residual: immediate None then P4 *)
+  remember (mu s) as k.
+  assert (Hle: mu s <= k) by (subst; lia).
+  clear Heqk.
+  revert s Hp3 Hle.
+  induction k as [|k IH]; intros s Hp3 Hle.
+  - (* k = 0: mu s <= 0 implies mu s = 0; thus no match and immediate P4 *)
     exists 0. simpl. split.
     + unfold step; rewrite Hp3.
       destruct (match_step s) as [s'|] eqn:Hm.
       * exfalso. pose proof (mu_decreases_on_match s s' Hp3 Hm) as Hlt.
-        rewrite Hk in Hlt. lia.
+        (* Contradiction with mu s <= 0 *)
+        lia.
       * reflexivity.
     + unfold execute; simpl.
-      unfold step; rewrite Hp3.
       destruct (match_step s) as [s'|] eqn:Hm; [|reflexivity].
-      exfalso. pose proof (mu_decreases_on_match s s' Hp3 Hm) as Hlt.
-      rewrite Hk in Hlt. lia.
-  - destruct (match_step s) as [s'|] eqn:Hm.
+      exfalso. pose proof (mu_decreases_on_match s s' Hp3 Hm) as Hlt. lia.
+  - (* k = S k: either progress with smaller measure or None *)
+    destruct (match_step s) as [s'|] eqn:Hm.
     + (* progress case *)
       assert (Hlt : mu s' < mu s) by (apply mu_decreases_on_match; assumption).
-      rewrite Hk in Hlt. assert (mu s' <= k) by lia.
-      specialize (IH (mu s')) as IH'.
+      (* derive mu s' <= k from mu s = S k and Hlt *)
+      assert (Hle' : mu s' <= k) by lia.
       assert (Hp3' : phase s' = P3).
-      { unfold match_step in Hm.
-        destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:?; try discriminate.
-        inversion Hm; subst; reflexivity. }
-      apply IH' in Hp3'. 2: reflexivity.
-      destruct Hp3' as [n [HP4 Hnone]].
-      exists (S n). split.
-      * simpl. exact HP4.
-      * simpl. exact Hnone.
+      { pose proof (match_step_phase_invariant s s' Hm) as Hph.
+        rewrite Hp3 in Hph. exact Hph. }
+  destruct (IH s' Hp3' Hle') as [n [HP4 Hnone]].
+  exists (S n). split.
+  * rewrite execute_S. unfold step; rewrite Hp3; simpl. rewrite Hm. exact HP4.
+  * rewrite execute_S. unfold step; rewrite Hp3; simpl. rewrite Hm. exact Hnone.
     + (* None case *)
       exists 0. simpl. split.
       * unfold step; rewrite Hp3, Hm. reflexivity.
@@ -416,23 +481,21 @@ Proof.
   (* Show conjunction holds at index n: phase=4 and no_feasible *)
   split.
   - (* Atom (p_phase 4) *)
-    simpl. rewrite mu_trace_at_execute. unfold interp_atom.
+    change (satisfies (mu_trace s) (S n) (Atom (p_phase 4))) with
+      ((trace_at (mu_trace s) (S n)) (p_phase 4)).
+    rewrite (mu_trace_at_execute s (S n)). unfold interp_atom.
     rewrite HP4. reflexivity.
   - (* Atom p_no_feasible *)
-    simpl. rewrite mu_trace_at_execute. unfold interp_atom.
+    change (satisfies (mu_trace s) (S n) (Atom p_no_feasible)) with
+      ((trace_at (mu_trace s) (S n)) p_no_feasible).
+    rewrite (mu_trace_at_execute s (S n)). unfold interp_atom.
     set (t := execute n s) in *.
-    assert (Ht : phase t = P3 /\ match_step t = None) by
-      (apply no_feasible_when_P4_reached in HP4; exact HP4).
-    destruct Ht as [HtP3 HtNone].
+    (* Use step_P4_inversion on the predecessor t to get phase P3 and None *)
+  assert (HstepP4 : phase (step t) = P4) by (subst t; rewrite (execute_step_after n s) in HP4; exact HP4).
+    destruct (step_P4_inversion t HstepP4) as [HtP3 HtNone].
     (* no_feasible holds in step t, i.e., in execute (S n) s *)
-  assert (Hnf : no_feasible_prop (step t)).
-  { apply no_feasible_step_from_None; assumption. }
-    (* rewrite execute (S n) s as step t *)
-    assert (execute (S n) s = step t) as ->.
-    { subst t.
-      induction n as [|n IH].
-      - simpl. reflexivity.
-      - simpl. rewrite IH. reflexivity. }
-    exact Hnf.
+    assert (Hnf : no_feasible_prop (step t)) by (apply no_feasible_step_from_None; assumption).
+  (* rewrite on hypothesis to avoid brittle goal rewriting *)
+  subst t. rewrite <- (execute_step_after n s) in Hnf. exact Hnf.
 Qed.
 
