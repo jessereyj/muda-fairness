@@ -10,32 +10,6 @@ Local Open Scope LTL_scope.
 Definition priorityOK : LTL_formula :=
   (G (Atom p_prioB_step)) ∧ (G (Atom p_prioS_step)).
 
-(* Section 4 alignment notes:
-   - Atoms p_prioB_step and p_prioS_step are interpreted by interp_atom
-     as priorityB_step_ok_prop s and priorityS_step_ok_prop s, respectively
-     (see Fairness/Interpretation.v).
-   - To prove the LTL obligations on mu_trace, it suffices to show that
-     for every index i, priority*_step_ok_prop holds at the i-th state
-     along the MUDA step execution (execute i s).
-   - We scaffold the two bridging lemmas that connect trace semantics for
-     Atom to interp_atom at execute i s, and the core operational fact
-     that priority holds at each step. These are natural Section 4 hooks
-     and can be discharged with Matching/Sorting lemmas. *)
-
-(* Core operational facts to be proved from Matching/Sorting:
-   - In P3, find_feasible never returns a dominated pair (buyers).
-   - Analogous for sellers. These should be shown to hold for all i along
-     execute i s, hence the following lemmas. *)
-(* We assume bids remain sorted across P3 iterations: sorting establishes
-   order at P2->P3 transition and match_step preserves list order. *)
-
-(* If a higher-priority feasible (b1,a) exists, find_feasible cannot pick (b2,a). *)
-(* Priority relation refines the sorting comparator *)
-(* Single-step greedy priority property (Section 4.3.1). We state it as an
-   axiom here; it can be proved by induction on the bid list using the
-   left-to-right structure of find_feasible and feasibility monotonicity. *)
-(* (Moved axioms to MUDA/Atoms.v to keep semantic layer thin.) *)
-
 Lemma priorityB_step_ok_everywhere :
   forall s i, priorityB_step_ok_prop (execute i s).
 Proof.

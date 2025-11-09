@@ -86,7 +86,8 @@ Fairness/RejectionFairness.v
 Fairness/All.v
 
 # ===== Simulation (Layer 4) =====
-Examples/CloudMarket.v
+Example/CloudMarket.v
+
 EOF
 info "_CoqProject generated."
 echo ""

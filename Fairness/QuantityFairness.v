@@ -1,7 +1,6 @@
 (* Fairness/QuantityFairness.v *)
 From Stdlib Require Import Arith List Lia.
 Import ListNotations.
-
 From LTL      Require Import LTL.
 From MUDA     Require Import MUDA Atoms.
 From Fairness Require Import Interpretation.  (* for p_allocOK and mu_trace *)
