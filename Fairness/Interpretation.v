@@ -62,3 +62,23 @@ Proof.
   - reflexivity.
   - destruct (phase s) eqn:Hp; simpl; apply IH.
 Qed.
+
+(* Bridge: satisfaction of Atom along mu_trace reduces to interp_atom
+   at the i-th executed state. *)
+Lemma mu_trace_atom_at_execute :
+  forall s i p,
+    satisfies (mu_trace s) i (Atom p) <-> interp_atom (execute i s) p.
+Proof.
+  intros s i p; split.
+  - (* → *)
+    (* satisfies (mu_trace s) i (Atom p) = trace_at (mu_trace s) i p *)
+    unfold satisfies; revert s p.
+    induction i as [|i IH]; intros s p; simpl.
+    + intros H; exact H.
+    + destruct (phase s); simpl; auto.
+  - (* ← *)
+    unfold satisfies; revert s p.
+    induction i as [|i IH]; intros s p; simpl.
+    + intros H; exact H.
+    + destruct (phase s); simpl; auto.
+Qed.

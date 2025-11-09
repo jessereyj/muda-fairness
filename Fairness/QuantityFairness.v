@@ -3,7 +3,7 @@ From Stdlib Require Import Arith List Lia.
 Import ListNotations.
 
 From LTL      Require Import LTL.
-From MUDA     Require Import MUDA.
+From MUDA     Require Import MUDA Atoms.
 From Fairness Require Import Interpretation.  (* for p_allocOK and mu_trace *)
 
 Local Open Scope LTL_scope.
@@ -53,6 +53,30 @@ Proof.
   apply IH, quantity_fairness_step, H.
 Qed.
 
-(* Relate the i-th state of mu_trace to execute i s. *)
-(* (Optional Section 4 lifting to traces can be added here once the general
-   mu_trace-to-execute bridge is established.) *)
+(* Lifting for initial states: At any index i, p_allocOK holds on mu_trace of an initial state. *)
+Lemma allocOK_to_prop : forall s, allocOK s -> allocOK_prop s.
+Proof. intros s H; exact H. Qed.
+
+Lemma mu_trace_satisfies_allocOK_initial :
+  forall bs as_list i,
+    satisfies (mu_trace (initial_state bs as_list)) i (Atom p_allocOK).
+Proof.
+  intros bs as_list i.
+  apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) i p_allocOK)).
+  unfold interp_atom.
+  (* Need allocOK_prop on execute i initial *)
+  apply allocOK_to_prop.
+  apply allocOK_preserved_n.
+  apply quantity_fairness_initial.
+Qed.
+
+(* Global quantity fairness on traces for initial states. *)
+Theorem quantity_fairness_LTL_initial : forall bs as_list,
+  satisfies (mu_trace (initial_state bs as_list)) 0 quantityOK.
+Proof.
+  intros bs as_list.
+  unfold quantityOK.
+  rewrite satisfies_always_unfold.
+  intros j _.
+  apply mu_trace_satisfies_allocOK_initial.
+Qed.

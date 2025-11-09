@@ -384,6 +384,22 @@ Proof.
   intros n s. rewrite execute_S. symmetry. apply step_execute_comm.
 Qed.
 
+(* Composition lemma: running n, then m steps equals n+m total steps. *)
+Lemma execute_add_tail : forall n m s, execute m (execute n s) = execute (n + m) s.
+Proof.
+  intros n m s. revert n s.
+  induction m as [|m IH]; intros n s; simpl.
+  - rewrite Nat.add_0_r. reflexivity.
+  - (* m -> S m *)
+    (* LHS *)
+    rewrite step_execute_comm.
+    (* step (execute n s) becomes execute n (step s) *)
+    simpl.
+    rewrite IH.
+    rewrite Nat.add_succ_r.
+    reflexivity.
+Qed.
+
 (* We no longer need an explicit predecessor enumeration lemma; we derive
    predecessor state properties on demand using execute_step_after and
    step_P4_inversion. *)
@@ -477,25 +493,62 @@ Proof.
   intros s Hp3.
   unfold maximal. rewrite satisfies_eventually_unfold.
   destruct (eventually_P4_with_None s Hp3) as [n [HP4 Hnone]].
+  (* We'll produce witness (S n); need to transport atoms via mu_trace_atom_at_execute. *)
   exists (S n). split; [lia|].
   (* Show conjunction holds at index n: phase=4 and no_feasible *)
   split.
   - (* Atom (p_phase 4) *)
-    change (satisfies (mu_trace s) (S n) (Atom (p_phase 4))) with
-      ((trace_at (mu_trace s) (S n)) (p_phase 4)).
-    rewrite (mu_trace_at_execute s (S n)). unfold interp_atom.
-    rewrite HP4. reflexivity.
+    (* Use bridge lemma instead of manual trace_at unfolding. *)
+    apply (proj2 (mu_trace_atom_at_execute s (S n) (p_phase 4))).
+    (* Convert HP4 (phase (execute (S n) s)=P4) into interp_atom fact *)
+    unfold interp_atom.
+    (* Phase decoding path: ensure p_phase 4 inside range; we rely on direct equality path. *)
+    (* Evaluate phase predicate decoding condition *)
+    destruct (andb (Nat.leb (p_phase 1) (p_phase 4)) (Nat.leb (p_phase 4) (p_phase 7))) eqn:Hrange.
+    2:{ (* Unexpected fallthrough, but range holds; contradiction path *) discriminate. }
+    (* Range true: match branch uses nth_phase logic *)
+    simpl. (* nth_phase (p_phase 4 - 10) = P4 *)
+    (* Show resulting equality from HP4 *)
+    exact HP4.
   - (* Atom p_no_feasible *)
-    change (satisfies (mu_trace s) (S n) (Atom p_no_feasible)) with
-      ((trace_at (mu_trace s) (S n)) p_no_feasible).
-    rewrite (mu_trace_at_execute s (S n)). unfold interp_atom.
+    apply (proj2 (mu_trace_atom_at_execute s (S n) p_no_feasible)).
+    (* Derive no_feasible_prop (execute (S n) s) as before *)
     set (t := execute n s) in *.
-    (* Use step_P4_inversion on the predecessor t to get phase P3 and None *)
-  assert (HstepP4 : phase (step t) = P4) by (subst t; rewrite (execute_step_after n s) in HP4; exact HP4).
+    assert (HstepP4 : phase (step t) = P4) by (subst t; rewrite (execute_step_after n s) in HP4; exact HP4).
     destruct (step_P4_inversion t HstepP4) as [HtP3 HtNone].
-    (* no_feasible holds in step t, i.e., in execute (S n) s *)
-    assert (Hnf : no_feasible_prop (step t)) by (apply no_feasible_step_from_None; assumption).
-  (* rewrite on hypothesis to avoid brittle goal rewriting *)
-  subst t. rewrite <- (execute_step_after n s) in Hnf. exact Hnf.
+    assert (Hnf_step : no_feasible_prop (step t)) by (apply no_feasible_step_from_None; assumption).
+    subst t. rewrite <- (execute_step_after n s) in Hnf_step. exact Hnf_step.
+Qed.
+
+(* --- Reaching P3 from any earlier phase (pipeline progression) --------- *)
+(* Reach P3 from P1/P2 initial pipeline *)
+Lemma reach_P3_from_initial : forall s,
+  phase s = P1 \/ phase s = P2 -> exists n, phase (execute n s) = P3.
+Proof.
+  intros s [Hp1|Hp2].
+  - exists 2. simpl. unfold step; rewrite Hp1. simpl. reflexivity.
+  - exists 1. simpl. unfold step; rewrite Hp2. simpl. reflexivity.
+Qed.
+
+Theorem maximality_from_P1_or_P2 : forall s,
+  (phase s = P1 \/ phase s = P2) -> satisfies (mu_trace s) 0 maximal.
+Proof.
+  intros s Hinit.
+  destruct (reach_P3_from_initial s Hinit) as [n Hn].
+  pose proof (maximality_eventually (execute n s) Hn) as Hmax.
+  unfold maximal in *.
+  rewrite satisfies_eventually_unfold.
+  rewrite satisfies_eventually_unfold in Hmax.
+  destruct Hmax as [m [Hm_ge [Hph4 Hnf]]].
+  (* Shift the trace starting at (execute n s) by m back to original trace using execute_add_tail. *)
+  exists (n + m). split; [lia|]. split.
+  - (* phase 4 atom *)
+    apply (proj2 (mu_trace_atom_at_execute s (n+m) (p_phase 4))).
+    pose proof (proj1 (mu_trace_atom_at_execute (execute n s) m (p_phase 4)) Hph4) as Hph4_interp.
+    rewrite (execute_add_tail n m s) in Hph4_interp. exact Hph4_interp.
+  - (* no feasible atom *)
+    apply (proj2 (mu_trace_atom_at_execute s (n+m) p_no_feasible)).
+    pose proof (proj1 (mu_trace_atom_at_execute (execute n s) m p_no_feasible) Hnf) as Hnf_interp.
+    rewrite (execute_add_tail n m s) in Hnf_interp. exact Hnf_interp.
 Qed.
 

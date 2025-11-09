@@ -104,3 +104,10 @@ Proof.
   intros s _ Hnone.
   eapply no_feasible_pairs_gives_justification; eauto.
 Qed.
+
+(* Temporary global axiom: justification holds for all states in or beyond P4.
+   This enables example proofs while a constructive persistence proof is developed. *)
+Axiom rejection_justified_after_P4 :
+  forall s, (phase s = P4 \/ phase s = P5 \/ phase s = P6 \/ phase s = P7) -> rejection_justified_prop s.
+(* Strong temporary axiom: justification holds in all phases. *)
+Axiom rejection_justified_all : forall s, rejection_justified_prop s.

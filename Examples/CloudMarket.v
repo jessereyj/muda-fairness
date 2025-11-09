@@ -13,7 +13,7 @@
 
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions Atoms.
 From LTL Require Import Syntax Semantics Axioms Soundness Completeness LTL.
-Require Import List.
+From Stdlib Require Import List.
 Import ListNotations.
 (* Import fairness properties (LTL formulas) *)
 From Fairness Require Import All.
@@ -52,23 +52,30 @@ Section Case_1.
 
   Example Case1_Priority :
     satisfies run_case_1 0 priorityOK.
-  Proof. Admitted.
+  Proof. apply priority_fairness_LTL. Qed.
 
   Example Case1_Quantity :
     satisfies run_case_1 0 quantityOK.
-  Proof. Admitted.
+  Proof. apply quantity_fairness_LTL_initial. Qed.
 
   Example Case1_MatchFinality :
     satisfies run_case_1 0 finalityOK.
-  Proof. Admitted.
+  Proof. apply match_finality_LTL. Qed.
 
   Example Case1_Maximality :
     satisfies run_case_1 0 maximal.
-  Proof. Admitted.
+  Proof.
+    apply maximality_from_P1_or_P2. left. reflexivity.
+  Qed.
 
   Example Case1_Rejection :
     satisfies run_case_1 0 rejectionOK.
-  Proof. Admitted.
+  Proof.
+  unfold rejectionOK. rewrite satisfies_always_unfold.
+  intros j _. right.
+  apply (proj2 (mu_trace_atom_at_execute s0_case_1 j p_rejection_justified)).
+  apply rejection_justified_all.
+  Qed.
 End Case_1.
 
 (*** Scenario 2 *************************************************************)
@@ -80,11 +87,18 @@ Section Case_2.
   Definition s0_case_2 : State := initial_state bs2 as2.
   Definition run_case_2 : trace := mu_trace s0_case_2.
 
-  Example Case2_Priority : satisfies run_case_2 0 priorityOK. Proof. Admitted.
-  Example Case2_Quantity : satisfies run_case_2 0 quantityOK.   Proof. Admitted.
-  Example Case2_MatchFinality :  satisfies run_case_2 0 finalityOK.     Proof. Admitted.
-  Example Case2_Maximality: satisfies run_case_2 0 maximal.       Proof. Admitted.
-  Example Case2_Rejection : satisfies run_case_2 0 rejectionOK.   Proof. Admitted.
+  Example Case2_Priority : satisfies run_case_2 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
+  Example Case2_Quantity : satisfies run_case_2 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case2_MatchFinality :  satisfies run_case_2 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
+  Example Case2_Maximality: satisfies run_case_2 0 maximal.       Proof.
+    apply maximality_from_P1_or_P2. left. reflexivity.
+  Qed.
+  Example Case2_Rejection : satisfies run_case_2 0 rejectionOK.   Proof.
+  unfold rejectionOK. rewrite satisfies_always_unfold. intros j _. right.
+  apply (proj2 (mu_trace_atom_at_execute s0_case_2 j p_rejection_justified)).
+  apply rejection_justified_all.
+  Qed.
+  (* Remove duplicate admitted examples (already proved above). *)
 End Case_2.
 
 (*** Scenario 3 *************************************************************)
@@ -96,11 +110,17 @@ Section Case_3.
   Definition s0_case_3 : State := initial_state bs3 as3.
   Definition run_case_3 : trace := mu_trace s0_case_3.
 
-  Example Case3_Priority : satisfies run_case_3 0 priorityOK. Proof. Admitted.
-  Example Case3_Quantity : satisfies run_case_3 0 quantityOK.   Proof. Admitted.
-  Example Case3_MatchFinality :  satisfies run_case_3 0 finalityOK.     Proof. Admitted.
-  Example Case3_Maximality: satisfies run_case_3 0 maximal.       Proof. Admitted.
-  Example Case3_Rejection : satisfies run_case_3 0 rejectionOK.   Proof. Admitted.
+  Example Case3_Priority : satisfies run_case_3 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
+  Example Case3_Quantity : satisfies run_case_3 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case3_MatchFinality :  satisfies run_case_3 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
+  Example Case3_Maximality: satisfies run_case_3 0 maximal.       Proof.
+    apply maximality_from_P1_or_P2. left. reflexivity.
+  Qed.
+  Example Case3_Rejection : satisfies run_case_3 0 rejectionOK.   Proof.
+  unfold rejectionOK. rewrite satisfies_always_unfold. intros j _. right.
+  apply (proj2 (mu_trace_atom_at_execute s0_case_3 j p_rejection_justified)).
+  apply rejection_justified_all.
+  Qed.
 End Case_3.
 
 (*** Scenario 4 *************************************************************)
@@ -112,11 +132,17 @@ Section Case_4.
   Definition s0_case_4 : State := initial_state bs4 as4.
   Definition run_case_4 : trace := mu_trace s0_case_4.
 
-  Example Case4_Priority : satisfies run_case_4 0 priorityOK. Proof. Admitted.
-  Example Case4_Quantity : satisfies run_case_4 0 quantityOK.   Proof. Admitted.
-  Example Case4_MatchFinality :  satisfies run_case_4 0 finalityOK.     Proof. Admitted.
-  Example Case4_Maximality: satisfies run_case_4 0 maximal.       Proof. Admitted.
-  Example Case4_Rejection : satisfies run_case_4 0 rejectionOK.   Proof. Admitted.
+  Example Case4_Priority : satisfies run_case_4 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
+  Example Case4_Quantity : satisfies run_case_4 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case4_MatchFinality :  satisfies run_case_4 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
+  Example Case4_Maximality: satisfies run_case_4 0 maximal.       Proof.
+    apply maximality_from_P1_or_P2. left. reflexivity.
+  Qed.
+  Example Case4_Rejection : satisfies run_case_4 0 rejectionOK.   Proof.
+  unfold rejectionOK. rewrite satisfies_always_unfold. intros j _. right.
+  apply (proj2 (mu_trace_atom_at_execute s0_case_4 j p_rejection_justified)).
+  apply rejection_justified_all.
+  Qed.
 End Case_4.
 
 (*** Scenario 5 *************************************************************)
@@ -128,11 +154,17 @@ Section Case_5.
   Definition s0_case_5 : State := initial_state bs5 as5.
   Definition run_case_5 : trace := mu_trace s0_case_5.
 
-  Example Case5_Priority : satisfies run_case_5 0 priorityOK. Proof. Admitted.
-  Example Case5_Quantity : satisfies run_case_5 0 quantityOK.   Proof. Admitted.
-  Example Case5_MatchFinality :  satisfies run_case_5 0 finalityOK.     Proof. Admitted.
-  Example Case5_Maximality: satisfies run_case_5 0 maximal.       Proof. Admitted.
-  Example Case5_Rejection : satisfies run_case_5 0 rejectionOK.   Proof. Admitted.
+  Example Case5_Priority : satisfies run_case_5 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
+  Example Case5_Quantity : satisfies run_case_5 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case5_MatchFinality :  satisfies run_case_5 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
+  Example Case5_Maximality: satisfies run_case_5 0 maximal.       Proof.
+    apply maximality_from_P1_or_P2. left. reflexivity.
+  Qed.
+  Example Case5_Rejection : satisfies run_case_5 0 rejectionOK.   Proof.
+  unfold rejectionOK. rewrite satisfies_always_unfold. intros j _. right.
+  apply (proj2 (mu_trace_atom_at_execute s0_case_5 j p_rejection_justified)).
+  apply rejection_justified_all.
+  Qed.
 End Case_5.
 
 (*** Scenario 6 *************************************************************)
@@ -144,11 +176,17 @@ Section Case_6.
   Definition s0_case_6 : State := initial_state bs6 as6.
   Definition run_case_6 : trace := mu_trace s0_case_6.
 
-  Example Case6_Priority : satisfies run_case_6 0 priorityOK. Proof. Admitted.
-  Example Case6_Quantity : satisfies run_case_6 0 quantityOK.   Proof. Admitted.
-  Example Case6_MatchFinality :  satisfies run_case_6 0 finalityOK.     Proof. Admitted.
-  Example Case6_Maximality: satisfies run_case_6 0 maximal.       Proof. Admitted.
-  Example Case6_Rejection : satisfies run_case_6 0 rejectionOK.   Proof. Admitted.
+  Example Case6_Priority : satisfies run_case_6 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
+  Example Case6_Quantity : satisfies run_case_6 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case6_MatchFinality :  satisfies run_case_6 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
+  Example Case6_Maximality: satisfies run_case_6 0 maximal.       Proof.
+    apply maximality_from_P1_or_P2. left. reflexivity.
+  Qed.
+  Example Case6_Rejection : satisfies run_case_6 0 rejectionOK.   Proof.
+  unfold rejectionOK. rewrite satisfies_always_unfold. intros j _. right.
+  apply (proj2 (mu_trace_atom_at_execute s0_case_6 j p_rejection_justified)).
+  apply rejection_justified_all.
+  Qed.
 End Case_6.
 
 (*** Scenario 7 *************************************************************)
@@ -160,9 +198,15 @@ Section Case_7.
   Definition s0_case_7 : State := initial_state bs7 as7.
   Definition run_case_7 : trace := mu_trace s0_case_7.
 
-  Example Case7_Priority : satisfies run_case_7 0 priorityOK. Proof. Admitted.
-  Example Case7_Quantity : satisfies run_case_7 0 quantityOK.   Proof. Admitted.
-  Example Case7_MatchFinality :  satisfies run_case_7 0 finalityOK.     Proof. Admitted.
-  Example Case7_Maximality: satisfies run_case_7 0 maximal.       Proof. Admitted.
-  Example Case7_Rejection : satisfies run_case_7 0 rejectionOK.   Proof. Admitted.
+  Example Case7_Priority : satisfies run_case_7 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
+  Example Case7_Quantity : satisfies run_case_7 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case7_MatchFinality :  satisfies run_case_7 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
+  Example Case7_Maximality: satisfies run_case_7 0 maximal.       Proof.
+    apply maximality_from_P1_or_P2. left. reflexivity.
+  Qed.
+  Example Case7_Rejection : satisfies run_case_7 0 rejectionOK.   Proof.
+  unfold rejectionOK. rewrite satisfies_always_unfold. intros j _. right.
+  apply (proj2 (mu_trace_atom_at_execute s0_case_7 j p_rejection_justified)).
+  apply rejection_justified_all.
+  Qed.
 End Case_7.

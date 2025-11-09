@@ -2,7 +2,7 @@
 From Stdlib Require Import List.
 Import ListNotations.
 From LTL  Require Import LTL.           (* re-export module *)
-From MUDA Require Import MUDA.
+From MUDA Require Import MUDA Atoms.
 From Fairness Require Import Interpretation. (* for p_terminal, p_match_keep *)
 
 Local Open Scope LTL_scope.
@@ -40,4 +40,21 @@ Theorem match_finality_after_n : forall n s m,
 Proof.
   induction n as [|n IH]; intros s m Hin; simpl; [exact Hin|].
   apply IH. eapply matches_monotone; eauto.
+Qed.
+
+(* Lifting: At any index i, Atom p_match_keep holds on mu_trace because
+   interp_atom maps it to matches_monotone_1_prop and we proved that holds for any state. *)
+Lemma matches_monotone_1 : forall s, matches_monotone_1_prop s.
+Proof.
+  intros s m Hin. now apply matches_monotone.
+Qed.
+
+Theorem match_finality_LTL : forall s,
+  satisfies (mu_trace s) 0 finalityOK.
+Proof.
+  intro s. unfold finalityOK.
+  rewrite satisfies_always_unfold.
+  intros j _.
+  apply (proj2 (mu_trace_atom_at_execute s j p_match_keep)).
+  unfold interp_atom. apply matches_monotone_1.
 Qed.
