@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 # Check for Admitted
-ADMITS=$(grep -rn "Admitted\." LTL/ MUDA/ Fairness/ 2>/dev/null | wc -l | tr -d ' ')
+ADMITS=$(grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Examples/ 2>/dev/null | wc -l | tr -d ' ')
 
 if [[ $ADMITS -eq 0 ]]; then
     echo -e "${GREEN}✓ SUCCESS${NC}: No admitted lemmas found!"
@@ -22,7 +22,7 @@ if [[ $ADMITS -eq 0 ]]; then
 else
     echo -e "${RED}✗ FAILURE${NC}: Found $ADMITS admitted lemma(s):"
     echo ""
-    grep -rn "Admitted\." LTL/ MUDA/ Fairness/ 2>/dev/null || true
+    grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Examples/ 2>/dev/null || true
     echo ""
     echo -e "${YELLOW}Please complete these proofs before submission.${NC}"
     exit 1

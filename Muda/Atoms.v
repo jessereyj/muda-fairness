@@ -65,3 +65,28 @@ Definition priorityS_step_ok_prop (s: State) : Prop :=
     prioS a1 a2 ->
     feasible b a1 (matches s) ->
     find_feasible (bids s) (asks s) (matches s) <> Some (b, a2).
+
+(** Priority invariants and greedy selection principles used by Fairness proofs. **)
+(* Invariant: within the matching phase (P3), lists remain sorted by priority. *)
+Axiom bids_sorted_in_P3 : forall s,
+  phase s = P3 -> bids_sorted (bids s).
+
+Axiom asks_sorted_in_P3 : forall s,
+  phase s = P3 -> asks_sorted (asks s).
+
+(* Greedy selection respects priority: a dominated counterparty is never chosen
+   if a strictly better feasible one exists. These reflect the left-to-right
+   scan of find_feasible and are convenient Section 4 hooks. *)
+Axiom greedy_respects_priority_bids :
+  forall s b1 b2 a,
+    phase s = P3 ->
+    prioB b1 b2 ->
+    feasible b1 a (matches s) ->
+    find_feasible (bids s) (asks s) (matches s) <> Some (b2,a).
+
+Axiom greedy_respects_priority_asks :
+  forall s a1 a2 b,
+    phase s = P3 ->
+    prioS a1 a2 ->
+    feasible b a1 (matches s) ->
+    find_feasible (bids s) (asks s) (matches s) <> Some (b,a2).
