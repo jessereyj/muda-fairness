@@ -28,11 +28,9 @@ Definition bounds_cstar_prop (s : State) : Prop :=
 Definition matches_monotone_1_prop (s : State) : Prop :=
   forall m, In m (matches s) -> In m (matches (step s)).
 
-(* Stubs to replace with your concrete Section 3 predicates *)
-Definition priorityOK_prop  (s : State) : Prop := True.
-Definition final_prop       (s : State) : Prop := True.
-Definition maximal_prop     (s : State) : Prop := True.
-Definition rejectionOK_prop (s : State) : Prop := True.
+(* Removed unused True-stub predicates (priorityOK_prop/final_prop/maximal_prop/
+  rejectionOK_prop). Fairness proofs use concrete atoms defined in
+  Fairness/Interpretation.v via interp_atom and do not depend on these stubs. *)
 
 (* Rejection fairness building blocks (Section 4.3.6) *)
 Definition rejected_bid_prop (b : Bid) (s : State) : Prop :=
