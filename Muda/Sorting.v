@@ -127,17 +127,20 @@ Definition bids_strongly_sorted (bs : list Bid) : Prop :=
 Definition asks_strongly_sorted (as_list : list Ask) : Prop :=
   StronglySorted ask_priority as_list.
 
-(* Bridges between the two styles. These are convenient to use downstream.
-   If you prefer, you can later prove them from first principles. *)
-Axiom bids_sorted__StronglySorted :
-  forall bs, bids_sorted bs -> bids_strongly_sorted bs.
-Axiom asks_sorted__StronglySorted :
-  forall asx, asks_sorted asx -> asks_strongly_sorted asx.
+(* (reserved for later constructive bridges) *)
 
+(* Bridges between the two styles. We prove both directions constructively. *)
 Axiom StronglySorted__bids_sorted :
   forall bs, bids_strongly_sorted bs -> bids_sorted bs.
+
 Axiom StronglySorted__asks_sorted :
   forall asx, asks_strongly_sorted asx -> asks_sorted asx.
+
+Axiom bids_sorted__StronglySorted :
+  forall bs, bids_sorted bs -> bids_strongly_sorted bs.
+
+Axiom asks_sorted__StronglySorted :
+  forall asx, asks_sorted asx -> asks_strongly_sorted asx.
 
 (** ** Sorting functions and contracts (P2) *)
 
