@@ -104,6 +104,25 @@ Proof.
       right; split; [ now rewrite Hxy_tseq, Hyz_tseq | lia].
 Qed.
 
+(** ** Refinement: three-key priority refines the two-key order (with tie case) *)
+Lemma bid_priority_refines_prioB :
+  forall x y,
+    bid_priority x y ->
+    prioB x y \/ (price x = price y /\ ts x = ts y /\ bid_id x < bid_id y).
+Proof.
+  intros x y H; unfold bid_priority in H; unfold prioB.
+  destruct H as [Hp | [Hp [Ht | [Ht Hid]]]]; eauto 6.
+Qed.
+
+Lemma ask_priority_refines_prioS :
+  forall x y,
+    ask_priority x y ->
+    prioS x y \/ (ask_price x = ask_price y /\ ask_ts x = ask_ts y /\ ask_id x < ask_id y).
+Proof.
+  intros x y H; unfold ask_priority in H; unfold prioS.
+  destruct H as [Hp | [Hp [Ht | [Ht Hid]]]]; eauto 6.
+Qed.
+
 (** ** Sortedness predicates (index-based, convenient for nth_error reasoning) *)
 
 Definition bids_sorted (bs : list Bid) : Prop :=
