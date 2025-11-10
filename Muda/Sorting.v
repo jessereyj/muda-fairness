@@ -41,14 +41,68 @@ Proof.
   intros a; unfold ask_priority; intros [Hlt|[Heq [Hlt'|[Heqt Hid]]]]; try lia.
 Qed.
 
-(* Transitivity for these lexicographic orders is routine but case-heavy.
-   We keep them available as axioms to simplify later developments; you can
-   replace these with full proofs when you implement a concrete comparator. *)
-Axiom bid_priority_trans :
+(* Transitivity for these lexicographic orders (proved by case analysis). *)
+Lemma bid_priority_trans :
   forall x y z, bid_priority x y -> bid_priority y z -> bid_priority x z.
+Proof.
+  intros x y z Hxy Hyz.
+  unfold bid_priority in *.
+  destruct Hxy as [Hx_gt | [Hxy_peq [Hxy_tslt | [Hxy_tseq Hxy_idlt]]]].
+  - (* price x > price y *)
+    destruct Hyz as [Hy_gt | [Hyz_peq _]].
+    + left; lia.
+    + left. rewrite <- Hyz_peq. exact Hx_gt.
+  - (* price x = price y, ts x < ts y *)
+    destruct Hyz as [Hy_gt | [Hyz_peq [Hyz_tslt | [Hyz_tseq Hyz_idlt]]]].
+    + (* y price > z price *) left. rewrite Hxy_peq; exact Hy_gt.
+    + (* equal price, ts y < ts z *)
+      right; split.
+      * (* price x = price z *) now rewrite Hxy_peq.
+      * (* ts x < ts z by transitivity *)
+        left; eapply Nat.lt_trans; eauto.
+    + (* equal price, ts y = ts z and id y < id z *)
+      right; split.
+      * now rewrite Hxy_peq.
+      * (* ts x < ts z since ts x < ts y = ts z *)
+        left; rewrite Hyz_tseq in Hxy_tslt; exact Hxy_tslt.
+  - (* price x = price y, ts x = ts y and id x < id y *)
+    destruct Hyz as [Hy_gt | [Hyz_peq [Hyz_tslt | [Hyz_tseq Hyz_idlt]]]].
+    + left. rewrite Hxy_peq; exact Hy_gt.
+    + (* price y = price z, ts y < ts z *)
+      right; split; [ now rewrite Hxy_peq, Hyz_peq |].
+      left. rewrite Hxy_tseq; exact Hyz_tslt.
+    + (* price y = price z, ts y = ts z, id y < id z *)
+      right; split; [ now rewrite Hxy_peq, Hyz_peq |].
+      right; split; [ now rewrite Hxy_tseq, Hyz_tseq | lia].
+Qed.
 
-Axiom ask_priority_trans :
+Lemma ask_priority_trans :
   forall x y z, ask_priority x y -> ask_priority y z -> ask_priority x z.
+Proof.
+  intros x y z Hxy Hyz.
+  unfold ask_priority in *.
+  destruct Hxy as [Hx_lt | [Hxy_peq [Hxy_tslt | [Hxy_tseq Hxy_idlt]]]].
+  - (* price x < price y *)
+    destruct Hyz as [Hy_lt | [Hyz_peq _]].
+    + left; lia.
+    + left. rewrite <- Hyz_peq. exact Hx_lt.
+  - (* price x = price y, ts x < ts y *)
+    destruct Hyz as [Hy_lt | [Hyz_peq [Hyz_tslt | [Hyz_tseq Hyz_idlt]]]].
+    + left. rewrite Hxy_peq; exact Hy_lt.
+    + right; split; [ now rewrite Hxy_peq |]. left.
+      eapply Nat.lt_trans; eauto.
+    + right; split; [ now rewrite Hxy_peq |]. left.
+      rewrite Hyz_tseq in Hxy_tslt; exact Hxy_tslt.
+  - (* price x = price y, ts x = ts y and id x < id y *)
+    destruct Hyz as [Hy_lt | [Hyz_peq [Hyz_tslt | [Hyz_tseq Hyz_idlt]]]].
+    + left. rewrite Hxy_peq; exact Hy_lt.
+    + (* price y = price z, ts y < ts z *)
+      right; split; [ now rewrite Hxy_peq, Hyz_peq |].
+      left. rewrite Hxy_tseq; exact Hyz_tslt.
+    + (* price y = price z, ts y = ts z, id y < id z *)
+      right; split; [ now rewrite Hxy_peq, Hyz_peq |].
+      right; split; [ now rewrite Hxy_tseq, Hyz_tseq | lia].
+Qed.
 
 (** ** Sortedness predicates (index-based, convenient for nth_error reasoning) *)
 
@@ -87,6 +141,8 @@ Axiom StronglySorted__asks_sorted :
 
 (** ** Sorting functions and contracts (P2) *)
 
+(* We assume existence of sorting functions that realize the above priority.
+   Later you can instantiate these with a concrete stable sort + comparator. *)
 (* We assume existence of sorting functions that realize the above priority.
    Later you can instantiate these with a concrete stable sort + comparator. *)
 Axiom sort_bids      : list Bid -> list Bid.
