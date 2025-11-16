@@ -80,6 +80,7 @@ MUDA/MUDA.v
 Fairness/Interpretation.v
 Fairness/PriorityFairness.v
 Fairness/QuantityFairness.v
+Fairness/ClearingPriceFairness.v
 Fairness/MatchFinality.v
 Fairness/Maximality.v
 Fairness/RejectionFairness.v
@@ -186,8 +187,10 @@ fi
 # Step 8: Check for admitted lemmas (KEPT)
 echo ""
 info "Checking for admitted lemmas..."
-ADMITS=$(grep -r "Admitted\." LTL/ MUDA/ Fairness/ 2>/dev/null | wc -l | tr -d ' ')
-if [[ $ADMITS -eq 0 ]]; then
+# With 'set -euo pipefail', bare grep with no matches returns 1 and would exit the script.
+# Wrap grep with '|| true' to make the pipeline succeed when there are zero matches.
+ADMITS="$( (grep -r "Admitted\." LTL/ MUDA/ Fairness/ 2>/dev/null || true) | wc -l | tr -d ' ' )"
+if [[ ${ADMITS:-0} -eq 0 ]]; then
     info "✓ No admitted lemmas found. All proofs complete!"
 else
     warn "Found $ADMITS admitted lemma(s):"

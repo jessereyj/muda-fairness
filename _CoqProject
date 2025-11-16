@@ -34,6 +34,7 @@ MUDA/MUDA.v
 Fairness/Interpretation.v
 Fairness/PriorityFairness.v
 Fairness/QuantityFairness.v
+Fairness/ClearingPriceFairness.v
 Fairness/MatchFinality.v
 Fairness/Maximality.v
 Fairness/RejectionFairness.v

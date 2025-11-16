@@ -33,17 +33,17 @@ echo "  Total:    $TOTAL_LOC"
 echo ""
 
 # Count theorems
-THEOREMS=$(grep -rh "^Theorem\|^Lemma\|^Corollary" LTL/ MUDA/ Fairness/ 2>/dev/null | wc -l | tr -d ' ')
+THEOREMS="$( (grep -rh "^Theorem\|^Lemma\|^Corollary" LTL/ MUDA/ Fairness/ 2>/dev/null || true) | wc -l | tr -d ' ' )"
 echo "Theorems/Lemmas: $THEOREMS"
 echo ""
 
 # Count admitted
-ADMITS=$(grep -r "Admitted\." LTL/ MUDA/ Fairness/ 2>/dev/null | wc -l | tr -d ' ')
+ADMITS="$( (grep -r "Admitted\." LTL/ MUDA/ Fairness/ 2>/dev/null || true) | wc -l | tr -d ' ' )"
 echo "Admitted lemmas: $ADMITS"
 echo ""
 
 # Count definitions
-DEFS=$(grep -rh "^Definition\|^Fixpoint\|^Inductive\|^Record" LTL/ MUDA/ Fairness/ 2>/dev/null | wc -l | tr -d ' ')
+DEFS="$( (grep -rh "^Definition\|^Fixpoint\|^Inductive\|^Record" LTL/ MUDA/ Fairness/ 2>/dev/null || true) | wc -l | tr -d ' ' )"
 echo "Definitions: $DEFS"
 echo ""
 
