@@ -12,9 +12,6 @@ Inductive Phase : Type :=
   | P6  (* Settlement *)
   | P7. (* Terminal *)
 
-Lemma phase_eq_dec : forall (p1 p2 : Phase), {p1 = p2} + {p1 <> p2}.
-Proof. decide equality. Defined.
-
 Record State := {
   bids : list Bid;
   asks : list Ask;
@@ -32,11 +29,6 @@ Definition initial_state (bs : list Bid) (as_list : list Ask) : State :=
 
 (** ** State Properties *)
 
-Definition is_terminal (s : State) : Prop :=
-  phase s = P7.
-
-Definition no_matches (s : State) : Prop :=
-  matches s = [].
 
 (** ** Residual Quantities *)
 (* Calculate how much of a bid has been allocated *)
@@ -74,6 +66,3 @@ Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
   price b >= ask_price a
   /\ residual_bid b ms > 0
   /\ residual_ask a ms > 0.
-
-Definition has_feasible (s:State) : Prop :=
-  exists b a, In b (bids s) /\ In a (asks s) /\ feasible_pair b a (matches s).

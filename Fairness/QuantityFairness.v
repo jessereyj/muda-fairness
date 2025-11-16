@@ -10,6 +10,10 @@ Local Open Scope LTL_scope.
 (* LTL specification alias for Section 4 *)
 Definition quantityOK : LTL_formula := G (Atom p_allocOK).
 
+(* Clearing price fairness: whenever a clearing price is defined it lies
+  between marginal ask and bid; vacuously True otherwise. *)
+Definition uniformPriceOK : LTL_formula := G (Atom p_bounds_cstar).
+
 (* ===== Initial state ===== *)
 Theorem quantity_fairness_initial : forall bs as_list,
   allocOK (initial_state bs as_list).
@@ -78,4 +82,41 @@ Proof.
   rewrite satisfies_always_unfold.
   intros j _.
   apply mu_trace_satisfies_allocOK_initial.
+Qed.
+
+(* Auxiliary: bounds_cstar_prop holds globally from initial state. *)
+(* From a well-formed state, bounds_cstar_prop holds (trivial True or bounds via clearing_price_bounds). *)
+Lemma bounds_cstar_from_wf : forall s,
+  wf_state s -> bounds_cstar_prop s.
+Proof.
+  intros s Hwf.
+  unfold bounds_cstar_prop.
+  destruct (marginal_pair s) as [[b a]|] eqn:Hmp.
+  - destruct (determine_clearing_price s) as [c|] eqn:Hdc.
+    + apply (clearing_price_bounds s b a c); [exact Hwf | exact Hmp | exact Hdc].
+    + exact I.
+  - destruct (determine_clearing_price s) as [c|]; exact I.
+Qed.
+
+Lemma bounds_cstar_preserved_n : forall n bs as_list,
+  bounds_cstar_prop (execute n (initial_state bs as_list)).
+Proof.
+  intros n bs as_list.
+  apply bounds_cstar_from_wf.
+  apply wf_state_execute_n.
+  apply wf_state_initial.
+Qed.
+
+Theorem uniform_price_fairness_LTL_initial : forall bs as_list,
+  satisfies (mu_trace (initial_state bs as_list)) 0 uniformPriceOK.
+Proof.
+  intros bs as_list.
+  unfold uniformPriceOK.
+  rewrite satisfies_always_unfold.
+  intros j _.
+  rewrite mu_trace_atom_at_execute.
+  unfold interp_atom.
+  (* predicate 4 maps to bounds_cstar_prop; others irrelevant *)
+  change (bounds_cstar_prop (execute j (initial_state bs as_list))).
+  apply bounds_cstar_preserved_n.
 Qed.

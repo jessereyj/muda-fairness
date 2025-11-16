@@ -108,3 +108,41 @@ Proof.
     + (* None -> finish_matching, no change *)
       lia.
 Qed.
+
+(* Well-formedness preservation moved here to avoid circular dependency. *)
+Lemma wf_state_step_preservation : forall s,
+  wf_state s -> wf_state (step s).
+Proof.
+  intros s Hwf.
+  unfold step.
+  destruct (phase s) eqn:Hp; simpl.
+  - (* P1 -> P2 *) exact Hwf.
+  - (* P2 sorting — matches unchanged *) exact Hwf.
+  - (* P3 matching *)
+    destruct (match_step s) as [s'|] eqn:Hm.
+    + (* successful match adds head respecting feasibility *)
+      unfold match_step in Hm.
+      destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
+      inversion Hm; subst s'; clear Hm.
+      intros m Hin; simpl in Hin.
+      destruct Hin as [Hin|Hin].
+      * subst m. apply find_feasible_spec in Hf.
+        unfold is_feasible in Hf.
+        repeat rewrite Bool.andb_true_iff in Hf.
+  destruct Hf as [[Hprice _] _].
+  apply Nat.leb_le in Hprice. simpl. exact Hprice.
+      * apply Hwf, Hin.
+    + (* finish_matching; matches unchanged *) exact Hwf.
+  - (* P4 clearing price *) exact Hwf.
+  - (* P5 -> P6 *) exact Hwf.
+  - (* P6 -> P7 *) exact Hwf.
+  - (* P7 stays same *) exact Hwf.
+Qed.
+
+Lemma wf_state_execute_n : forall n s,
+  wf_state s -> wf_state (execute n s).
+Proof.
+  induction n as [|n IH]; intros s Hwf; simpl.
+  - exact Hwf.
+  - apply IH. apply wf_state_step_preservation. exact Hwf.
+Qed.

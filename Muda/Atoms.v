@@ -68,9 +68,17 @@ Definition priorityS_step_ok_prop (s: State) : Prop :=
 (* Invariant: within the matching phase (P3), lists remain sorted by priority. *)
 Axiom bids_sorted_in_P3 : forall s,
   phase s = P3 -> bids_sorted (bids s).
+(* TODO: Replace bids_sorted_in_P3.
+  Plan: prove via (1) constructive sorting correctness for do_sorting establishing
+  bids_sorted after P2; (2) show matching phase (step / match_step) preserves
+  index-based sortedness because find_feasible only removes residual quantities
+  but never reorders lists; (3) chain phase progression P2 -> P3 invariant.
+  This will yield a lemma bids_sorted_in_P3_constructive without using an axiom. *)
 
 Axiom asks_sorted_in_P3 : forall s,
   phase s = P3 -> asks_sorted (asks s).
+(* TODO: Replace asks_sorted_in_P3 similarly to bids: sorting correctness +
+  preservation under matching + phase transition argument. *)
 
 (* Greedy selection respects priority: a dominated counterparty is never chosen
    if a strictly better feasible one exists. These reflect the left-to-right
@@ -81,6 +89,11 @@ Axiom greedy_respects_priority_bids :
     prioB b1 b2 ->
     feasible b1 a (matches s) ->
     find_feasible (bids s) (asks s) (matches s) <> Some (b2,a).
+(* TODO: Derive greedy_respects_priority_bids constructively.
+   Outline: prove a specification lemma for find_feasible stating it returns
+   the first feasible (b,a) in left-to-right traversal; combine with sortedness
+   and prioB transitivity to show any dominated b2 cannot be chosen while a
+   strictly better feasible b1 exists earlier in the list. *)
 
 Axiom greedy_respects_priority_asks :
   forall s a1 a2 b,
@@ -88,3 +101,5 @@ Axiom greedy_respects_priority_asks :
     prioS a1 a2 ->
     feasible b a1 (matches s) ->
     find_feasible (bids s) (asks s) (matches s) <> Some (b,a2).
+(* TODO: Derive greedy_respects_priority_asks symmetrically using the
+   analogous find_feasible traversal argument for asks dimension. *)

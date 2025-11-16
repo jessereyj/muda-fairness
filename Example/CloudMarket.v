@@ -58,6 +58,10 @@ Section Case_1.
     satisfies run_case_1 0 quantityOK.
   Proof. apply quantity_fairness_LTL_initial. Qed.
 
+  Example Case1_UniformPrice :
+    satisfies run_case_1 0 uniformPriceOK.
+  Proof. apply uniform_price_fairness_LTL_initial. Qed.
+
   Example Case1_MatchFinality :
     satisfies run_case_1 0 finalityOK.
   Proof. apply match_finality_LTL. Qed.
@@ -81,6 +85,7 @@ Section Case_2.
 
   Example Case2_Priority : satisfies run_case_2 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
   Example Case2_Quantity : satisfies run_case_2 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case2_UniformPrice : satisfies run_case_2 0 uniformPriceOK. Proof. apply uniform_price_fairness_LTL_initial. Qed.
   Example Case2_MatchFinality :  satisfies run_case_2 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
   Example Case2_Maximality: satisfies run_case_2 0 maximal.       Proof.
     apply maximality_from_P1_or_P2. left. reflexivity.
@@ -99,6 +104,7 @@ Section Case_3.
 
   Example Case3_Priority : satisfies run_case_3 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
   Example Case3_Quantity : satisfies run_case_3 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case3_UniformPrice : satisfies run_case_3 0 uniformPriceOK. Proof. apply uniform_price_fairness_LTL_initial. Qed.
   Example Case3_MatchFinality :  satisfies run_case_3 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
   Example Case3_Maximality: satisfies run_case_3 0 maximal.
   Proof. apply maximality_from_P1_or_P2. left. reflexivity. Qed.
@@ -116,6 +122,7 @@ Section Case_4.
   Example Case4_Priority : satisfies run_case_4 0 priorityOK.
   Proof. apply priority_fairness_LTL. Qed.
   Example Case4_Quantity : satisfies run_case_4 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case4_UniformPrice : satisfies run_case_4 0 uniformPriceOK. Proof. apply uniform_price_fairness_LTL_initial. Qed.
   Example Case4_MatchFinality :  satisfies run_case_4 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
   Example Case4_Maximality: satisfies run_case_4 0 maximal.       Proof.
     apply maximality_from_P1_or_P2. left. reflexivity.
@@ -134,6 +141,7 @@ Section Case_5.
   Example Case5_Priority : satisfies run_case_5 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
   Example Case5_Quantity : satisfies run_case_5 0 quantityOK.
   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case5_UniformPrice : satisfies run_case_5 0 uniformPriceOK. Proof. apply uniform_price_fairness_LTL_initial. Qed.
   Example Case5_MatchFinality :  satisfies run_case_5 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
   Example Case5_Maximality: satisfies run_case_5 0 maximal.       Proof.
     apply maximality_from_P1_or_P2. left. reflexivity.
@@ -152,6 +160,7 @@ Section Case_6.
   Example Case6_Priority : satisfies run_case_6 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
   Example Case6_Quantity : satisfies run_case_6 0 quantityOK.
   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case6_UniformPrice : satisfies run_case_6 0 uniformPriceOK. Proof. apply uniform_price_fairness_LTL_initial. Qed.
   Example Case6_MatchFinality :  satisfies run_case_6 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
   Example Case6_Maximality: satisfies run_case_6 0 maximal.       Proof.
     apply maximality_from_P1_or_P2. left. reflexivity.
@@ -169,6 +178,7 @@ Section Case_7.
 
   Example Case7_Priority : satisfies run_case_7 0 priorityOK. Proof. apply priority_fairness_LTL. Qed.
   Example Case7_Quantity : satisfies run_case_7 0 quantityOK.   Proof. apply quantity_fairness_LTL_initial. Qed.
+  Example Case7_UniformPrice : satisfies run_case_7 0 uniformPriceOK. Proof. apply uniform_price_fairness_LTL_initial. Qed.
   Example Case7_MatchFinality :  satisfies run_case_7 0 finalityOK.     Proof. apply match_finality_LTL. Qed.
   Example Case7_Maximality: satisfies run_case_7 0 maximal.       Proof.
     apply maximality_from_P1_or_P2. left. reflexivity.

@@ -1,8 +1,10 @@
 (** * MUDA/ClearingPrice.v*)
 From Stdlib Require Import Arith List.
 Import ListNotations.
+From LTL  Require Import Syntax Semantics.
 From MUDA Require Import Types State Matching.
 
+Local Open Scope LTL_scope.
 Local Open Scope nat_scope.
 
 (* ------------------------------------------------------------------------- *)
@@ -13,42 +15,36 @@ Definition wf_state (s : State) : Prop :=
   forall m, In m (matches s) ->
     ask_price (matched_ask m) <= price (matched_bid m).
 
-Lemma wf_state_empty :
-  forall bs asx,
-    wf_state {| bids := bs; asks := asx; matches := [];
-                clearing_price := None; phase := P3 |}.
+(* Empty initial state trivially well-formed (no matches). *)
+Lemma wf_state_initial : forall bs as_list,
+  wf_state (initial_state bs as_list).
 Proof.
-  intros bs asx m Hin. inversion Hin.
+  intros bs as_list m Hin. inversion Hin.
 Qed.
 
-Lemma wf_state_preserved_by_match_step :
+(* Preservation across a successful match_step (adds one match at head). *)
+Lemma wf_state_match_step_preservation :
   forall s s',
     wf_state s ->
     match_step s = Some s' ->
     wf_state s'.
 Proof.
-  intros s s' Hwf Hstep.
-  unfold wf_state.                     (* goal: forall m, In m (matches s') -> ... *)
-  intros m Hin.                        (* now Hin exists *)
-  unfold match_step in Hstep.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf;
-    try discriminate.
-  inversion Hstep; subst s'; clear Hstep.
-  simpl in Hin.
-  destruct Hin as [Hin | Hin].
-  - (* head: the newly created match *)
-    subst m.
-    (* find_feasible -> is_feasible -> price guard *)
-    apply find_feasible_spec in Hf.      (* is_feasible b a (matches s) = true *)
+  intros s s' Hwf Hms.
+  unfold match_step in Hms.
+  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
+  inversion Hms; subst s'; clear Hms.
+  unfold wf_state in *. intros m Hin. simpl in Hin.
+  destruct Hin as [Hin|Hin].
+  - subst m. (* newly created match *)
+    apply find_feasible_spec in Hf.
     unfold is_feasible in Hf.
     repeat rewrite Bool.andb_true_iff in Hf.
     destruct Hf as [[Hp _] _].
-    apply Nat.leb_le in Hp.
-    simpl.                               (* matched_ask/create_match = a, matched_bid = b *)
-    exact Hp.
-  - (* tail: inherited from s *)
-    exact (Hwf m Hin).
+    apply Nat.leb_le in Hp. simpl. exact Hp.
+  - (* inherited *) apply Hwf, Hin.
 Qed.
+
+(* step preserves wf_state through all phases. *)
 
 (* ------------------------------------------------------------------------- *)
 (* Marginal pair: newest match is at head (added by match_step).             *)
