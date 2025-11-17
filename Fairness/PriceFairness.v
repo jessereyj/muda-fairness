@@ -8,7 +8,7 @@ From Fairness Require Import Interpretation QuantityFairness.
 Local Open Scope LTL_scope.
 
 (* Uniform clearing price fairness: reuse the canonical definition from QuantityFairness. *)
-Notation uniformPriceOK := QuantityFairness.uniformPriceOK.
+Notation priceOK := QuantityFairness.priceOK.
 
 (* Note: bounds_cstar_from_wf is proved in QuantityFairness.v to avoid module cycles. *)
 Lemma bounds_cstar_prop_holds_all : forall s i,
@@ -18,10 +18,10 @@ Proof.
 Qed.
 
 Lemma uniform_price_fairness_LTL_initial : forall bs as_list,
-  satisfies (mu_trace (initial_state bs as_list)) 0 uniformPriceOK.
+  satisfies (mu_trace (initial_state bs as_list)) 0 priceOK.
 Proof.
   intros bs as_list.
-  unfold uniformPriceOK.
+  unfold priceOK.
   rewrite satisfies_always_unfold.
   intros j _.
   rewrite mu_trace_atom_at_execute.

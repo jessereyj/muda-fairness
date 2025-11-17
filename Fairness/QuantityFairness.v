@@ -12,7 +12,7 @@ Definition quantityOK : LTL_formula := G (Atom p_allocOK).
 
 (* Clearing price fairness: whenever a clearing price is defined it lies
   between marginal ask and bid; vacuously True otherwise. *)
-Definition uniformPriceOK : LTL_formula := G (Atom p_bounds_cstar).
+Definition priceOK : LTL_formula := G (Atom p_bounds_cstar).
 
 (* ===== Initial state ===== *)
 Theorem quantity_fairness_initial : forall bs as_list,
@@ -108,10 +108,10 @@ Proof.
 Qed.
 
 Theorem uniform_price_fairness_LTL_initial : forall bs as_list,
-  satisfies (mu_trace (initial_state bs as_list)) 0 uniformPriceOK.
+  satisfies (mu_trace (initial_state bs as_list)) 0 priceOK.
 Proof.
   intros bs as_list.
-  unfold uniformPriceOK.
+  unfold priceOK.
   rewrite satisfies_always_unfold.
   intros j _.
   rewrite mu_trace_atom_at_execute.
