@@ -1,4 +1,4 @@
-(* Fairness/ClearingPriceFairness.v *)
+(* Fairness/PriceFairness.v *)
 From Stdlib Require Import List Nat.
 Import ListNotations.
 From LTL  Require Import Syntax Semantics.
