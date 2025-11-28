@@ -1,15 +1,4 @@
-(** * MUDA Fairness Simulations
-    Seven scenarios checked against LTL fairness properties.
-
-    Preconditions
-    - Section 3: State, transitions, and MUDA operations are defined.
-    - Section 4: LTL syntax/semantics and the five finalized formulas are exported.
-    - Section 5: These scenarios match the narrative and figures in the text.
-
-    This file only depends on the exported, finalized formulas:
-      priorityOK, allocOK, final, maximal, rejectionOK.
-    The Examples below state exactly the claims listed in Section 5.
-*)
+(** * CloudMarket*)
 
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions Atoms.
 From LTL Require Import Syntax Semantics Axioms Soundness Completeness LTL.
