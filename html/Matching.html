@@ -1,0 +1,476 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Matching</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library Matching</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">PeanoNat</span> <span class="id" title="var">Bool</span> <span class="id" title="var">Lia</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Eqb</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Sorting</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat_scope</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">is_feasible</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Nat.leb</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>) (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&amp;&amp; <span class="id" title="var">Nat.leb</span> 1 (<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>)<br/>
+&nbsp;&nbsp;&amp;&amp; <span class="id" title="var">Nat.leb</span> 1 (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">feasible</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">true</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">pick_ask</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">as_list</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>)<br/>
+&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">Ask</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">as_list</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">a</span> :: <span class="id" title="var">as'</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">a</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">pick_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as'</span> <span class="id" title="var">ms</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">find_feasible</span> (<span class="id" title="var">bs</span> : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span>) (<span class="id" title="var">as_list</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>)<br/>
+&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">Bid</span> * <span class="id" title="var">Ask</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">bs</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">b</span> :: <span class="id" title="var">bs'</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">pick_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">a</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">find_feasible</span> <span class="id" title="var">bs'</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">pick_ask_spec</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">pick_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> <span class="id" title="var">a</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">true</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">as_list</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">ah</span> <span class="id" title="var">asx</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">ah</span> <span class="id" title="var">ms</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">injection</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> -&gt;. <span class="id" title="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">IH</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">pick_ask_None_forall</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">pick_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">None</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">as_list</span> -&gt; <span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">false</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">Hnone</span> <span class="id" title="var">a</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">as_list</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">ah</span> <span class="id" title="var">asx</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">contradiction</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">ah</span> <span class="id" title="var">ms</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">discriminate</span> <span class="id" title="var">Hnone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> <span class="id" title="var">Hin</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hin0</span>|<span class="id" title="var">HinRest</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">apply</span> <span class="id" title="var">IH</span>; <span class="id" title="tactic">assumption</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">pick_ask_None_all_false</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">pick_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">None</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">as_list</span> -&gt; <span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">false</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">Hnone</span> <span class="id" title="var">a</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="var">a</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">as_list</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">ah</span> <span class="id" title="var">asx</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">intros</span> <span class="id" title="var">a</span> <span class="id" title="var">Hin</span>; <span class="id" title="tactic">try</span> <span class="id" title="var">contradiction</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">ah</span> <span class="id" title="var">ms</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">discriminate</span> <span class="id" title="var">Hnone</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> <span class="id" title="var">Hin</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hin0</span>|<span class="id" title="var">HinRest</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">eapply</span> <span class="id" title="var">IH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">exact</span> <span class="id" title="var">Hnone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">exact</span> <span class="id" title="var">HinRest</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_spec</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">true</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">bs</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">b0</span> <span class="id" title="var">bs</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">pick_ask</span> <span class="id" title="var">b0</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">a0</span>|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hpick</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">subst</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>. <span class="id" title="tactic">clear</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">pick_ask_spec</span> <span class="id" title="var">b0</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">a0</span>). <span class="id" title="tactic">exact</span> <span class="id" title="var">Hpick</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> (<span class="id" title="var">IH</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>). <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_None_forall</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">None</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">b</span> <span class="id" title="var">bs</span> -&gt; <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">as_list</span> -&gt; <span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">false</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">bs</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">b0</span> <span class="id" title="var">bs</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">Hnone</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">Hb</span> <span class="id" title="var">Ha</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">contradiction</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hnone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">pick_ask</span> <span class="id" title="var">b0</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">a0</span>|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hpick</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">discriminate</span> <span class="id" title="var">Hnone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hb</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hb0</span>|<span class="id" title="var">HbRest</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">subst</span> <span class="id" title="var">b</span>. <span class="id" title="tactic">eapply</span> <span class="id" title="var">pick_ask_None_all_false</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">eapply</span> <span class="id" title="var">IH</span>; <span class="id" title="tactic">eauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">create_match</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">Match</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">q</span> := <span class="id" title="var">Nat.min</span> (<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>) (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;{| <span class="id" title="var">matched_bid</span> := <span class="id" title="var">b</span>; <span class="id" title="var">matched_ask</span> := <span class="id" title="var">a</span>; <span class="id" title="var">match_quantity</span> := <span class="id" title="var">q</span> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_quantity_pos</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 &lt; <span class="id" title="var">match_quantity</span> (<span class="id" title="var">create_match</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">create_match</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">find_feasible_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_feasible</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hf</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">_</span> <span class="id" title="var">Hb</span>] <span class="id" title="var">Ha</span>].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hb</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Ha</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.min_glb_lt</span>; <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">match_step</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">m</span> := <span class="id" title="var">create_match</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> {| <span class="id" title="var">bids</span> := <span class="id" title="var">bids</span> <span class="id" title="var">s</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">asks</span> := <span class="id" title="var">asks</span> <span class="id" title="var">s</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">matches</span> := <span class="id" title="var">m</span> :: <span class="id" title="var">matches</span> <span class="id" title="var">s</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> := <span class="id" title="var">clearing_price</span> <span class="id" title="var">s</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">phase</span> := <span class="id" title="var">phase</span> <span class="id" title="var">s</span> |}<br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_step_monotonic</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">match_step</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">s'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">incl</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s'</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">match_step</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">HF</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">incl</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">x</span> <span class="id" title="var">Hx</span>. <span class="id" title="tactic">right</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hx</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">matched_quantities</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">ms</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| [] =&gt; 0<br/>
+&nbsp;&nbsp;| <span class="id" title="var">m</span> :: <span class="id" title="var">ms'</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">matched_bid</span> <span class="id" title="var">m</span> =? <span class="id" title="var">b</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">match_quantity</span> <span class="id" title="var">m</span> + <span class="id" title="var">matched_quantities</span> <span class="id" title="var">b</span> <span class="id" title="var">ms'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">matched_quantities</span> <span class="id" title="var">b</span> <span class="id" title="var">ms'</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">matched_quantities_ask</span> (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">ms</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| [] =&gt; 0<br/>
+&nbsp;&nbsp;| <span class="id" title="var">m</span> :: <span class="id" title="var">ms'</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">matched_ask</span> <span class="id" title="var">m</span> =? <span class="id" title="var">a</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">match_quantity</span> <span class="id" title="var">m</span> + <span class="id" title="var">matched_quantities_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">matched_quantities_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms'</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">feasible_implies_pos</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">true</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1 &lt;= <span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span> /\ 1 &lt;= <span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> <span class="id" title="var">Hf</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">is_feasible</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hf</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">Hprice</span> <span class="id" title="var">Hrb</span>] <span class="id" title="var">Hra</span>].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span>; <span class="id" title="tactic">assumption</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">pick_ask_price_bound</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">pick_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> <span class="id" title="var">a</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">pick_ask_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_feasible</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">Hp</span> <span class="id" title="var">_</span>] <span class="id" title="var">_</span>]. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hp</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_price_bound</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">find_feasible_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_feasible</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">Hp</span> <span class="id" title="var">_</span>] <span class="id" title="var">_</span>]. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hp</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_price_bounds</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">find_feasible_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_feasible</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> !<span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">Hp</span> <span class="id" title="var">_</span>] <span class="id" title="var">_</span>].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hp</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assumption</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_step_head_price_bounds</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">match_step</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">s'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">matches</span> <span class="id" title="var">s'</span> = <span class="id" title="var">create_match</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) :: <span class="id" title="var">matches</span> <span class="id" title="var">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">Hstep</span> <span class="id" title="var">Hhd</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">match_step</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hstep</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b0</span> <span class="id" title="var">a0</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hstep</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">Hstep</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hhd</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hhd</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">Hhd</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">match_price_bounds</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hf</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">feasible_price_bounds</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">true</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_feasible</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hf</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">Hp</span> <span class="id" title="var">_</span>] <span class="id" title="var">_</span>].<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hp</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_price_bounds</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">find_feasible_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">feasible_price_bounds</span>; <span class="id" title="tactic">eauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">create_match_price_bounds</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">true</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">feasible_price_bounds</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Core, provable hooks for Priority Fairness (Section 3 &amp; 4) 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_in_lists</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">true</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">b</span> <span class="id" title="var">bs</span> /\ <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">as_list</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">bs</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">b0</span> <span class="id" title="var">bs</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">pick_ask</span> <span class="id" title="var">b0</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">a0</span>|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hpick</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">subst</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">eapply</span> <span class="id" title="var">pick_ask_spec</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">split</span>; [<span class="id" title="tactic">left</span>; <span class="id" title="tactic">reflexivity</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="var">as_list</span> <span class="id" title="var">Hpick</span>; <span class="id" title="tactic">induction</span> <span class="id" title="var">as_list</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">ah</span> <span class="id" title="var">asx</span> <span class="id" title="var">IHas</span>]; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">intro</span> <span class="id" title="var">Hpick</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">discriminate</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">is_feasible</span> <span class="id" title="var">b0</span> <span class="id" title="var">ah</span> <span class="id" title="var">ms</span>) <span class="id" title="var">eqn</span>:?; [<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hpick</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="var">now</span> <span class="id" title="tactic">left</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">IHas</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hpick</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">IH</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hf</span> [<span class="id" title="var">HinB</span> <span class="id" title="var">HinA</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">assumption</span>|]. <span class="id" title="tactic">split</span>; [<span class="id" title="tactic">right</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">HinB</span> | <span class="id" title="tactic">exact</span> <span class="id" title="var">HinA</span>].<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_step_head_is_create</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">match_step</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">s'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>, <span class="id" title="var">matches</span> <span class="id" title="var">s'</span> = <span class="id" title="var">create_match</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) :: <span class="id" title="var">matches</span> <span class="id" title="var">s</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">match_step</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">eexists</span> <span class="id" title="var">b</span>, <span class="id" title="var">a</span>; <span class="id" title="tactic">reflexivity</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_step_head_price_bound</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">match_step</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">s'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">matches</span> <span class="id" title="var">s'</span> = <span class="id" title="var">create_match</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) :: <span class="id" title="var">matches</span> <span class="id" title="var">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">Hstep</span> <span class="id" title="var">Hhd</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">match_step</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hstep</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b0</span> <span class="id" title="var">a0</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hstep</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">Hstep</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hhd</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hhd</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">Hhd</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">find_feasible_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_feasible</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hf</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">Hp</span> <span class="id" title="var">_</span>] <span class="id" title="var">_</span>]. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hp</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">allocOK_after_match</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">allocOK</span> <span class="id" title="var">s</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">match_step</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">s'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">allocOK</span> <span class="id" title="var">s'</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> [<span class="id" title="var">Hbid</span> <span class="id" title="var">Hask</span>] <span class="id" title="var">Hstep</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">match_step</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hstep</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hstep</span>; <span class="id" title="tactic">subst</span> <span class="id" title="var">s'</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">Hstep</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">ms</span> := <span class="id" title="var">matches</span> <span class="id" title="var">s</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">m</span> := <span class="id" title="var">create_match</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">find_feasible_in_lists</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">Hf</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Hfeas</span> [<span class="id" title="var">Hb_in</span> <span class="id" title="var">Ha_in</span>]].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b'</span> <span class="id" title="var">Hb'in</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">bid_eq_dec</span> (<span class="id" title="var">matched_bid</span> <span class="id" title="var">m</span>) <span class="id" title="var">b'</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Eeq</span>|<span class="id" title="var">Eneq</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">symmetry</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eeq</span>; <span class="id" title="tactic">assert</span> (<span class="id" title="var">b'</span> = <span class="id" title="var">b</span>) <span class="id" title="keyword">as</span> -&gt;.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">unfold</span> <span class="id" title="var">m</span>, <span class="id" title="var">create_match</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eeq</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eeq</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Eeq</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">A</span> := <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">Q</span> := <span class="id" title="var">quantity</span> <span class="id" title="var">b</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">q</span> := <span class="id" title="var">Nat.min</span> (<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>) (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Hbound</span> : <span class="id" title="var">A</span> &lt;= <span class="id" title="var">Q</span>) <span class="id" title="tactic">by</span> (<span class="id" title="tactic">eapply</span> <span class="id" title="var">Hbid</span>; <span class="id" title="tactic">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Hq_le_res</span> : <span class="id" title="var">q</span> &lt;= <span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">unfold</span> <span class="id" title="var">q</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.le_min_l</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">residual_bid</span>, <span class="id" title="var">A</span>, <span class="id" title="var">Q</span>, <span class="id" title="var">q</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">match_quantity</span>, <span class="id" title="var">create_match</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">bid_eq_dec</span> <span class="id" title="var">b</span> <span class="id" title="var">b</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">_</span>|]; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">PeanoNat.Nat.add_le_mono_r</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">p</span> := <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>) <span class="id" title="tactic">in</span> <span class="id" title="var">Hq_le_res</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">PeanoNat.Nat.sub_add</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hq_le_res</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">exact</span> <span class="id" title="var">Hbound</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">Hq_le_res</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">bid_eq_dec</span> (<span class="id" title="var">matched_bid</span> <span class="id" title="var">m</span>) <span class="id" title="var">b'</span>) <span class="id" title="keyword">as</span> [|<span class="id" title="var">Hneq'</span>]; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">bid_eq_dec</span> <span class="id" title="var">b</span> <span class="id" title="var">b'</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Heqb</span>|<span class="id" title="var">Hneqb</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">m</span>, <span class="id" title="var">create_match</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eneq</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eneq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">b'</span>. <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">eapply</span> <span class="id" title="var">Hbid</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hb'in</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a'</span> <span class="id" title="var">Ha'in</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">ask_eq_dec</span> (<span class="id" title="var">matched_ask</span> <span class="id" title="var">m</span>) <span class="id" title="var">a'</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Eeq</span>|<span class="id" title="var">Eneq</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">symmetry</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eeq</span>; <span class="id" title="tactic">assert</span> (<span class="id" title="var">a'</span> = <span class="id" title="var">a</span>) <span class="id" title="keyword">as</span> -&gt;.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">unfold</span> <span class="id" title="var">m</span>, <span class="id" title="var">create_match</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eeq</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eeq</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Eeq</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">A</span> := <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">Q</span> := <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">q</span> := <span class="id" title="var">Nat.min</span> (<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>) (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Hbound</span> : <span class="id" title="var">A</span> &lt;= <span class="id" title="var">Q</span>) <span class="id" title="tactic">by</span> (<span class="id" title="tactic">eapply</span> <span class="id" title="var">Hask</span>; <span class="id" title="tactic">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Hq_le_res</span> : <span class="id" title="var">q</span> &lt;= <span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">unfold</span> <span class="id" title="var">q</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.le_min_r</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">residual_ask</span>, <span class="id" title="var">A</span>, <span class="id" title="var">Q</span>, <span class="id" title="var">q</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">match_quantity</span>, <span class="id" title="var">create_match</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">ask_eq_dec</span> <span class="id" title="var">a</span> <span class="id" title="var">a</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">_</span>|]; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">PeanoNat.Nat.add_le_mono_r</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">p</span> := <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>) <span class="id" title="tactic">in</span> <span class="id" title="var">Hq_le_res</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">PeanoNat.Nat.sub_add</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hq_le_res</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">exact</span> <span class="id" title="var">Hbound</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">Hq_le_res</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">ask_eq_dec</span> (<span class="id" title="var">matched_ask</span> <span class="id" title="var">m</span>) <span class="id" title="var">a'</span>) <span class="id" title="keyword">as</span> [|<span class="id" title="var">Hneq'</span>]; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">ask_eq_dec</span> <span class="id" title="var">a</span> <span class="id" title="var">a'</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Heqa</span>|<span class="id" title="var">Hneqa</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">m</span>, <span class="id" title="var">create_match</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eneq</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Eneq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">a'</span>. <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">eapply</span> <span class="id" title="var">Hask</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Ha'in</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">pick_ask_in</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">pick_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> <span class="id" title="var">a</span> -&gt; <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">as_list</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">as_list</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">ah</span> <span class="id" title="var">asx</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">ah</span> <span class="id" title="var">ms</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="var">now</span> <span class="id" title="tactic">left</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">right</span>; <span class="id" title="tactic">eauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_in</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">b</span> <span class="id" title="var">bs</span> /\ <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">as_list</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">bs</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">b0</span> <span class="id" title="var">bs</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">intros</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">pick_ask</span> <span class="id" title="var">b0</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">a0</span>|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hpick</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">split</span>; [<span class="id" title="var">now</span> <span class="id" title="tactic">left</span> |].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">pick_ask_in</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hpick</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hpick</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">IH</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hb</span> <span class="id" title="var">Ha</span>]; <span class="id" title="tactic">split</span>; [<span class="id" title="tactic">right</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hb</span> | <span class="id" title="tactic">exact</span> <span class="id" title="var">Ha</span>].<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://rocq-prover.org/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

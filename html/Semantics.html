@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Semantics</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library Semantics</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">Arith</span> <span class="id" title="var">Lia</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">List.ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span>. 
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat_scope</span>.<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">state</span> := <span class="id" title="var">predicate</span> -&gt; <span class="id" title="keyword">Prop</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">CoInductive</span> <span class="id" title="var">trace</span> : <span class="id" title="keyword">Type</span> :=<br/>
+| <span class="id" title="var">Trace</span> : <span class="id" title="var">state</span> -&gt; <span class="id" title="var">trace</span> -&gt; <span class="id" title="var">trace</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">trace_at</span> (σ : <span class="id" title="var">trace</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) : <span class="id" title="var">state</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> σ <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Trace</span> <span class="id" title="var">s</span> σ' =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">i</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 0   =&gt; <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">S</span> <span class="id" title="var">j</span> =&gt; <span class="id" title="var">trace_at</span> σ' <span class="id" title="var">j</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">satisfies</span> (σ : <span class="id" title="var">trace</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) (φ : <span class="id" title="var">LTL_formula</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> φ <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Atom</span> <span class="id" title="var">p</span>             =&gt; <span class="id" title="var">trace_at</span> σ <span class="id" title="var">i</span> <span class="id" title="var">p</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Not</span> φ'             =&gt; ~ <span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ'<br/>
+&nbsp;&nbsp;| <span class="id" title="var">And</span> φ<span class="id" title="var">₁</span> φ<span class="id" title="var">₂</span>          =&gt; <span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ<span class="id" title="var">₁</span> /\ <span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ<span class="id" title="var">₂</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Or</span>  φ<span class="id" title="var">₁</span> φ<span class="id" title="var">₂</span>          =&gt; <span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ<span class="id" title="var">₁</span> \/ <span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ<span class="id" title="var">₂</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Implies</span> φ<span class="id" title="var">₁</span> φ<span class="id" title="var">₂</span>      =&gt; ~ <span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ<span class="id" title="var">₁</span> \/ <span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ<span class="id" title="var">₂</span><br/>
+&nbsp;&nbsp;| <span class="id" title="keyword">Next</span> φ'            =&gt; <span class="id" title="var">satisfies</span> σ (<span class="id" title="var">S</span> <span class="id" title="var">i</span>) φ'<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Always</span> φ'          =&gt; <span class="id" title="keyword">forall</span> <span class="id" title="var">j</span>, <span class="id" title="var">j</span> &gt;= <span class="id" title="var">i</span> -&gt; <span class="id" title="var">satisfies</span> σ <span class="id" title="var">j</span> φ'<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Eventually</span> φ'      =&gt; <span class="id" title="tactic">exists</span> <span class="id" title="var">j</span>, <span class="id" title="var">j</span> &gt;= <span class="id" title="var">i</span> /\ <span class="id" title="var">satisfies</span> σ <span class="id" title="var">j</span> φ'<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Until</span> φ<span class="id" title="var">₁</span> φ<span class="id" title="var">₂</span>        =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">j</span>, <span class="id" title="var">j</span> &gt;= <span class="id" title="var">i</span> /\ <span class="id" title="var">satisfies</span> σ <span class="id" title="var">j</span> φ<span class="id" title="var">₂</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">k</span>, <span class="id" title="var">i</span> &lt;= <span class="id" title="var">k</span> &lt; <span class="id" title="var">j</span> -&gt; <span class="id" title="var">satisfies</span> σ <span class="id" title="var">k</span> φ<span class="id" title="var">₁</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">models</span> (σ : <span class="id" title="var">trace</span>) (φ : <span class="id" title="var">LTL_formula</span>) : <span class="id" title="keyword">Prop</span> := <span class="id" title="var">satisfies</span> σ 0 φ.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">valid</span>  (φ : <span class="id" title="var">LTL_formula</span>) : <span class="id" title="keyword">Prop</span> := <span class="id" title="keyword">forall</span> σ <span class="id" title="var">i</span>, <span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ.<br/>
+
+<br/>
+<span class="id" title="keyword">Notation</span> &quot;σ ⊨ φ" := (<span class="id" title="var">models</span> σ φ) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 70).<br/>
+<span class="id" title="keyword">Notation</span> &quot;⊨ φ"    := (<span class="id" title="var">valid</span> φ)     (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 70).<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">satisfies_eventually_unfold</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> σ <span class="id" title="var">i</span> φ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> (<span class="id" title="var">Eventually</span> φ)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id" title="tactic">exists</span> <span class="id" title="var">j</span>, <span class="id" title="var">j</span> &gt;= <span class="id" title="var">i</span> /\ <span class="id" title="var">satisfies</span> σ <span class="id" title="var">j</span> φ.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">satisfies_always_unfold</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> σ <span class="id" title="var">i</span> φ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> (<span class="id" title="var">Always</span> φ)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id" title="keyword">forall</span> <span class="id" title="var">j</span>, <span class="id" title="var">j</span> &gt;= <span class="id" title="var">i</span> -&gt; <span class="id" title="var">satisfies</span> σ <span class="id" title="var">j</span> φ.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">satisfies_until_unfold</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> σ <span class="id" title="var">i</span> φ ψ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> (<span class="id" title="var">Until</span> φ ψ)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; (<span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> ψ \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">satisfies</span> σ <span class="id" title="var">i</span> φ /\ <span class="id" title="var">satisfies</span> σ (<span class="id" title="var">S</span> <span class="id" title="var">i</span>) (<span class="id" title="var">Until</span> φ ψ))).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> σ <span class="id" title="var">i</span> φ ψ; <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">intros</span> (<span class="id" title="var">j</span> &amp; <span class="id" title="var">Hj</span> &amp; <span class="id" title="var">H</span>ψ &amp; <span class="id" title="var">Hseg</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Nat.eq_dec</span> <span class="id" title="var">j</span> <span class="id" title="var">i</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Heq</span>|<span class="id" title="var">Hneq</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">left</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>ψ.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">assert</span> (<span class="id" title="var">i</span> &lt; <span class="id" title="var">j</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Hlt</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>. <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">specialize</span> (<span class="id" title="var">Hseg</span> <span class="id" title="var">i</span>); <span class="id" title="tactic">apply</span> <span class="id" title="var">Hseg</span>; <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">exists</span> <span class="id" title="var">j</span>. <span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|]. <span class="id" title="tactic">split</span>; [<span class="id" title="tactic">assumption</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">k</span> <span class="id" title="var">Hk</span>; <span class="id" title="tactic">apply</span> <span class="id" title="var">Hseg</span>; <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">intros</span> [<span class="id" title="var">H</span>ψ | [<span class="id" title="var">H</span>φ <span class="id" title="var">Hnext</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">exists</span> <span class="id" title="var">i</span>; <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>; <span class="id" title="tactic">try</span> <span class="id" title="var">lia</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>ψ.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hnext</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hnext</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">j</span> &amp; <span class="id" title="var">Hj</span> &amp; <span class="id" title="var">H</span>ψ<span class="id" title="var">j</span> &amp; <span class="id" title="var">HsegSi</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">j</span>; <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>; <span class="id" title="tactic">try</span> <span class="id" title="var">lia</span>; [<span class="id" title="tactic">assumption</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">k</span> <span class="id" title="var">Hk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Nat.eq_dec</span> <span class="id" title="var">k</span> <span class="id" title="var">i</span>) <span class="id" title="keyword">as</span> [-&gt;|<span class="id" title="var">Hneq</span>]; [<span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>φ|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">HsegSi</span>; <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">satisfies_shift_tail</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> (<span class="id" title="var">s</span> : <span class="id" title="var">state</span>) (σ' : <span class="id" title="var">trace</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) (φ : <span class="id" title="var">LTL_formula</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">Trace</span> <span class="id" title="var">s</span> σ') (<span class="id" title="var">S</span> <span class="id" title="var">i</span>) φ &lt;-&gt; <span class="id" title="var">satisfies</span> σ' <span class="id" title="var">i</span> φ.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> σ' <span class="id" title="var">i</span> φ; <span class="id" title="var">revert</span> <span class="id" title="var">s</span> σ' <span class="id" title="var">i</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> φ <span class="id" title="keyword">as</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ <span class="id" title="var">p</span>                                   <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| φ <span class="id" title="var">IH</span>φ                               <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| φ1 <span class="id" title="var">IH1</span> φ2 <span class="id" title="var">IH2</span>                       <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| φ1 <span class="id" title="var">IH1</span> φ2 <span class="id" title="var">IH2</span>                       <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| φ1 <span class="id" title="var">IH1</span> φ2 <span class="id" title="var">IH2</span>                       <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| φ <span class="id" title="var">IH</span>φ                               <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| φ <span class="id" title="var">IH</span>φ                               <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| φ <span class="id" title="var">IH</span>φ                               <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| φ1 <span class="id" title="var">IH1</span> φ2 <span class="id" title="var">IH2</span>                       <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]; <span class="id" title="tactic">intros</span> <span class="id" title="var">s0</span> σ0 <span class="id" title="var">i0</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">IH</span>φ; <span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">IH1</span>, <span class="id" title="var">IH2</span>; <span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">IH1</span>, <span class="id" title="var">IH2</span>; <span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">IH1</span>, <span class="id" title="var">IH2</span>; <span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">IH</span>φ <span class="id" title="var">s0</span> σ0 (<span class="id" title="var">S</span> <span class="id" title="var">i0</span>)); <span class="id" title="tactic">exact</span> <span class="id" title="var">IH</span>φ.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">H</span> <span class="id" title="var">j</span> <span class="id" title="var">Hj</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">H</span> (<span class="id" title="var">S</span> <span class="id" title="var">j</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">S</span> <span class="id" title="var">j</span> &gt;= <span class="id" title="var">S</span> <span class="id" title="var">i0</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">H0</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">H</span> <span class="id" title="var">H0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> (<span class="id" title="var">IH</span>φ <span class="id" title="var">s0</span> σ0 <span class="id" title="var">j</span>) <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">H</span> <span class="id" title="var">j</span> <span class="id" title="var">Hj</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">j</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">k</span>]; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">k</span> &gt;= <span class="id" title="var">i0</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">H0</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">apply</span> <span class="id" title="var">le_S_n</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hj</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">H</span> <span class="id" title="var">k</span> <span class="id" title="var">H0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">IH</span>φ <span class="id" title="var">s0</span> σ0 <span class="id" title="var">k</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> (<span class="id" title="var">j</span> &amp; <span class="id" title="var">Hj</span> &amp; <span class="id" title="var">Hsat</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">j</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">k</span>]; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">k</span>. <span class="id" title="tactic">split</span>; [<span class="id" title="tactic">apply</span> <span class="id" title="var">le_S_n</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hj</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hj</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hsat</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj1</span> (<span class="id" title="var">IH</span>φ <span class="id" title="var">s0</span> σ0 <span class="id" title="var">k</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">Hsat</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hsat</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> (<span class="id" title="var">k</span> &amp; <span class="id" title="var">Hk</span> &amp; <span class="id" title="var">Hsat0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (<span class="id" title="var">S</span> <span class="id" title="var">k</span>). <span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">IH</span>φ <span class="id" title="var">s0</span> σ0 <span class="id" title="var">k</span>)); <span class="id" title="tactic">exact</span> <span class="id" title="var">Hsat0</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> (<span class="id" title="var">j</span> &amp; <span class="id" title="var">Hj</span> &amp; <span class="id" title="var">H</span>ψ &amp; <span class="id" title="var">Hseg</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">j</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">k</span>]; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">k</span>. <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>; <span class="id" title="tactic">try</span> (<span class="id" title="tactic">apply</span> <span class="id" title="var">le_S_n</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hj</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hj</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>ψ. <span class="id" title="tactic">apply</span> (<span class="id" title="var">proj1</span> (<span class="id" title="var">IH2</span> <span class="id" title="var">s0</span> σ0 <span class="id" title="var">k</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>ψ. <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>ψ.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">k0</span> <span class="id" title="var">Hrange</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">Hseg</span> (<span class="id" title="var">S</span> <span class="id" title="var">k0</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">S</span> <span class="id" title="var">i0</span> &lt;= <span class="id" title="var">S</span> <span class="id" title="var">k0</span> &lt; <span class="id" title="var">S</span> <span class="id" title="var">k</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">H0</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">Hseg</span> <span class="id" title="var">H0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj1</span> (<span class="id" title="var">IH1</span> <span class="id" title="var">s0</span> σ0 <span class="id" title="var">k0</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">Hseg</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hseg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> (<span class="id" title="var">k</span> &amp; <span class="id" title="var">Hk</span> &amp; <span class="id" title="var">H</span>ψ0 &amp; <span class="id" title="var">Hseg0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (<span class="id" title="var">S</span> <span class="id" title="var">k</span>). <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>; <span class="id" title="tactic">try</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">IH2</span> <span class="id" title="var">s0</span> σ0 <span class="id" title="var">k</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>ψ0. <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>ψ0.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">Hj</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">j</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">k'</span>]; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">i0</span> &lt;= <span class="id" title="var">k'</span> &lt; <span class="id" title="var">k</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Hrange</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">Hseg0</span> <span class="id" title="var">k'</span> <span class="id" title="var">Hrange</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">IH1</span> <span class="id" title="var">s0</span> σ0 <span class="id" title="var">k'</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">Hseg0</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hseg0</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://rocq-prover.org/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -60,6 +60,26 @@ Run `./stats.sh` to see up-to-date counts of files, lines, definitions, and admi
 - Maximality: `maximal := F (Atom (p_phase 4) ∧ Atom p_no_feasible)`
 - Rejection Fairness: `rejectionOK` (see `Fairness/RejectionFairness.v`)
 
+## Assumptions & Foundations
+
+- **Axiomatic LTL Core:** The project retains a Hilbert-style axiomatic foundation for LTL. Files `LTL/Axioms.v`, `LTL/Soundness.v`, and `LTL/Completeness.v` are available and registered; examples and fairness proofs use semantic satisfaction (`satisfies`) over traces and do not mix derivability judgments.
+- **Operational Invariants:** MUDA invariants (e.g., `wf_state`, match persistence, clearing price bounds) are proved constructively in `MUDA/*` and lifted to LTL via the interpretation of atomic predicates.
+- **Remaining MUDA Axioms:** Some protocol properties are currently axiomatized for build stability:
+	- Sorting bridges between strong sortedness and index-based priority
+	- Greedy priority respect lemmas for bids/asks
+	Fairness results depend on these axioms; constructive replacements are planned.
+
+## Module Notes
+
+- **Price Fairness:** Consolidated in `Fairness/PriceFairness.v` as `priceOK := G (Atom p_bounds_cstar)`. Examples in `Example/CloudMarket.v` use `priceOK` and the theorem `uniform_price_fairness_LTL_initial`.
+- **Fairness Export:** `Fairness/All.v` re-exports `Interpretation`, `PriorityFairness`, `QuantityFairness`, `PriceFairness`, `MatchFinality`, `Maximality`, and `RejectionFairness` for convenience.
+
+## Future Work
+
+- Replace sorting and greedy priority axioms with constructive proofs and update fairness theorems accordingly.
+- Optional: add a phase-guarded price fairness variant (only required from `P4` onward) and prove it from initial states.
+- Trim example imports to the minimal needed LTL modules (e.g., `Syntax`, `Semantics`, `LTL`) while keeping axioms available.
+
 ## Development Workflow
 
 ### Edit a file

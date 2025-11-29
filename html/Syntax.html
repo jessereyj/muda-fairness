@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Syntax</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library Syntax</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">List.ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Declare Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Delimit</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span> <span class="id" title="keyword">with</span> <span class="id" title="var">LTL</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">predicate</span> := <span class="id" title="var">nat</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">LTL_formula</span> : <span class="id" title="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Atom</span>       : <span class="id" title="var">predicate</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Not</span>        : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">And</span>        : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Or</span>         : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Implies</span>    : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
+&nbsp;&nbsp;| <span class="id" title="keyword">Next</span>       : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Always</span>     : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Eventually</span> : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Until</span>      : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">top</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">Or</span> (<span class="id" title="var">Atom</span> 0) (<span class="id" title="var">Not</span> (<span class="id" title="var">Atom</span> 0)).<br/>
+
+<br/>
+<span class="id" title="keyword">Notation</span> &quot;¬ φ"     := (<span class="id" title="var">Not</span> φ)                   (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 75, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Notation</span> &quot;φ ∧ ψ"   := (<span class="id" title="var">And</span> φ ψ)                 (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 80, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Notation</span> &quot;φ ∨ ψ"   := (<span class="id" title="var">Or</span> φ ψ)                  (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 85, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Notation</span> &quot;φ → ψ"   := (<span class="id" title="var">Implies</span> φ ψ)             (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 90, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Notation</span> &quot;'X' φ"   := (<span class="id" title="keyword">Next</span> φ)                  (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 75) : <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Notation</span> &quot;'G' φ"   := (<span class="id" title="var">Always</span> φ)                (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 75) : <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Notation</span> &quot;'F' φ"   := (<span class="id" title="var">Eventually</span> φ)            (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 75) : <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Notation</span> &quot;φ ⟪U⟫ ψ" := (<span class="id" title="var">Until</span> φ ψ)               (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 85, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">LTL_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Notation</span> &quot;phi 'IMPLIES' psi" := (<span class="id" title="var">Implies</span> <span class="id" title="var">phi</span> <span class="id" title="var">psi</span>) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 90, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>).<br/>
+<span class="id" title="keyword">Notation</span> &quot;phi 'UNTIL' psi"   := (<span class="id" title="var">Until</span>   <span class="id" title="var">phi</span> <span class="id" title="var">psi</span>) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 85, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://rocq-prover.org/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

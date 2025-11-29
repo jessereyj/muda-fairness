@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>MatchFinality</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library MatchFinality</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LTL</span>. <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">MUDA</span> <span class="id" title="var">Atoms</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span>. 
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">final</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">Atom</span> <span class="id" title="var">p_terminal</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">finalityOK</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_match_keep</span>).<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">matches_monotone</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">m</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">m</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">In</span> <span class="id" title="var">m</span> (<span class="id" title="var">matches</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">m</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">step</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> <span class="id" title="var">s</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">exact</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">match_step</span> <span class="id" title="var">s</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hms</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">match_step_monotonic</span> <span class="id" title="var">s</span> <span class="id" title="var">s0</span> <span class="id" title="var">Hms</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">Hin</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">match_finality_after_n</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">s</span> <span class="id" title="var">m</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">m</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">In</span> <span class="id" title="var">m</span> (<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> <span class="id" title="var">n</span> <span class="id" title="var">s</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">n</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">m</span> <span class="id" title="var">Hin</span>; <span class="id" title="tactic">simpl</span>; [<span class="id" title="tactic">exact</span> <span class="id" title="var">Hin</span>|].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">IH</span>. <span class="id" title="tactic">eapply</span> <span class="id" title="var">matches_monotone</span>; <span class="id" title="tactic">eauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">matches_monotone_1</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">matches_monotone_1_prop</span> <span class="id" title="var">s</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">m</span> <span class="id" title="var">Hin</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">matches_monotone</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">match_finality_LTL</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> <span class="id" title="var">s</span>) 0 <span class="id" title="var">finalityOK</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">finalityOK</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> <span class="id" title="var">s</span> <span class="id" title="var">j</span> <span class="id" title="var">p_match_keep</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">matches_monotone_1</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://rocq-prover.org/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

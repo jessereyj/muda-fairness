@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Interpretation</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library Interpretation</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">PeanoNat</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">State</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_allocOK</span>      : <span class="id" title="var">predicate</span> := 0.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_terminal</span>     : <span class="id" title="var">predicate</span> := 1.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_no_feasible</span>  : <span class="id" title="var">predicate</span> := 2.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_has_cprice</span>   : <span class="id" title="var">predicate</span> := 3.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_bounds_cstar</span> : <span class="id" title="var">predicate</span> := 4.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_match_keep</span>   : <span class="id" title="var">predicate</span> := 5.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_prioB_step</span>   : <span class="id" title="var">predicate</span> := 6.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_prioS_step</span>   : <span class="id" title="var">predicate</span> := 7.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_rejection_justified</span> : <span class="id" title="var">predicate</span> := 8.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_phase</span> (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) : <span class="id" title="var">predicate</span> := (10 + <span class="id" title="var">i</span>)%<span class="id" title="var">nat</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">nth_phase</span> (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) : <span class="id" title="var">Phase</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">i</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| 1 =&gt; <span class="id" title="var">P1</span> | 2 =&gt; <span class="id" title="var">P2</span> | 3 =&gt; <span class="id" title="var">P3</span> | 4 =&gt; <span class="id" title="var">P4</span><br/>
+&nbsp;&nbsp;| 5 =&gt; <span class="id" title="var">P5</span> | 6 =&gt; <span class="id" title="var">P6</span> | <span class="id" title="var">_</span> =&gt; <span class="id" title="var">P7</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">interp_atom</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">predicate</span> -&gt; <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">p</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">p</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 0 =&gt; <span class="id" title="var">allocOK_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 1 =&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P7</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 2 =&gt; <span class="id" title="var">no_feasible_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 3 =&gt; <span class="id" title="var">has_clearing_price_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 4 =&gt; <span class="id" title="var">bounds_cstar_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 5 =&gt; <span class="id" title="var">matches_monotone_1_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 6 =&gt; <span class="id" title="var">priorityB_step_ok_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 7 =&gt; <span class="id" title="var">priorityS_step_ok_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;| 8 =&gt; <span class="id" title="var">rejection_justified_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">p'</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">andb</span> (<span class="id" title="var">Nat.leb</span> (<span class="id" title="var">p_phase</span> 1) <span class="id" title="var">p'</span>) (<span class="id" title="var">Nat.leb</span> <span class="id" title="var">p'</span> (<span class="id" title="var">p_phase</span> 7)) <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">i</span> := (<span class="id" title="var">p'</span> - 10)%<span class="id" title="var">nat</span> <span class="id" title="tactic">in</span> <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">nth_phase</span> <span class="id" title="var">i</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">CoFixpoint</span> <span class="id" title="var">mu_trace</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">trace</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Trace</span> (<span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">match</span> <span class="id" title="var">phase</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">P7</span> =&gt; <span class="id" title="var">mu_trace</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)   <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span>  =&gt; <span class="id" title="var">mu_trace</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_trace_at_execute</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">trace_at</span> (<span class="id" title="var">mu_trace</span> <span class="id" title="var">s</span>) <span class="id" title="var">n</span> = <span class="id" title="var">interp_atom</span> (<span class="id" title="var">execute</span> <span class="id" title="var">n</span> <span class="id" title="var">s</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="var">s</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">n</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">s</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> <span class="id" title="var">s</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">apply</span> <span class="id" title="var">IH</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_trace_atom_at_execute</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span> <span class="id" title="var">p</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> <span class="id" title="var">s</span>) <span class="id" title="var">i</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p</span>) &lt;-&gt; <span class="id" title="var">interp_atom</span> (<span class="id" title="var">execute</span> <span class="id" title="var">i</span> <span class="id" title="var">s</span>) <span class="id" title="var">p</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span> <span class="id" title="var">p</span>; <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">satisfies</span>; <span class="id" title="var">revert</span> <span class="id" title="var">s</span> <span class="id" title="var">p</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">i</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">i</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">p</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> <span class="id" title="var">s</span>); <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">satisfies</span>; <span class="id" title="var">revert</span> <span class="id" title="var">s</span> <span class="id" title="var">p</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">i</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">i</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">p</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> <span class="id" title="var">s</span>); <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://rocq-prover.org/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

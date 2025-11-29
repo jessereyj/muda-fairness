@@ -207,5 +207,14 @@ info "  - Comment or uncomment .v entries in _CoqProject to control what builds"
 info "  - Use 'rocq doc -html -d html ${ENABLED_VFILES}' for HTML docs"
 echo ""
 
+# Optional: generate HTML documentation for enabled files
+info "Generating HTML docs (optional step)..."
+mkdir -p html || true
+if rocq doc -html -d html ${ENABLED_VFILES}; then
+    info "✓ HTML docs generated under ./html"
+else
+    warn "HTML doc generation encountered warnings/errors; pages may be incomplete."
+fi
+
 # Optional: post-build cleanup hook
 ./clean.sh || true

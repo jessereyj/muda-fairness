@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Sorting</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library Sorting</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Lia</span> <span class="id" title="var">Arith</span> <span class="id" title="var">Sorting</span> <span class="id" title="var">Permutation</span> <span class="id" title="var">Sorted</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Eqb</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab7"></a><h1 class="section">Sorting Bids and Asks (Phase P2)</h1>
+
+<div class="paragraph"> </div>
+
+<a id="lab8"></a><h2 class="section">Priority Orders</h2>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">prioB</span> (<span class="id" title="var">b1</span> <span class="id" title="var">b2</span> : <span class="id" title="var">Bid</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">price</span> <span class="id" title="var">b1</span> &gt; <span class="id" title="var">price</span> <span class="id" title="var">b2</span> \/<br/>
+&nbsp;&nbsp;(<span class="id" title="var">price</span> <span class="id" title="var">b1</span> = <span class="id" title="var">price</span> <span class="id" title="var">b2</span> /\ <span class="id" title="var">ts</span> <span class="id" title="var">b1</span> &lt; <span class="id" title="var">ts</span> <span class="id" title="var">b2</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">prioS</span> (<span class="id" title="var">a1</span> <span class="id" title="var">a2</span> : <span class="id" title="var">Ask</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a1</span> &lt; <span class="id" title="var">ask_price</span> <span class="id" title="var">a2</span> \/<br/>
+&nbsp;&nbsp;(<span class="id" title="var">ask_price</span> <span class="id" title="var">a1</span> = <span class="id" title="var">ask_price</span> <span class="id" title="var">a2</span> /\ <span class="id" title="var">ask_ts</span> <span class="id" title="var">a1</span> &lt; <span class="id" title="var">ask_ts</span> <span class="id" title="var">a2</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">bid_priority</span> (<span class="id" title="var">b1</span> <span class="id" title="var">b2</span> : <span class="id" title="var">Bid</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">price</span> <span class="id" title="var">b1</span> &gt; <span class="id" title="var">price</span> <span class="id" title="var">b2</span> \/<br/>
+&nbsp;&nbsp;(<span class="id" title="var">price</span> <span class="id" title="var">b1</span> = <span class="id" title="var">price</span> <span class="id" title="var">b2</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ts</span> <span class="id" title="var">b1</span> &lt; <span class="id" title="var">ts</span> <span class="id" title="var">b2</span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ts</span> <span class="id" title="var">b1</span> = <span class="id" title="var">ts</span> <span class="id" title="var">b2</span> /\ <span class="id" title="var">bid_id</span> <span class="id" title="var">b1</span> &lt; <span class="id" title="var">bid_id</span> <span class="id" title="var">b2</span>))).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">ask_priority</span> (<span class="id" title="var">a1</span> <span class="id" title="var">a2</span> : <span class="id" title="var">Ask</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a1</span> &lt; <span class="id" title="var">ask_price</span> <span class="id" title="var">a2</span> \/<br/>
+&nbsp;&nbsp;(<span class="id" title="var">ask_price</span> <span class="id" title="var">a1</span> = <span class="id" title="var">ask_price</span> <span class="id" title="var">a2</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ask_ts</span> <span class="id" title="var">a1</span> &lt; <span class="id" title="var">ask_ts</span> <span class="id" title="var">a2</span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ask_ts</span> <span class="id" title="var">a1</span> = <span class="id" title="var">ask_ts</span> <span class="id" title="var">a2</span> /\ <span class="id" title="var">ask_id</span> <span class="id" title="var">a1</span> &lt; <span class="id" title="var">ask_id</span> <span class="id" title="var">a2</span>))).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab9"></a><h2 class="section">Basic order facts (useful in P2 invariants)</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">bid_priority_irrefl</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b</span>, ~ <span class="id" title="var">bid_priority</span> <span class="id" title="var">b</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">bid_priority</span>; <span class="id" title="tactic">intros</span> [<span class="id" title="var">Hgt</span>|[<span class="id" title="var">Heq</span> [<span class="id" title="var">Hlt</span>|[<span class="id" title="var">Heqt</span> <span class="id" title="var">Hid</span>]]]]; <span class="id" title="tactic">try</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">ask_priority_irrefl</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, ~ <span class="id" title="var">ask_priority</span> <span class="id" title="var">a</span> <span class="id" title="var">a</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">ask_priority</span>; <span class="id" title="tactic">intros</span> [<span class="id" title="var">Hlt</span>|[<span class="id" title="var">Heq</span> [<span class="id" title="var">Hlt'</span>|[<span class="id" title="var">Heqt</span> <span class="id" title="var">Hid</span>]]]]; <span class="id" title="tactic">try</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">bid_priority_trans</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>, <span class="id" title="var">bid_priority</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> -&gt; <span class="id" title="var">bid_priority</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> -&gt; <span class="id" title="var">bid_priority</span> <span class="id" title="var">x</span> <span class="id" title="var">z</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> <span class="id" title="var">Hxy</span> <span class="id" title="var">Hyz</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">bid_priority</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hxy</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hx_gt</span> | [<span class="id" title="var">Hxy_peq</span> [<span class="id" title="var">Hxy_tslt</span> | [<span class="id" title="var">Hxy_tseq</span> <span class="id" title="var">Hxy_idlt</span>]]]].<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hyz</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hy_gt</span> | [<span class="id" title="var">Hyz_peq</span> <span class="id" title="var">_</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">left</span>; <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Hyz_peq</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hx_gt</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hyz</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hy_gt</span> | [<span class="id" title="var">Hyz_peq</span> [<span class="id" title="var">Hyz_tslt</span> | [<span class="id" title="var">Hyz_tseq</span> <span class="id" title="var">Hyz_idlt</span>]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+  <span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hy_gt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*  <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">left</span>; <span class="id" title="tactic">eapply</span> <span class="id" title="var">Nat.lt_trans</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">left</span>; <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hyz_tseq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hxy_tslt</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hxy_tslt</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hyz</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hy_gt</span> | [<span class="id" title="var">Hyz_peq</span> [<span class="id" title="var">Hyz_tslt</span> | [<span class="id" title="var">Hyz_tseq</span> <span class="id" title="var">Hyz_idlt</span>]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hy_gt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>; [ <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>, <span class="id" title="var">Hyz_peq</span> |].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_tseq</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hyz_tslt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>; [ <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>, <span class="id" title="var">Hyz_peq</span> |].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>; [ <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_tseq</span>, <span class="id" title="var">Hyz_tseq</span> | <span class="id" title="var">lia</span>].<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">ask_priority_trans</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>, <span class="id" title="var">ask_priority</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> -&gt; <span class="id" title="var">ask_priority</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> -&gt; <span class="id" title="var">ask_priority</span> <span class="id" title="var">x</span> <span class="id" title="var">z</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> <span class="id" title="var">Hxy</span> <span class="id" title="var">Hyz</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">ask_priority</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hxy</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hx_lt</span> | [<span class="id" title="var">Hxy_peq</span> [<span class="id" title="var">Hxy_tslt</span> | [<span class="id" title="var">Hxy_tseq</span> <span class="id" title="var">Hxy_idlt</span>]]]].<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hyz</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hy_lt</span> | [<span class="id" title="var">Hyz_peq</span> <span class="id" title="var">_</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">left</span>; <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Hyz_peq</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hx_lt</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hyz</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hy_lt</span> | [<span class="id" title="var">Hyz_peq</span> [<span class="id" title="var">Hyz_tslt</span> | [<span class="id" title="var">Hyz_tseq</span> <span class="id" title="var">Hyz_idlt</span>]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hy_lt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>; [ <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span> |]. <span class="id" title="tactic">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">Nat.lt_trans</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>; [ <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span> |]. <span class="id" title="tactic">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hyz_tseq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hxy_tslt</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hxy_tslt</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hyz</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hy_lt</span> | [<span class="id" title="var">Hyz_peq</span> [<span class="id" title="var">Hyz_tslt</span> | [<span class="id" title="var">Hyz_tseq</span> <span class="id" title="var">Hyz_idlt</span>]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hy_lt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>; [ <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>, <span class="id" title="var">Hyz_peq</span> |].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_tseq</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hyz_tslt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>; [ <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_peq</span>, <span class="id" title="var">Hyz_peq</span> |].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">split</span>; [ <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hxy_tseq</span>, <span class="id" title="var">Hyz_tseq</span> | <span class="id" title="var">lia</span>].<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab10"></a><h2 class="section">Refinement: three-key priority refines the two-key order (with tie case)</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">bid_priority_refines_prioB</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">bid_priority</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prioB</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> \/ (<span class="id" title="var">price</span> <span class="id" title="var">x</span> = <span class="id" title="var">price</span> <span class="id" title="var">y</span> /\ <span class="id" title="var">ts</span> <span class="id" title="var">x</span> = <span class="id" title="var">ts</span> <span class="id" title="var">y</span> /\ <span class="id" title="var">bid_id</span> <span class="id" title="var">x</span> &lt; <span class="id" title="var">bid_id</span> <span class="id" title="var">y</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">bid_priority</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">prioB</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hp</span> | [<span class="id" title="var">Hp</span> [<span class="id" title="var">Ht</span> | [<span class="id" title="var">Ht</span> <span class="id" title="var">Hid</span>]]]]; <span class="id" title="tactic">eauto</span> 6.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">ask_priority_refines_prioS</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_priority</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prioS</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> \/ (<span class="id" title="var">ask_price</span> <span class="id" title="var">x</span> = <span class="id" title="var">ask_price</span> <span class="id" title="var">y</span> /\ <span class="id" title="var">ask_ts</span> <span class="id" title="var">x</span> = <span class="id" title="var">ask_ts</span> <span class="id" title="var">y</span> /\ <span class="id" title="var">ask_id</span> <span class="id" title="var">x</span> &lt; <span class="id" title="var">ask_id</span> <span class="id" title="var">y</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">ask_priority</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">prioS</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hp</span> | [<span class="id" title="var">Hp</span> [<span class="id" title="var">Ht</span> | [<span class="id" title="var">Ht</span> <span class="id" title="var">Hid</span>]]]]; <span class="id" title="tactic">eauto</span> 6.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab11"></a><h2 class="section">Sortedness predicates (index-based, convenient for nth_error reasoning)</h2>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">bids_sorted</span> (<span class="id" title="var">bs</span> : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">i</span> <span class="id" title="var">j</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">nth_error</span> <span class="id" title="var">bs</span> <span class="id" title="var">i</span> = <span class="id" title="var">Some</span> <span class="id" title="var">b1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">nth_error</span> <span class="id" title="var">bs</span> <span class="id" title="var">j</span> = <span class="id" title="var">Some</span> <span class="id" title="var">b2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">i</span> &lt; <span class="id" title="var">j</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">asks_sorted</span> (<span class="id" title="var">as_list</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">i</span> <span class="id" title="var">j</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">nth_error</span> <span class="id" title="var">as_list</span> <span class="id" title="var">i</span> = <span class="id" title="var">Some</span> <span class="id" title="var">a1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">nth_error</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> = <span class="id" title="var">Some</span> <span class="id" title="var">a2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">i</span> &lt; <span class="id" title="var">j</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab12"></a><h2 class="section">StronglySorted variants (sometimes easier for inductive proofs)</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">bids_strongly_sorted</span> (<span class="id" title="var">bs</span> : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">StronglySorted</span> <span class="id" title="var">bid_priority</span> <span class="id" title="var">bs</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">asks_strongly_sorted</span> (<span class="id" title="var">as_list</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">StronglySorted</span> <span class="id" title="var">ask_priority</span> <span class="id" title="var">as_list</span>.<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">StronglySorted__bids_sorted</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span>, <span class="id" title="var">bids_strongly_sorted</span> <span class="id" title="var">bs</span> -&gt; <span class="id" title="var">bids_sorted</span> <span class="id" title="var">bs</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">StronglySorted__asks_sorted</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">asx</span>, <span class="id" title="var">asks_strongly_sorted</span> <span class="id" title="var">asx</span> -&gt; <span class="id" title="var">asks_sorted</span> <span class="id" title="var">asx</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">bids_sorted__StronglySorted</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span>, <span class="id" title="var">bids_sorted</span> <span class="id" title="var">bs</span> -&gt; <span class="id" title="var">bids_strongly_sorted</span> <span class="id" title="var">bs</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">asks_sorted__StronglySorted</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">asx</span>, <span class="id" title="var">asks_sorted</span> <span class="id" title="var">asx</span> -&gt; <span class="id" title="var">asks_strongly_sorted</span> <span class="id" title="var">asx</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab13"></a><h2 class="section">Sorting functions and contracts (P2)</h2>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">sort_bids</span>      : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span> -&gt; <span class="id" title="var">list</span> <span class="id" title="var">Bid</span>.<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">sort_asks</span>      : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span> -&gt; <span class="id" title="var">list</span> <span class="id" title="var">Ask</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">sort_bids_correct</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span>, <span class="id" title="var">bids_sorted</span> (<span class="id" title="var">sort_bids</span> <span class="id" title="var">bs</span>).<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">sort_asks_correct</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">asx</span>, <span class="id" title="var">asks_sorted</span> (<span class="id" title="var">sort_asks</span> <span class="id" title="var">asx</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">sort_bids_perm</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span>, <span class="id" title="var">Permutation</span> (<span class="id" title="var">sort_bids</span> <span class="id" title="var">bs</span>) <span class="id" title="var">bs</span>.<br/>
+<span class="id" title="keyword">Axiom</span> <span class="id" title="var">sort_asks_perm</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">asx</span>, <span class="id" title="var">Permutation</span> (<span class="id" title="var">sort_asks</span> <span class="id" title="var">asx</span>) <span class="id" title="var">asx</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab14"></a><h2 class="section">Phase P2 Transition (Section 3 pipeline)</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">do_sorting</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;{| <span class="id" title="var">bids</span> := <span class="id" title="var">sort_bids</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">asks</span> := <span class="id" title="var">sort_asks</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">matches</span> := <span class="id" title="var">matches</span> <span class="id" title="var">s</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> := <span class="id" title="var">clearing_price</span> <span class="id" title="var">s</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">phase</span> := <span class="id" title="var">P3</span> |}.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://rocq-prover.org/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>
