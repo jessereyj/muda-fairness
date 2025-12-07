@@ -1,4 +1,4 @@
-(* Fairness/RejectionFairness.v *)
+(* Fairness/JustifiedRejection.v *)
 From Stdlib Require Import List.
 Import ListNotations.
 From LTL  Require Import LTL.           (* re-export module *)
@@ -50,7 +50,7 @@ Proof.
     split; intro H; try reflexivity; try discriminate.
 Qed.
 
-Theorem rejection_fairness_from_None :
+Theorem justified_rejection_from_None :
   forall s, match_step s = None -> rejection_justified_prop s.
 Proof.
   intros s Hms.
@@ -59,7 +59,7 @@ Proof.
 Qed.
 
 (* Phase-flavored wrapper if you use it after P4/P5/P6/P7. *)
-Theorem rejection_fairness :
+Theorem justified_rejection :
   forall s,
     (phase s = P4 \/ phase s = P5 \/ phase s = P6 \/ phase s = P7) ->
     find_feasible (bids s) (asks s) (matches s) = None ->
@@ -70,4 +70,4 @@ Proof.
 Qed.
 
 (* Note: No global axioms about rejection justification. Constructive facts
-  are provided above (rejection_fairness_from_None and rejection_fairness). *)
+  are provided above (justified_rejection_from_None and justified_rejection). *)

@@ -83,7 +83,7 @@ Fairness/QuantityFairness.v
 Fairness/PriceFairness.v
 Fairness/MatchFinality.v
 Fairness/Maximality.v
-Fairness/RejectionFairness.v
+Fairness/JustifiedRejection.v
 Fairness/All.v
 
 # ===== Simulation (Layer 4) =====
