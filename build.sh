@@ -51,6 +51,7 @@ cat > _CoqProject <<'EOF'
 -R LTL LTL
 -R MUDA MUDA
 -R Fairness Fairness
+-R Example Example
 
 
 # Suppress common warnings
@@ -87,7 +88,10 @@ Fairness/JustifiedRejection.v
 Fairness/All.v
 
 # ===== Simulation (Layer 4) =====
+Example/LogicalSoundness.v
+Example/LogicalCompleteness.v
 Example/CloudMarket.v
+
 
 EOF
 info "_CoqProject generated."
