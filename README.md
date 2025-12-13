@@ -1,13 +1,13 @@
 # MUDA Fairness Verification
 
-Formal verification of fairness properties in Multi-Unit Double Auction (MUDA) using Rocq/Coq and Linear Temporal Logic (LTL).
+Temporal verification of fairness in Multi-Unit Double Auction (MUDA) using Rocq/Coq and Linear Temporal Logic (LTL).
 
 ## Structure
 ```
 LTL/       - Linear Temporal Logic foundation
 MUDA/      - MUDA protocol model (state, sorting, matching, price)
 Fairness/  - Fairness property formulas and proofs
-Example/   - Cloud market scenarios exercising the proofs
+Example/   - Validate the logical soundness and completeness. Cloud market scenarios exercising the proofs
 ```
 
 ## Quick Start
