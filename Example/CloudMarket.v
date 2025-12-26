@@ -1,10 +1,8 @@
 (** * CloudMarket*)
-
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions Atoms.
 From LTL Require Import Syntax Semantics Axioms Soundness Completeness LTL.
 From Stdlib Require Import List.
 Import ListNotations.
-(* Import fairness properties (LTL formulas) *)
 From Fairness Require Import All.
 
 Local Open Scope LTL_scope.
@@ -12,10 +10,6 @@ Local Open Scope LTL_scope.
 Set Implicit Arguments.
 Generalizable All Variables.
 
-(* If your LTL library uses a valuation for atoms, ensure the five formulas
-  below are already closed formulas, exported by Fairness/Fairness.v. *)
-(*** Utilities **************************************************************)
-(* Concrete construction helpers for scenarios *)
 Definition mk_buyer (id: nat) : Agent := {| agent_id := id; agent_type := Buyer |}.
 Definition mk_seller (id: nat) : Agent := {| agent_id := id; agent_type := Seller |}.
 
@@ -25,13 +19,7 @@ Definition B (id p q t: nat) : Bid :=
 Definition A (id p q t: nat) : Ask :=
   {| ask_id := id; seller := mk_seller id; ask_price := p; ask_quantity := q; ask_ts := t |}.
 
-(** * 
-    Case 1: Late Buyer Attempts to Rematch
-    Inputs (price, quantity, ts):
-      b1 = (100, 1, 1), b2 = (90, 1, 2), b3 = (95, 1, 3)
-      s1 = (85,  1, 1)
-    We construct the initial state and instantiate the Fairness theorems.
-*)
+
 Section Case_1.
   (* Inputs: b1=(100,1,1), b2=(90,1,2), b3=(95,1,3); s1=(85,1,1) *)
   Definition bs1 : list Bid := [B 1 100 1 1; B 2 90 1 2; B 3 95 1 3].
@@ -63,8 +51,6 @@ Section Case_1.
 
 End Case_1.
 
-(*** Scenario 2 *************************************************************)
-
 Section Case_2.
   (* Inputs: b1=(100,1,1), b2=(60,1,2); s1=(80,1,1) *)
   Definition bs2 : list Bid := [B 1 100 1 1; B 2 60 1 2].
@@ -79,10 +65,7 @@ Section Case_2.
   Example Case2_Maximality: satisfies run_case_2 0 maximal.       Proof.
     apply maximality_from_P1_or_P2. left. reflexivity.
   Qed.
-  (* Remove duplicate admitted examples (already proved above). *)
 End Case_2.
-
-(*** Scenario 3 *************************************************************)
 
 Section Case_3.
   (* Inputs: b1=(100,2,1), b2=(90,1,2), b3=(85,1,3); s1=(80,1,1), s2=(85,1,2) *)
@@ -98,8 +81,6 @@ Section Case_3.
   Example Case3_Maximality: satisfies run_case_3 0 maximal.
   Proof. apply maximality_from_P1_or_P2. left. reflexivity. Qed.
 End Case_3.
-
-(*** Scenario 4 *************************************************************)
 
 Section Case_4.
   (* Inputs: b1=(90,1,2), b2=(90,1,3); s1=(80,1,1) *)
@@ -118,8 +99,6 @@ Section Case_4.
   Qed.
 End Case_4.
 
-(*** Scenario 5 *************************************************************)
-
 Section Case_5.
   (* Inputs: b1=(100,5,1), b2=(95,1,2); s1=(80,1,1), s2=(85,1,2), s3=(90,1,3) *)
   Definition bs5 : list Bid := [B 1 100 5 1; B 2 95 1 2].
@@ -137,8 +116,6 @@ Section Case_5.
   Qed.
 End Case_5.
 
-(*** Scenario 6 *************************************************************)
-
 Section Case_6.
   (* Inputs: b1=(100,1,1) (true need 2); s1=(80,2,1) *)
   Definition bs6 : list Bid := [B 1 100 1 1].
@@ -155,8 +132,6 @@ Section Case_6.
     apply maximality_from_P1_or_P2. left. reflexivity.
   Qed.
 End Case_6.
-
-(*** Scenario 7 *************************************************************)
 
 Section Case_7.
   (* Inputs: b1=(100,1,1), b2=(90,1,2), b3=(85,1,3); s1=(80,1,1), s2=(95,1,2) *)

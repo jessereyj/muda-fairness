@@ -1,24 +1,16 @@
 (* Fairness/MatchFinality.v *)
 From Stdlib Require Import List.
 Import ListNotations.
-From LTL  Require Import LTL.           (* re-export module *)
+From LTL  Require Import LTL.
 From MUDA Require Import MUDA Atoms.
-From Fairness Require Import Interpretation. (* for p_terminal, p_match_keep *)
+From Fairness Require Import Interpretation.
 
 Local Open Scope LTL_scope.
 
-(* LTL formula: eventual terminal phase (market closed) *)
 Definition final : LTL_formula := Atom p_terminal.
 
-(* LTL formula: global match persistence (no match deletion). *)
 Definition finalityOK : LTL_formula := G (Atom p_match_keep).
 
-(* A pointwise version of matches_monotone_1_prop from the global lemma *)
-(* Aligning with Section 4.3.4: we keep the operational monotonicity lemma.
-   A future enhancement can prove the full LTL lifting once an execute/trace
-   correspondence lemma is stabilized (similar to quantity fairness). *)
-
-(* One-step: every existing match persists after step. *)
 Lemma matches_monotone : forall s m,
   In m (matches s) -> In m (matches (step s)).
 Proof.
@@ -42,8 +34,6 @@ Proof.
   apply IH. eapply matches_monotone; eauto.
 Qed.
 
-(* Lifting: At any index i, Atom p_match_keep holds on mu_trace because
-   interp_atom maps it to matches_monotone_1_prop and we proved that holds for any state. *)
 Lemma matches_monotone_1 : forall s, matches_monotone_1_prop s.
 Proof.
   intros s m Hin. now apply matches_monotone.

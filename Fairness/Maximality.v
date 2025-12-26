@@ -9,7 +9,6 @@ Local Open Scope LTL_scope.
 
 Definition maximal : LTL_formula := F (And (Atom (p_phase 4)) (Atom p_no_feasible)).
 
-(* --- A simple size measure to reason about leaving P3 -------------------- *)
 Fixpoint sum_residual_bids (bs:list Bid) (ms:list Match) : nat :=
   match bs with
   | [] => 0
@@ -28,8 +27,6 @@ Definition mu (s:State) : nat :=
 Lemma mu_ge_0 : forall s, mu s >= 0.
 Proof. intros; unfold mu; lia. Qed.
 
-(* Matching a positive quantity strictly decreases mu. *)
-(* Helper: residual quantity strictly drops for the matched bid/ask *)
 Lemma residual_bid_drop : forall s s' b a,
   match_step s = Some s' ->
   find_feasible (bids s) (asks s) (matches s) = Some (b,a) ->
@@ -98,7 +95,6 @@ Proof.
   destruct q; [lia|]. simpl. lia.
 Qed.
 
-(* For other bids/asks, residuals unchanged. *)
 Lemma residual_bid_unchanged : forall s s' b0 a b,
   match_step s = Some s' ->
   find_feasible (bids s) (asks s) (matches s) = Some (b0,a) ->
@@ -182,10 +178,6 @@ Proof.
   inversion H; reflexivity.
 Qed.
 
-
-(* Pointwise-to-sum lemmas (specialized, no fold_right rewrite needed) *)
-
-(* Pointwise-to-sum lemmas specialized to our sum definitions *)
 Lemma sum_residual_bids_pointwise_le : forall bs ms ms',
   (forall x, In x bs -> residual_bid x ms' <= residual_bid x ms) ->
   sum_residual_bids bs ms' <= sum_residual_bids bs ms.
@@ -257,12 +249,10 @@ Proof.
   pose proof (match_step_bids_unchanged s s' Hstep) as Hbids.
   pose proof (residual_bid_drop s s' b a Hstep Hf) as Hstrict_b.
   pose proof (find_feasible_In_b (bids s) (asks s) (matches s) b a Hf) as Hin_b.
-  (* Pointwise: matched bid strictly drops; others unchanged (hence <=). *)
   assert (Hpoint: forall x, In x (bids s) -> residual_bid x (matches s') <= residual_bid x (matches s)) by
     (intros x Hx; destruct (bid_eq_dec x b) as [->|Hneq]; [apply Nat.lt_le_incl; exact Hstrict_b|
        rewrite (residual_bid_unchanged s s' b a x Hstep Hf Hneq); lia]).
   rewrite Hbids.
-  (* Apply specialized sum lemma without converting to fold_right *)
   eapply sum_residual_bids_pointwise_strict; eauto.
 Qed.
 
@@ -290,9 +280,7 @@ Proof.
   unfold mu.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf;
     [|
-     (* Impossible: match_step s = Some s' but find_feasible returned None *)
      unfold match_step in Hstep; rewrite Hf in Hstep; discriminate].
-  (* Use previously proven sum-drop lemmas directly on s -> s' *)
   assert (Hsumb_strict: sum_residual_bids (bids s') (matches s') < sum_residual_bids (bids s) (matches s))
     by (eapply sum_residual_bids_drop; eauto).
   assert (Hsuma_strict: sum_residual_asks (asks s') (matches s') < sum_residual_asks (asks s) (matches s))
@@ -300,7 +288,6 @@ Proof.
   lia.
 Qed.
 
-(* --- Local progress/exit at P3 ------------------------------------------- *)
 Lemma step_P3_progress_or_exit : forall s,
   phase s = P3 ->
   (exists s', match_step s = Some s') \/ (match_step s = None).
@@ -312,7 +299,6 @@ Proof.
   - right. reflexivity.
 Qed.
 
-(* If we are in P3 and no feasible pair, the next phase is P4. *)
 Lemma step_P4_from_P3_None : forall s,
   phase s = P3 ->
   match_step s = None ->
@@ -322,7 +308,6 @@ Proof.
   unfold step. rewrite Hp. simpl. rewrite Hnone. reflexivity.
 Qed.
 
-(* Match-step keeps the phase (constructed state sets phase := phase s). *)
 Lemma match_step_phase_invariant :
   forall s s', match_step s = Some s' -> phase s' = phase s.
 Proof.
@@ -384,7 +369,6 @@ Proof.
   intros n s. rewrite execute_S. symmetry. apply step_execute_comm.
 Qed.
 
-(* Composition lemma: running n, then m steps equals n+m total steps. *)
 Lemma execute_add_tail : forall n m s, execute m (execute n s) = execute (n + m) s.
 Proof.
   intros n m s. revert n s.
@@ -400,10 +384,6 @@ Proof.
     reflexivity.
 Qed.
 
-(* We no longer need an explicit predecessor enumeration lemma; we derive
-   predecessor state properties on demand using execute_step_after and
-   step_P4_inversion. *)
-
 (* If match_step fails, there is no feasible pair in the current state. *)
 Lemma no_feasible_from_None : forall s,
   match_step s = None -> no_feasible_prop s.
@@ -415,8 +395,6 @@ Proof.
   intros b0 a0 Hb Ha.
   eapply find_feasible_None_forall; eauto.
 Qed.
-
-(* Eventual exit from P3 using measure descent. *)
 
 Lemma no_feasible_step_from_None : forall t,
   phase t = P3 -> match_step t = None -> no_feasible_prop (step t).

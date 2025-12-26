@@ -7,14 +7,10 @@ From Fairness Require Import Interpretation.  (* for p_allocOK and mu_trace *)
 
 Local Open Scope LTL_scope.
 
-(* LTL specification alias for Section 4 *)
 Definition quantityOK : LTL_formula := G (Atom p_allocOK).
 
-(* Clearing price fairness: whenever a clearing price is defined it lies
-  between marginal ask and bid; vacuously True otherwise. *)
 Definition priceOK : LTL_formula := G (Atom p_bounds_cstar).
 
-(* ===== Initial state ===== *)
 Theorem quantity_fairness_initial : forall bs as_list,
   allocOK (initial_state bs as_list).
 Proof.
@@ -23,7 +19,6 @@ Proof.
   split; intros; lia.
 Qed.
 
-(* ===== One-step preservation across the pipeline ===== *)
 Theorem quantity_fairness_step :
   forall s, allocOK s -> allocOK (step s).
 Proof.
@@ -48,7 +43,6 @@ Proof.
     unfold step; rewrite Hp; exact H.
 Qed.
 
-(* ===== n-step preservation, used to lift to LTL traces ===== *)
 Lemma allocOK_preserved_n :
   forall n s, allocOK s -> allocOK (execute n s).
 Proof.
@@ -56,7 +50,6 @@ Proof.
   apply IH, quantity_fairness_step, H.
 Qed.
 
-(* Lifting for initial states: At any index i, p_allocOK holds on mu_trace of an initial state. *)
 Lemma allocOK_to_prop : forall s, allocOK s -> allocOK_prop s.
 Proof. intros s H; exact H. Qed.
 
@@ -73,7 +66,6 @@ Proof.
   apply quantity_fairness_initial.
 Qed.
 
-(* Global quantity fairness on traces for initial states. *)
 Theorem quantity_fairness_LTL_initial : forall bs as_list,
   satisfies (mu_trace (initial_state bs as_list)) 0 quantityOK.
 Proof.
@@ -84,8 +76,6 @@ Proof.
   apply mu_trace_satisfies_allocOK_initial.
 Qed.
 
-(* Auxiliary: bounds_cstar_prop holds globally from initial state. *)
-(* From a well-formed state, bounds_cstar_prop holds (trivial True or bounds via clearing_price_bounds). *)
 Lemma bounds_cstar_from_wf : forall s,
   wf_state s -> bounds_cstar_prop s.
 Proof.

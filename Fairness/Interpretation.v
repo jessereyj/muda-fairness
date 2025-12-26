@@ -6,8 +6,6 @@ From MUDA Require Import State Transitions Atoms.
 Local Open Scope LTL_scope.
 Local Open Scope bool_scope.  
 
-(* Fixed indices for atoms used in Section 4 *)
-(* indices *)
 Definition p_allocOK      : predicate := 0.
 Definition p_terminal     : predicate := 1.
 Definition p_no_feasible  : predicate := 2.
@@ -17,7 +15,6 @@ Definition p_match_keep   : predicate := 5.
 Definition p_prioB_step   : predicate := 6.
 Definition p_prioS_step   : predicate := 7.
 Definition p_rejection_justified : predicate := 8.
-(* add more only when needed *)
 
 Definition p_phase (i : nat) : predicate := (10 + i)%nat.
 
@@ -63,15 +60,12 @@ Proof.
   - destruct (phase s) eqn:Hp; simpl; apply IH.
 Qed.
 
-(* Bridge: satisfaction of Atom along mu_trace reduces to interp_atom
-   at the i-th executed state. *)
 Lemma mu_trace_atom_at_execute :
   forall s i p,
     satisfies (mu_trace s) i (Atom p) <-> interp_atom (execute i s) p.
 Proof.
   intros s i p; split.
   - (* → *)
-    (* satisfies (mu_trace s) i (Atom p) = trace_at (mu_trace s) i p *)
     unfold satisfies; revert s p.
     induction i as [|i IH]; intros s p; simpl.
     + intros H; exact H.

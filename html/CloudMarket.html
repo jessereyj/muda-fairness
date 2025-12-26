@@ -26,8 +26,6 @@
 
 </div>
 <div class="code">
-
-<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Eqb</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Sorting</span> <span class="id" title="var">Matching</span> <span class="id" title="var">ClearingPrice</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span> <span class="id" title="keyword">Axioms</span> <span class="id" title="var">Soundness</span> <span class="id" title="var">Completeness</span> <span class="id" title="var">LTL</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
@@ -54,19 +52,6 @@
 &nbsp;&nbsp;{| <span class="id" title="var">ask_id</span> := <span class="id" title="var">id</span>; <span class="id" title="var">seller</span> := <span class="id" title="var">mk_seller</span> <span class="id" title="var">id</span>; <span class="id" title="var">ask_price</span> := <span class="id" title="var">p</span>; <span class="id" title="var">ask_quantity</span> := <span class="id" title="var">q</span>; <span class="id" title="var">ask_ts</span> := <span class="id" title="var">t</span> |}.<br/>
 
 <br/>
-</div>
-
-<div class="doc">
-<a id="lab20"></a><h1 class="section"> </h1>
-
-    Case 1: Late Buyer Attempts to Rematch
-    Inputs (price, quantity, ts):
-      b1 = (100, 1, 1), b2 = (90, 1, 2), b3 = (95, 1, 3)
-      s1 = (85,  1, 1)
-    We construct the initial state and instantiate the Fairness theorems.
-
-</div>
-<div class="code">
 <span class="id" title="keyword">Section</span> <span class="id" title="var">Case_1</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">bs1</span> : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span> := [<span class="id" title="var">B</span> 1 100 1 1; <span class="id" title="var">B</span> 2 90 1 2; <span class="id" title="var">B</span> 3 95 1 3].<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">as1</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span> := [<span class="id" title="var">A</span> 1 85 1 1].<br/>
@@ -104,8 +89,6 @@
 <span class="id" title="keyword">End</span> <span class="id" title="var">Case_1</span>.<br/>
 
 <br/>
-
-<br/>
 <span class="id" title="keyword">Section</span> <span class="id" title="var">Case_2</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">bs2</span> : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span> := [<span class="id" title="var">B</span> 1 100 1 1; <span class="id" title="var">B</span> 2 60 1 2].<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">as2</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span> := [<span class="id" title="var">A</span> 1 80 1 1].<br/>
@@ -123,8 +106,6 @@
 <span class="id" title="keyword">End</span> <span class="id" title="var">Case_2</span>.<br/>
 
 <br/>
-
-<br/>
 <span class="id" title="keyword">Section</span> <span class="id" title="var">Case_3</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">bs3</span> : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span> := [<span class="id" title="var">B</span> 1 100 2 1; <span class="id" title="var">B</span> 2 90 1 2; <span class="id" title="var">B</span> 3 85 1 3].<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">as3</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span> := [<span class="id" title="var">A</span> 1 80 1 1; <span class="id" title="var">A</span> 2 85 1 2].<br/>
@@ -139,8 +120,6 @@
 &nbsp;&nbsp;<span class="id" title="keyword">Example</span> <span class="id" title="var">Case3_Maximality</span>: <span class="id" title="var">satisfies</span> <span class="id" title="var">run_case_3</span> 0 <span class="id" title="var">maximal</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">maximality_from_P1_or_P2</span>. <span class="id" title="tactic">left</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
 <span class="id" title="keyword">End</span> <span class="id" title="var">Case_3</span>.<br/>
-
-<br/>
 
 <br/>
 <span class="id" title="keyword">Section</span> <span class="id" title="var">Case_4</span>.<br/>
@@ -161,8 +140,6 @@
 <span class="id" title="keyword">End</span> <span class="id" title="var">Case_4</span>.<br/>
 
 <br/>
-
-<br/>
 <span class="id" title="keyword">Section</span> <span class="id" title="var">Case_5</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">bs5</span> : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span> := [<span class="id" title="var">B</span> 1 100 5 1; <span class="id" title="var">B</span> 2 95 1 2].<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">as5</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span> := [<span class="id" title="var">A</span> 1 80 1 1; <span class="id" title="var">A</span> 2 85 1 2; <span class="id" title="var">A</span> 3 90 1 3].<br/>
@@ -181,8 +158,6 @@
 <span class="id" title="keyword">End</span> <span class="id" title="var">Case_5</span>.<br/>
 
 <br/>
-
-<br/>
 <span class="id" title="keyword">Section</span> <span class="id" title="var">Case_6</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">bs6</span> : <span class="id" title="var">list</span> <span class="id" title="var">Bid</span> := [<span class="id" title="var">B</span> 1 100 1 1].<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">as6</span> : <span class="id" title="var">list</span> <span class="id" title="var">Ask</span> := [<span class="id" title="var">A</span> 1 80 2 1].<br/>
@@ -199,8 +174,6 @@
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">maximality_from_P1_or_P2</span>. <span class="id" title="tactic">left</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
 <span class="id" title="keyword">End</span> <span class="id" title="var">Case_6</span>.<br/>
-
-<br/>
 
 <br/>
 <span class="id" title="keyword">Section</span> <span class="id" title="var">Case_7</span>.<br/>

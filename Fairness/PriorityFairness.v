@@ -31,9 +31,6 @@ Proof.
     + (* P7 *) intros Hp3 b1 b2 a Hprio Hfeas Heq; rewrite Hp3 in Hph; discriminate.
 Qed.
 
-(* Symmetric seller-side axioms/lemmas *)
-(* (Seller-side axioms also moved to MUDA/Atoms.v) *)
-
 Lemma priorityS_step_ok_everywhere :
   forall s i, priorityS_step_ok_prop (execute i s).
 Proof.

@@ -1,26 +1,15 @@
 (* Fairness/JustifiedRejection.v *)
 From Stdlib Require Import List.
 Import ListNotations.
-From LTL  Require Import LTL.           (* re-export module *)
+From LTL  Require Import LTL.
 From MUDA Require Import MUDA Atoms Matching.
-From Fairness Require Import Interpretation. (* for p_match_keep p_rejection_justified *)
-
+From Fairness Require Import Interpretation.
 Local Open Scope LTL_scope.
 
-(* LTL formula (Section 4.3.6 Option A): after phase ≥ P4 every rejection is justified. *)
 Definition rejectionOK : LTL_formula :=
   G ( (Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7))
       → Atom p_rejection_justified ).
 
-(* ---------- Rejection predicates ---------- *)
-(* Rejection predicates and justification now come from MUDA/Atoms via
-   Interpretation atom p_rejection_justified. We retain local lemmas operating
-   over find_feasible to derive the global justification atom. *)
-
-(* ------------------------------------------------------------------------ *)
-(* From “no feasible pair overall” derive the local justification condition. *
-   (We reuse pick_ask_None_all_false and find_feasible_None_forall from
-    MUDA/Matching instead of redefining them here.)                      *)
 Lemma no_feasible_pairs_gives_justification :
   forall s,
     find_feasible (bids s) (asks s) (matches s) = None ->
@@ -40,7 +29,6 @@ Proof.
     right; exact Hinf.
 Qed.
 
-(* A small convenience equivalence for using match_step in proofs. *)
 Lemma match_step_None_iff :
   forall s, match_step s = None <->
             find_feasible (bids s) (asks s) (matches s) = None.
@@ -58,7 +46,6 @@ Proof.
   eapply no_feasible_pairs_gives_justification; eauto.
 Qed.
 
-(* Phase-flavored wrapper if you use it after P4/P5/P6/P7. *)
 Theorem justified_rejection :
   forall s,
     (phase s = P4 \/ phase s = P5 \/ phase s = P6 \/ phase s = P7) ->
@@ -68,6 +55,3 @@ Proof.
   intros s _ Hnone.
   eapply no_feasible_pairs_gives_justification; eauto.
 Qed.
-
-(* Note: No global axioms about rejection justification. Constructive facts
-  are provided above (justified_rejection_from_None and justified_rejection). *)
