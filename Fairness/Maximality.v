@@ -409,7 +409,6 @@ Proof.
   eapply find_feasible_None_forall; eauto.
 Qed.
 
-(* No feasible pair persists to the P4 state at entry. *)
 Lemma no_feasible_at_P4_index : forall s n,
   phase (execute (S n) s) = P4 -> no_feasible_prop (execute (S n) s).
 Proof.
@@ -498,8 +497,6 @@ Proof.
     subst t. rewrite <- (execute_step_after n s) in Hnf_step. exact Hnf_step.
 Qed.
 
-(* --- Reaching P3 from any earlier phase (pipeline progression) --------- *)
-(* Reach P3 from P1/P2 initial pipeline *)
 Lemma reach_P3_from_initial : forall s,
   phase s = P1 \/ phase s = P2 -> exists n, phase (execute n s) = P3.
 Proof.
