@@ -21,14 +21,11 @@
 <div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">Arith</span> <span class="id" title="var">Lia</span>.<br/>
 <span class="id" title="keyword">Import</span> <span class="id" title="var">List.ListNotations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span>.<br/>
 
-<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span>. 
 <br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat_scope</span>.<br/>
-
-<br/>
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">state</span> := <span class="id" title="var">predicate</span> -&gt; <span class="id" title="keyword">Prop</span>.<br/>
@@ -46,8 +43,6 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">S</span> <span class="id" title="var">j</span> =&gt; <span class="id" title="var">trace_at</span> σ' <span class="id" title="var">j</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
 &nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
-
-<br/>
 
 <br/>
 <span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">satisfies</span> (σ : <span class="id" title="var">trace</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) (φ : <span class="id" title="var">LTL_formula</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
@@ -72,8 +67,6 @@
 <br/>
 <span class="id" title="keyword">Notation</span> &quot;σ ⊨ φ" := (<span class="id" title="var">models</span> σ φ) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 70).<br/>
 <span class="id" title="keyword">Notation</span> &quot;⊨ φ"    := (<span class="id" title="var">valid</span> φ)     (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 70).<br/>
-
-<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">satisfies_eventually_unfold</span> :<br/>

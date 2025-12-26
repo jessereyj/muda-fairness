@@ -4,7 +4,6 @@ From MUDA Require Export Eqb.
 Import ListNotations.
 Local Open Scope bool_scope.
 
-(** ** Agent Types and Equality Instances *)
 Inductive AgentType := Buyer | Seller.
 
 Definition agent_type_eqb (x y : AgentType) : bool :=
@@ -39,8 +38,6 @@ Proof.
   + apply (proj2 (agent_type_eqb_spec t2 t2)). reflexivity.
 Qed.
 
-(** ** Orders *)
-
 Record Bid := {
   bid_id : nat;
   buyer : Agent;
@@ -63,8 +60,6 @@ Record Match := {
   match_quantity : nat
 }.
 
-(* --- Boolean equality for Bids, Asks, Matches --- *)
-
 Definition bid_eq (b1 b2 : Bid) : bool :=
   Nat.eqb (bid_id b1) (bid_id b2) &&
   Nat.eqb (price b1) (price b2) &&
@@ -84,13 +79,11 @@ Definition match_eq (m1 m2 : Match) : bool :=
   ask_eq (matched_ask m1) (matched_ask m2) &&
   Nat.eqb (match_quantity m1) (match_quantity m2).
 
-(* --- Instances --- *)
 #[export] Instance bid_eqb : Eqb Bid := { eqb := bid_eq }.
 #[export] Instance ask_eqb : Eqb Ask := { eqb := ask_eq }.
 #[export] Instance match_eqb : Eqb Match := { eqb := match_eq }.
 
-(* --- Specifications --- *)
-(* helper: build equality of bids from equal components *)
+
 Lemma build_bid_eq :
   forall id1 ag1 p1 q1 ts1 id2 ag2 p2 q2 ts2,
     id1 = id2 -> ag1 = ag2 -> p1 = p2 -> q1 = q2 -> ts1 = ts2 ->
@@ -200,15 +193,11 @@ Qed.
 #[export] Instance ask_eqb_spec : EqbSpec Ask := { eqb_eq := ask_eq_spec }.
 #[export] Instance match_eqb_spec : EqbSpec Match := { eqb_eq := match_eq_spec }.
 
-(* Decidable equality helpers *)
-
 Definition agent_type_eq_dec (x y : AgentType) : {x = y} + {x <> y}.
 Proof. decide equality. Defined.
 
 Definition agent_eq_dec (a1 a2 : Agent) : {a1 = a2} + {a1 <> a2}.
 Proof. decide equality. - apply agent_type_eq_dec. - apply Nat.eq_dec. Defined.
-
-(** ** Export hints *)
 
 #[export] Hint Resolve agent_type_eq_dec agent_eq_dec : core.
 
@@ -233,6 +222,5 @@ Proof.
 Qed.
 Definition match_eq_dec := match_eq_dec_spec.
 
-(* Mark the eq_dec functions as global *)
 #[global]
 Hint Resolve agent_type_eq_dec agent_eq_dec bid_eq_dec ask_eq_dec match_eq_dec : core.

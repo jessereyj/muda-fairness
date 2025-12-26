@@ -56,17 +56,6 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">phase</span> := <span class="id" title="var">P1</span> |}.<br/>
 
 <br/>
-</div>
-
-<div class="doc">
-<a id="lab4"></a><h2 class="section">State Properties</h2>
-
-<div class="paragraph"> </div>
-
-<a id="lab5"></a><h2 class="section">Residual Quantities</h2>
-
-</div>
-<div class="code">
 <span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">allocated_bid</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">nat</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">ms</span> <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;| [] =&gt; 0<br/>
@@ -95,13 +84,6 @@
 &nbsp;&nbsp;<span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span> - <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>.<br/>
 
 <br/>
-</div>
-
-<div class="doc">
-<a id="lab6"></a><h2 class="section">Allocation Constraint</h2>
-
-</div>
-<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">allocOK</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
 &nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span>, <span class="id" title="var">In</span> <span class="id" title="var">b</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">quantity</span> <span class="id" title="var">b</span>) /\<br/>
 &nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span>).<br/>

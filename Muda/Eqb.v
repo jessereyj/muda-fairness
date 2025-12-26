@@ -12,7 +12,6 @@ Class EqbSpec (A : Type) {eqb_instance : Eqb A} := {
 
 Notation "x =? y" := (eqb x y) (at level 70) : bool_scope.
 
-(* Optional: default boolean equality instance for nat *)
 #[export] Instance nat_eqb : Eqb nat := { eqb := Nat.eqb }.
 #[export] Instance nat_eqb_spec : EqbSpec nat.
 Proof.

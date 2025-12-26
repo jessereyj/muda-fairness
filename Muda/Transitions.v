@@ -3,14 +3,12 @@ From Stdlib Require Import List Lia Sorting Permutation.
 Import ListNotations.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
-(* When matching finishes (no feasible pair), transition to P4 and set clearing price *)
 Definition finish_matching (s : State) : State :=
   {| bids := bids s;
      asks := asks s;
      matches := matches s;
      clearing_price := determine_clearing_price s;
      phase := P4 |}.
-
 
 Definition step (s : State) : State :=
   match phase s with
@@ -38,7 +36,7 @@ Definition step (s : State) : State :=
   | P7 => s (* Terminal state *)
   end.
 
-(* Sorting only reorders bids/asks; matches are unchanged and constraints hold. *)
+
 Lemma allocOK_after_sorting :
   forall s,
     phase s = P2 ->
@@ -58,15 +56,14 @@ Proof.
     exact (Hask a H).
 Qed.
 
-(** ** Traces *)
-(* Finite execution trace *)
+
 Fixpoint execute (fuel : nat) (s : State) : State :=
   match fuel with
   | 0 => s
   | S fuel' => execute fuel' (step s)
   end.
 
-(** ** Properties *)
+
 Lemma step_preserves_bids_asks : forall s,
   phase s <> P2 ->
   bids (step s) = bids s /\ asks (step s) = asks s.
@@ -109,7 +106,7 @@ Proof.
       lia.
 Qed.
 
-(* Well-formedness preservation moved here to avoid circular dependency. *)
+
 Lemma wf_state_step_preservation : forall s,
   wf_state s -> wf_state (step s).
 Proof.

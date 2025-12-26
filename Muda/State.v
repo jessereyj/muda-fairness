@@ -27,11 +27,6 @@ Definition initial_state (bs : list Bid) (as_list : list Ask) : State :=
      clearing_price := None;
      phase := P1 |}.
 
-(** ** State Properties *)
-
-
-(** ** Residual Quantities *)
-(* Calculate how much of a bid has been allocated *)
 Fixpoint allocated_bid (b : Bid) (ms : list Match) : nat :=
   match ms with
   | [] => 0
@@ -56,12 +51,12 @@ Definition residual_bid (b : Bid) (ms : list Match) : nat :=
 Definition residual_ask (a : Ask) (ms : list Match) : nat :=
   ask_quantity a - allocated_ask a ms.
 
-(** ** Allocation Constraint *)
+
 Definition allocOK (s : State) : Prop :=
   (forall b, In b (bids s) -> allocated_bid b (matches s) <= quantity b) /\
   (forall a, In a (asks s) -> allocated_ask a (matches s) <= ask_quantity a).
 
-(* Feasibility & availability per §3.1.1 *)
+
 Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
   price b >= ask_price a
   /\ residual_bid b ms > 0

@@ -5,14 +5,11 @@ Import ListNotations.
 Local Open Scope nat_scope.
 Local Open Scope bool_scope.
 
-(* ---------- Match finding ---------- *)
-(* Check if a bid-ask pair is feasible given current matches *)
 Definition is_feasible (b : Bid) (a : Ask) (ms : list Match) : bool :=
   Nat.leb (ask_price a) (price b)
   && Nat.leb 1 (residual_bid b ms)
   && Nat.leb 1 (residual_ask a ms).
 
-(* Prop-level wrapper for feasibility *)
 Definition feasible (b : Bid) (a : Ask) (ms : list Match) : Prop :=
   is_feasible b a ms = true.
 
@@ -52,7 +49,7 @@ Proof.
     + apply IH. exact H.
 Qed.
 
-(* If pick_ask fails, no ask in the list is feasible with b. *)
+
 Lemma pick_ask_None_forall :
   forall b as_list ms,
     pick_ask b as_list ms = None ->
@@ -68,7 +65,6 @@ Proof.
       * apply IH; assumption.
 Qed.
 
-(* Auxiliary version for reuse: same content with a stable name *)
 Lemma pick_ask_None_all_false :
   forall b as_list ms,
     pick_ask b as_list ms = None ->
@@ -99,7 +95,6 @@ Proof.
     + apply (IH as_list ms b a). exact H.
 Qed.
 
-(* If find_feasible fails, no feasible pair exists among provided lists. *)
 Lemma find_feasible_None_forall :
   forall bs as_list ms,
     find_feasible bs as_list ms = None ->
@@ -116,7 +111,7 @@ Proof.
       * eapply IH; eauto.
 Qed.
 
-(* ---------- Match creation ---------- *)
+
 Definition create_match (b : Bid) (a : Ask) (ms : list Match) : Match :=
   let q := Nat.min (residual_bid b ms) (residual_ask a ms) in
   {| matched_bid := b; matched_ask := a; match_quantity := q |}.
@@ -138,7 +133,7 @@ Proof.
   apply Nat.min_glb_lt; lia.
 Qed.
 
-(* ---------- Match step function and monotonicity ---------- *)
+
 Definition match_step (s : State) : option State :=
   match find_feasible (bids s) (asks s) (matches s) with
   | Some (b,a) =>
@@ -163,7 +158,7 @@ Proof.
   simpl. unfold incl. intros x Hx. right. exact Hx.
 Qed.
 
-(* ---------- Feasibility checking ---------- *)
+
 Fixpoint matched_quantities (b : Bid) (ms : list Match) : nat :=
   match ms with
   | [] => 0
@@ -182,7 +177,7 @@ Fixpoint matched_quantities_ask (a : Ask) (ms : list Match) : nat :=
       else matched_quantities_ask a ms'
   end.
 
-(* ---------- Feasibility: keep positivity guarded ---------- *)
+
 Lemma feasible_implies_pos :
   forall b a ms,
     is_feasible b a ms = true ->
@@ -194,7 +189,6 @@ Proof.
   split; apply Nat.leb_le; assumption.
 Qed.
 
-(* ---------- Price bounds, stated only for feasible pairs ---------- *)
 Lemma pick_ask_price_bound :
   forall b as_list ms a,
     pick_ask b as_list ms = Some a ->
@@ -213,14 +207,13 @@ Lemma find_feasible_price_bound :
     ask_price a <= price b.
 Proof.
   intros bs as_list ms b a H.
-  (* You already proved the feasibility spec. *)
   apply find_feasible_spec in H.
   unfold is_feasible in H.
   repeat rewrite Bool.andb_true_iff in H.
   destruct H as [[Hp _] _]. now apply Nat.leb_le in Hp.
 Qed.
 
-(* ---------- Match properties ---------- *)
+
 Lemma match_price_bounds : forall s b a,
   find_feasible (bids s) (asks s) (matches s) = Some (b, a) ->
   ask_price a <= price b.
@@ -249,7 +242,6 @@ Proof.
   now rewrite Hf.
 Qed.
 
-(* 1) From feasibility directly *)
 Lemma feasible_price_bounds :
   forall ms b a,
     is_feasible b a ms = true ->
@@ -262,7 +254,6 @@ Proof.
   now apply Nat.leb_le in Hp.
 Qed.
 
-(* 2) From find_feasible (state-level) *)
 Lemma find_feasible_price_bounds :
   forall s b a,
     find_feasible (bids s) (asks s) (matches s) = Some (b,a) ->
@@ -273,19 +264,15 @@ Proof.
   eapply feasible_price_bounds; eauto.
 Qed.
 
-(* 3) For a match constructed from a feasible pair *)
 Lemma create_match_price_bounds :
   forall ms b a,
     is_feasible b a ms = true ->
     ask_price a <= price b.
 Proof.
-  (* identical to (1); separated for readability/use sites *)
   apply feasible_price_bounds.
 Qed.
 
-(** Core, provable hooks for Priority Fairness (Section 3 & 4) *)
-(* 1) If find_feasible returns (b,a), then (a) the pair is feasible,
-      (b) b ∈ bids, and (c) a ∈ asks. *)
+
 Lemma find_feasible_in_lists :
   forall bs as_list ms b a,
     find_feasible bs as_list ms = Some (b,a) ->
@@ -309,7 +296,6 @@ Proof.
       split; [assumption|]. split; [right; exact HinB | exact HinA].
 Qed.
 
-(* 2) Shape of match_step on success: it conses the created match *)
 Lemma match_step_head_is_create :
   forall s s',
     match_step s = Some s' ->
@@ -322,7 +308,6 @@ Proof.
   eexists b, a; reflexivity.
 Qed.
 
-(* 3) Price bound of the chosen head match after a successful step *)
 Lemma match_step_head_price_bound :
   forall s s' b a,
     match_step s = Some s' ->

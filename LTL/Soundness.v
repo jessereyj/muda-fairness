@@ -6,12 +6,7 @@ From LTL Require Import Syntax Semantics Axioms.
 Local Open Scope LTL_scope.
 Local Open Scope nat_scope.
 
-(* Semantic fact: every propositional tautology is valid *)
 Axiom A0_valid : forall φ, IsPropTaut φ -> valid φ.
-
-(* ------------------------------------------------------------ *)
-(* Validity of axiom schemas                                    *)
-(* ------------------------------------------------------------ *)
 
 Lemma Ax1_valid : forall φ ψ, valid (Ax1 φ ψ).
 Proof.
@@ -45,10 +40,6 @@ Proof.
     left; exact Hnot.
 Qed.
 
-(* ------------------------------------------------------------ *)
-(* Soundness of rules                                           *)
-(* ------------------------------------------------------------ *)
-
 Lemma MP_valid :
   forall φ ψ, valid φ -> valid (φ → ψ) -> valid ψ.
 Proof.
@@ -64,10 +55,6 @@ Proof.
   (* A0_valid gives validity at every index, hence G φ holds. *)
   apply (A0_valid φ H).
 Qed.
-
-(* ------------------------------------------------------------ *)
-(* Main soundness theorem                                       *)
-(* ------------------------------------------------------------ *)
 
 Theorem soundness :
   forall φ, Provable φ -> valid φ.

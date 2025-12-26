@@ -1,15 +1,10 @@
 (* LTL/Semantics.v *)
 From Stdlib Require Import List Bool Arith Lia.
 Import List.ListNotations.
-
-From LTL Require Import Syntax.    (* was MUDA.LTL or LTL.Syntax *)
+From LTL Require Import Syntax.
 
 Local Open Scope LTL_scope.
 Local Open Scope nat_scope.
-
-(* ----------------------------- *)
-(* States and ω-traces           *)
-(* ----------------------------- *)
 
 Definition state := predicate -> Prop.
 
@@ -24,10 +19,6 @@ Fixpoint trace_at (σ : trace) (i : nat) : state :=
       | S j => trace_at σ' j
       end
   end.
-
-(* ----------------------------- *)
-(* Semantics                     *)
-(* ----------------------------- *)
 
 Fixpoint satisfies (σ : trace) (i : nat) (φ : LTL_formula) : Prop :=
   match φ with
@@ -49,10 +40,6 @@ Definition valid  (φ : LTL_formula) : Prop := forall σ i, satisfies σ i φ.
 
 Notation "σ ⊨ φ" := (models σ φ) (at level 70).
 Notation "⊨ φ"    := (valid φ)     (at level 70).
-
-(* ----------------------------- *)
-(* Unfold and equivalence lemmas  *)
-(* ----------------------------- *)
 
 Lemma satisfies_eventually_unfold :
   forall σ i φ,

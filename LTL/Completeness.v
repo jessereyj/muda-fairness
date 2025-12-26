@@ -5,20 +5,14 @@ From LTL Require Import Syntax Semantics Axioms Soundness.
 Local Open Scope LTL_scope.
 Local Open Scope nat_scope.
 
-(* A simple inhabited trace (all predicates true) used in meta-arguments *)
 CoFixpoint ones : trace := Trace (fun _ => True) ones.
 
-(******************************************************************)
-(* Canonical-model meta-lemma, packaged as a single axiom.        *)
-(******************************************************************)
+
 Axiom canonical_countermodel :
   forall (φ : LTL_formula),
     ~ Provable φ ->
     exists (σ : trace), ~ models σ φ.
 
-(******************************************************************)
-(* Completeness w.r.t. validity                                   *)
-(******************************************************************)
 Theorem completeness_valid :
   forall φ, valid φ -> Provable φ.
 Proof.
@@ -29,9 +23,6 @@ Proof.
   unfold models in Hnot; contradiction.
 Qed.
 
-(******************************************************************)
-(* Completeness at index 0 from models                            *)
-(******************************************************************)
 Corollary completeness_models0 :
   forall φ, (forall σ, models σ φ) -> Provable φ.
 Proof.
@@ -47,14 +38,8 @@ Proof.
     apply IHi.
 Qed.
 
-(******************************************************************)
-(* Explicit exported Weak Completeness axiom (for other modules)    *)
-(******************************************************************)
 Axiom WeakCompleteness : forall φ, valid φ -> Provable φ.
 
-(******************************************************************)
-(* Consistency and Adequacy derived from Soundness & WeakCompleteness *)
-(******************************************************************)
 Theorem Consistency : ~ exists φ, Provable φ /\ Provable (Not φ).
 Proof.
   intros [φ [H1 H2]].
@@ -69,4 +54,3 @@ Qed.
 
 Theorem Adequacy φ : Provable φ <-> valid φ.
 Proof. split; [apply soundness|apply WeakCompleteness]. Qed.
-

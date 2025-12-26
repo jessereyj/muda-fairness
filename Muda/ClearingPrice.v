@@ -7,22 +7,16 @@ From MUDA Require Import Types State Matching.
 Local Open Scope LTL_scope.
 Local Open Scope nat_scope.
 
-(* ------------------------------------------------------------------------- *)
-(* Well-formedness: every stored match respects the feasibility price guard. *)
-(* Section 3 creates matches only via feasibility, so this holds from P3 on. *)
-(* ------------------------------------------------------------------------- *)
 Definition wf_state (s : State) : Prop :=
   forall m, In m (matches s) ->
     ask_price (matched_ask m) <= price (matched_bid m).
 
-(* Empty initial state trivially well-formed (no matches). *)
 Lemma wf_state_initial : forall bs as_list,
   wf_state (initial_state bs as_list).
 Proof.
   intros bs as_list m Hin. inversion Hin.
 Qed.
 
-(* Preservation across a successful match_step (adds one match at head). *)
 Lemma wf_state_match_step_preservation :
   forall s s',
     wf_state s ->
@@ -44,11 +38,6 @@ Proof.
   - (* inherited *) apply Hwf, Hin.
 Qed.
 
-(* step preserves wf_state through all phases. *)
-
-(* ------------------------------------------------------------------------- *)
-(* Marginal pair: newest match is at head (added by match_step).             *)
-(* ------------------------------------------------------------------------- *)
 Definition marginal_pair (s : State) : option (Bid * Ask) :=
   match matches s with
   | [] => None
@@ -72,14 +61,6 @@ Proof.
   exact Hwf.
 Qed.
 
-
-(* ------------------------------------------------------------------------- *)
-(* Uniform Price Rule (Section 3/4).                                         *)
-(* If both sides are fully satisfied at the marginal pair: price(b).         *)
-(* If only bid side is exhausted: price(b).                                  *)
-(* If only ask  side is exhausted: ask_price(a).                              *)
-(* The "else" branch shouldn't occur for a true marginal, but stays bounded. *)
-(* ------------------------------------------------------------------------- *)
 Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
@@ -92,7 +73,6 @@ Definition determine_clearing_price (s : State) : option nat :=
       else Some (price b) (* fallback: stays within bounds by wf_state *)
   end.
 
-(* Phase P4 transition *)
 Definition do_clearing_price (s : State) : State :=
   {| bids := bids s
    ; asks := asks s
@@ -100,9 +80,6 @@ Definition do_clearing_price (s : State) : State :=
    ; clearing_price := determine_clearing_price s
    ; phase := P5 |}.
 
-(* ------------------------------------------------------------------------- *)
-(* Bounds: chosen clearing price lies between ask and bid of marginal pair.  *)
-(* ------------------------------------------------------------------------- *)
 Lemma clearing_price_bounds :
   forall s b a c,
     wf_state s ->
