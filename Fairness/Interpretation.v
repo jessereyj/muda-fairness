@@ -15,6 +15,7 @@ Definition p_match_keep   : predicate := 5.
 Definition p_prioB_step   : predicate := 6.
 Definition p_prioS_step   : predicate := 7.
 Definition p_rejection_justified : predicate := 8.
+Definition p_price_rule         : predicate := 9.
 
 Definition p_phase (i : nat) : predicate := (10 + i)%nat.
 
@@ -36,6 +37,7 @@ Definition interp_atom (s : State) : predicate -> Prop :=
     | 6 => priorityB_step_ok_prop s
     | 7 => priorityS_step_ok_prop s
   | 8 => rejection_justified_prop s
+    | 9 => price_rule_prop s
     | p' =>
         (* decode phase atoms *)
         if andb (Nat.leb (p_phase 1) p') (Nat.leb p' (p_phase 7)) then

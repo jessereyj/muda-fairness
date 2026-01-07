@@ -20,6 +20,21 @@ Definition bounds_cstar_prop (s : State) : Prop :=
   | _, _ => True
   end.
 
+(* Price rule atom: matches the tie-breaking rule used in determine_clearing_price.
+   Vacuously true when no marginal pair exists (no matches). *)
+Definition price_rule_prop (s : State) : Prop :=
+  match marginal_pair s with
+  | None => True
+  | Some (b, a) =>
+      let eb := (residual_bid b (matches s) =? 0) in
+      let ea := (residual_ask a (matches s) =? 0) in
+      determine_clearing_price s =
+        (if eb && ea then Some (price b)
+         else if eb then Some (price b)
+         else if ea then Some (ask_price a)
+         else Some (price b))
+  end.
+
 Definition matches_monotone_1_prop (s : State) : Prop :=
   forall m, In m (matches s) -> In m (matches (step s)).
 
