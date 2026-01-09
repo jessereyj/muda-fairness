@@ -27,19 +27,21 @@ Proof.
   unfold match_step in Hms.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
   inversion Hms; subst s'; clear Hms.
-  unfold wf_state in *. intros m Hin. simpl in Hin.
+  unfold wf_state in *. intros m Hin.
+  rewrite in_app_iff in Hin.
   destruct Hin as [Hin|Hin].
-  - subst m. (* newly created match *)
+  - (* inherited *) apply Hwf, Hin.
+  - simpl in Hin. destruct Hin as [Hin|Hin]; [|contradiction].
+    subst m. (* newly created match *)
     apply find_feasible_spec in Hf.
     unfold is_feasible in Hf.
     repeat rewrite Bool.andb_true_iff in Hf.
     destruct Hf as [[Hp _] _].
     apply Nat.leb_le in Hp. simpl. exact Hp.
-  - (* inherited *) apply Hwf, Hin.
 Qed.
 
 Definition marginal_pair (s : State) : option (Bid * Ask) :=
-  match matches s with
+  match rev (matches s) with
   | [] => None
   | m :: _ => Some (matched_bid m, matched_ask m)
   end.
@@ -52,11 +54,12 @@ Lemma marginal_pair_price_bound :
 Proof.
   intros s b a Hwf Hm.
   unfold marginal_pair in Hm.
-  remember (matches s) as ms eqn:Hms.
+  remember (rev (matches s)) as ms eqn:Hms.
   destruct ms as [|m ms']; try discriminate.
   inversion Hm; subst b a; clear Hm.
   (* Build In m (matches s) using Hms, then apply the invariant *)
-  assert (Hin : In m (matches s)) by (rewrite <- Hms; simpl; left; reflexivity).
+  assert (Hin_rev : In m (rev (matches s))) by (rewrite <- Hms; simpl; left; reflexivity).
+  assert (Hin : In m (matches s)) by (apply (proj1 (in_rev m (matches s))); exact Hin_rev).
   specialize (Hwf m Hin).
   exact Hwf.
 Qed.
