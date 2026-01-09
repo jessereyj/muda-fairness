@@ -101,7 +101,8 @@ Proof.
     + (* Some s' -> one new head match *)
       unfold match_step in Hm.
       destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:?; try discriminate.
-      inversion Hm; subst; clear Hm; simpl; lia.
+      inversion Hm; subst; clear Hm.
+      rewrite app_length. simpl. lia.
     + (* None -> finish_matching, no change *)
       lia.
 Qed.
@@ -121,14 +122,16 @@ Proof.
       unfold match_step in Hm.
       destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
       inversion Hm; subst s'; clear Hm.
-      intros m Hin; simpl in Hin.
+      intros m Hin.
+      rewrite in_app_iff in Hin.
       destruct Hin as [Hin|Hin].
-      * subst m. apply find_feasible_spec in Hf.
+      * apply Hwf, Hin.
+      * simpl in Hin. destruct Hin as [Hin|Hin]; [|contradiction].
+        subst m. apply find_feasible_spec in Hf.
         unfold is_feasible in Hf.
         repeat rewrite Bool.andb_true_iff in Hf.
-  destruct Hf as [[Hprice _] _].
-  apply Nat.leb_le in Hprice. simpl. exact Hprice.
-      * apply Hwf, Hin.
+        destruct Hf as [[Hprice _] _].
+        apply Nat.leb_le in Hprice. simpl. exact Hprice.
     + (* finish_matching; matches unchanged *) exact Hwf.
   - (* P4 clearing price *) exact Hwf.
   - (* P5 -> P6 *) exact Hwf.

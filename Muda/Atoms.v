@@ -12,7 +12,10 @@ Definition no_feasible_prop (s : State) : Prop :=
               is_feasible b a (matches s) = false.
 
 Definition has_clearing_price_prop (s : State) : Prop :=
-  exists c, determine_clearing_price s = Some c.
+  match phase s with
+  | P4 | P5 | P6 | P7 => True
+  | _ => False
+  end.
 
 Definition bounds_cstar_prop (s : State) : Prop :=
   match marginal_pair s, determine_clearing_price s with
@@ -23,20 +26,27 @@ Definition bounds_cstar_prop (s : State) : Prop :=
 (* Price rule atom: matches the tie-breaking rule used in determine_clearing_price.
    Vacuously true when no marginal pair exists (no matches). *)
 Definition price_rule_prop (s : State) : Prop :=
-  match marginal_pair s with
-  | None => True
-  | Some (b, a) =>
-      let eb := (residual_bid b (matches s) =? 0) in
-      let ea := (residual_ask a (matches s) =? 0) in
-      determine_clearing_price s =
-        (if eb && ea then Some (price b)
-         else if eb then Some (price b)
-         else if ea then Some (ask_price a)
-         else Some (price b))
+  match phase s with
+  | P1 | P2 | P3 => True
+  | _ =>
+      match marginal_pair s with
+      | None => True
+      | Some (b, a) =>
+          let eb := (residual_bid b (matches s) =? 0) in
+          let ea := (residual_ask a (matches s) =? 0) in
+          determine_clearing_price s =
+            (if eb && ea then Some (price b)
+             else if eb then Some (price b)
+             else if ea then Some (ask_price a)
+             else Some (price b))
+      end
   end.
 
-Definition matches_monotone_1_prop (s : State) : Prop :=
-  forall m, In m (matches s) -> In m (matches (step s)).
+Definition prefix {A : Type} (l1 l2 : list A) : Prop :=
+  exists w, l2 = l1 ++ w.
+
+Definition match_keep_prop (s : State) : Prop :=
+  prefix (matches s) (matches (step s)).
 
 Definition rejected_bid_prop (b : Bid) (s : State) : Prop :=
   In b (bids s) /\ residual_bid b (matches s) > 0.

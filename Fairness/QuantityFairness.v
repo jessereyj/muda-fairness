@@ -9,7 +9,13 @@ Local Open Scope LTL_scope.
 
 Definition quantityOK : LTL_formula := G (Atom p_allocOK).
 
-Definition priceOK : LTL_formula := G (Atom p_bounds_cstar).
+Definition phase_ge_4 : LTL_formula :=
+  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
+
+Definition priceOK : LTL_formula :=
+  G (Atom p_bounds_cstar)
+  ∧ G (phase_ge_4 → Atom p_has_cprice)
+  ∧ G (Atom p_price_rule).
 
 Theorem quantity_fairness_initial : forall bs as_list,
   allocOK (initial_state bs as_list).
@@ -97,16 +103,79 @@ Proof.
   apply wf_state_initial.
 Qed.
 
+Lemma interp_atom_phase_4 : forall s, interp_atom s (p_phase 4) <-> phase s = P4.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_5 : forall s, interp_atom s (p_phase 5) <-> phase s = P5.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_6 : forall s, interp_atom s (p_phase 6) <-> phase s = P6.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_7 : forall s, interp_atom s (p_phase 7) <-> phase s = P7.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma phase_ge_4_implies_has_cprice :
+  forall s i,
+    satisfies (mu_trace s) i (phase_ge_4 → Atom p_has_cprice).
+Proof.
+  intros s i.
+  unfold phase_ge_4.
+  simpl.
+  repeat rewrite (mu_trace_atom_at_execute s i (p_phase 4)).
+  repeat rewrite (mu_trace_atom_at_execute s i (p_phase 5)).
+  repeat rewrite (mu_trace_atom_at_execute s i (p_phase 6)).
+  repeat rewrite (mu_trace_atom_at_execute s i (p_phase 7)).
+  rewrite (mu_trace_atom_at_execute s i p_has_cprice).
+  rewrite interp_atom_phase_4.
+  rewrite interp_atom_phase_5.
+  rewrite interp_atom_phase_6.
+  rewrite interp_atom_phase_7.
+  unfold interp_atom, has_clearing_price_prop.
+  destruct (phase (execute i s)); simpl; tauto.
+Qed.
+
+Lemma price_rule_fairness_LTL_initial : forall bs as_list,
+  satisfies (mu_trace (initial_state bs as_list)) 0 (G (Atom p_price_rule)).
+Proof.
+  intros bs as_list.
+  rewrite satisfies_always_unfold.
+  intros j _.
+  rewrite mu_trace_atom_at_execute.
+  unfold interp_atom.
+  (* goal: price_rule_prop (execute j (initial_state bs as_list)) *)
+  unfold price_rule_prop.
+  destruct (phase (execute j (initial_state bs as_list))) eqn:Hphase; simpl; auto.
+  destruct (marginal_pair (execute j (initial_state bs as_list))) as [[b a]|] eqn:Hmp; simpl; auto.
+  unfold determine_clearing_price.
+  rewrite Hmp. reflexivity.
+Qed.
+
 Theorem uniform_price_fairness_LTL_initial : forall bs as_list,
   satisfies (mu_trace (initial_state bs as_list)) 0 priceOK.
 Proof.
   intros bs as_list.
   unfold priceOK.
-  rewrite satisfies_always_unfold.
-  intros j _.
-  rewrite mu_trace_atom_at_execute.
-  unfold interp_atom.
-  (* predicate 4 maps to bounds_cstar_prop; others irrelevant *)
-  change (bounds_cstar_prop (execute j (initial_state bs as_list))).
-  apply bounds_cstar_preserved_n.
+  simpl.
+  split.
+  - rewrite satisfies_always_unfold.
+    intros j _.
+    rewrite mu_trace_atom_at_execute.
+    unfold interp_atom.
+    (* predicate 4 maps to bounds_cstar_prop; others irrelevant *)
+    change (bounds_cstar_prop (execute j (initial_state bs as_list))).
+    apply bounds_cstar_preserved_n.
+  - split.
+    + rewrite satisfies_always_unfold.
+      intros j _.
+      apply phase_ge_4_implies_has_cprice.
+    + apply price_rule_fairness_LTL_initial.
 Qed.

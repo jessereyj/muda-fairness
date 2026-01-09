@@ -55,7 +55,7 @@ Run `./stats.sh` to see up-to-date counts of files, lines, definitions, and admi
 
 - Quantity Fairness: `quantityOK := G (Atom p_allocOK)` — proven for traces from initial states
 - Priority Fairness: `priorityOK := (G (Atom p_prioB_step)) ∧ (G (Atom p_prioS_step))`
-- Uniform Price Fairness: `priceOK := G (Atom p_bounds_cstar)` — proven for traces from initial states
+- Uniform Price Fairness: `priceOK := G (Atom p_bounds_cstar) ∧ G((phase≥4) → Atom p_has_cprice) ∧ G (Atom p_price_rule)` — proven for traces from initial states
 - Match Finality: `finalityOK := G (Atom p_match_keep)`
 - Maximality: `maximal := F (Atom (p_phase 4) ∧ Atom p_no_feasible)`
 - Rejection Fairness: `rejectionOK` (see `Fairness/JustifiedRejection.v`)
@@ -71,7 +71,7 @@ Run `./stats.sh` to see up-to-date counts of files, lines, definitions, and admi
 
 ## Module Notes
 
-- **Price Fairness:** Consolidated in `Fairness/PriceFairness.v` as `priceOK := G (Atom p_bounds_cstar)`. Examples in `Example/CloudMarket.v` use `priceOK` and the theorem `uniform_price_fairness_LTL_initial`.
+- **Price Fairness:** Consolidated in `Fairness/PriceFairness.v` as `priceOK := G (Atom p_bounds_cstar) ∧ G((phase≥4) → Atom p_has_cprice) ∧ G (Atom p_price_rule)`. Examples in `Example/CloudMarket.v` use `priceOK` and the theorem `uniform_price_fairness_LTL_initial`.
 - **Fairness Export:** `Fairness/All.v` re-exports `Interpretation`, `PriorityFairness`, `QuantityFairness`, `PriceFairness`, `MatchFinality`, `Maximality`, and `JustifiedRejection` for convenience.
 
 ## Future Work

@@ -140,7 +140,7 @@ Definition match_step (s : State) : option State :=
       let m := create_match b a (matches s) in
       Some {| bids := bids s;
               asks := asks s;
-              matches := m :: matches s;
+              matches := matches s ++ [m];
               clearing_price := clearing_price s;
               phase := phase s |}
   | None => None
@@ -155,7 +155,40 @@ Proof.
   unfold match_step in H.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:HF; try discriminate.
   inversion H; subst; clear H.
-  simpl. unfold incl. intros x Hx. right. exact Hx.
+  simpl. unfold incl. intros x Hx.
+  rewrite in_app_iff. left. exact Hx.
+Qed.
+
+Lemma allocated_bid_app_single :
+  forall b ms m,
+    allocated_bid b (ms ++ [m]) =
+      allocated_bid b ms +
+      (if bid_eq_dec (matched_bid m) b then match_quantity m else 0).
+Proof.
+  induction ms as [|m0 ms IH]; intros m; simpl.
+  - destruct (bid_eq_dec (matched_bid m) b); simpl; lia.
+  - destruct (bid_eq_dec (matched_bid m0) b); simpl; rewrite IH; lia.
+Qed.
+
+Lemma allocated_ask_app_single :
+  forall a ms m,
+    allocated_ask a (ms ++ [m]) =
+      allocated_ask a ms +
+      (if ask_eq_dec (matched_ask m) a then match_quantity m else 0).
+Proof.
+  induction ms as [|m0 ms IH]; intros m; simpl.
+  - destruct (ask_eq_dec (matched_ask m) a); simpl; lia.
+  - destruct (ask_eq_dec (matched_ask m0) a); simpl; rewrite IH; lia.
+Qed.
+
+Lemma app_singleton_inj :
+  forall (A : Type) (l : list A) x y,
+    l ++ [x] = l ++ [y] -> x = y.
+Proof.
+  intros A l x y H.
+  induction l as [|a l IH]; simpl in H.
+  - inversion H. reflexivity.
+  - inversion H. apply IH. assumption.
 Qed.
 
 
@@ -230,14 +263,14 @@ Qed.
 Lemma match_step_head_price_bounds :
   forall s s' b a,
     match_step s = Some s' ->
-    matches s' = create_match b a (matches s) :: matches s ->
+    matches s' = matches s ++ [create_match b a (matches s)] ->
     ask_price a <= price b.
 Proof.
   intros s s' b a Hstep Hhd.
   unfold match_step in Hstep.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b0 a0]|] eqn:Hf; try discriminate.
   inversion Hstep; subst; clear Hstep. simpl in Hhd.
-  inversion Hhd; subst; clear Hhd.
+  apply app_singleton_inj in Hhd. inversion Hhd; subst; clear Hhd.
   eapply match_price_bounds.
   now rewrite Hf.
 Qed.
@@ -299,7 +332,7 @@ Qed.
 Lemma match_step_head_is_create :
   forall s s',
     match_step s = Some s' ->
-    exists b a, matches s' = create_match b a (matches s) :: matches s.
+    exists b a, matches s' = matches s ++ [create_match b a (matches s)].
 Proof.
   intros s s' H.
   unfold match_step in H.
@@ -311,14 +344,14 @@ Qed.
 Lemma match_step_head_price_bound :
   forall s s' b a,
     match_step s = Some s' ->
-    matches s' = create_match b a (matches s) :: matches s ->
+    matches s' = matches s ++ [create_match b a (matches s)] ->
     ask_price a <= price b.
 Proof.
   intros s s' b a Hstep Hhd.
   unfold match_step in Hstep.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b0 a0]|] eqn:Hf; try discriminate.
   inversion Hstep; subst; clear Hstep. simpl in Hhd.
-  inversion Hhd; subst; clear Hhd.
+  apply app_singleton_inj in Hhd. inversion Hhd; subst; clear Hhd.
   (* use the feasibility spec of find_feasible *)
   apply find_feasible_spec in Hf.
   unfold is_feasible in Hf.
@@ -343,13 +376,14 @@ Proof.
   pose proof (find_feasible_in_lists (bids s) (asks s) ms b a Hf) as [Hfeas [Hb_in Ha_in]].
   split.
   - (* bids side *)
-    intros b' Hb'in. simpl.
+    intros b' Hb'in.
+    fold ms.
+    fold m.
+    rewrite allocated_bid_app_single.
     destruct (bid_eq_dec (matched_bid m) b') as [Eeq|Eneq].
     + (* affected bid: matched_bid m = b' ; but matched_bid m = b *)
       symmetry in Eeq; assert (b' = b) as ->.
       { unfold m, create_match in Eeq; simpl in Eeq. exact Eeq. }
-      (* Now the "then" branch is selected; simplify *)
-      simpl.
       (* abbreviations *)
       set (A := allocated_bid b ms).
       set (Q := quantity b).
@@ -362,29 +396,24 @@ Proof.
         apply Nat.le_min_l. }
       unfold residual_bid, A, Q, q in *.
       (* show match_quantity m + allocated_bid b ms <= quantity b *)
-      simpl.
       unfold match_quantity, create_match; simpl.
       (* Now: Nat.min ... + allocated_bid b ms <= quantity b *)
       (* We have: Nat.min ... <= quantity b - allocated_bid b ms *)
       (* and allocated_bid b ms <= quantity b *)
-      destruct (bid_eq_dec b b) as [_|]; [|congruence].
       apply PeanoNat.Nat.add_le_mono_r with (p := allocated_bid b ms) in Hq_le_res.
       rewrite PeanoNat.Nat.sub_add in Hq_le_res by exact Hbound.
       exact Hq_le_res.
     + (* unaffected bid: allocation unchanged; reuse old bound *)
-      simpl. destruct (bid_eq_dec (matched_bid m) b') as [|Hneq']; [congruence|].
-      destruct (bid_eq_dec b b') as [Heqb|Hneqb].
-      * (* b = b' contradicts Eneq: matched_bid m <> b' and matched_bid m = b *)
-        unfold m, create_match in Eneq; simpl in Eneq.
-        subst b'. congruence.
-      * eapply Hbid; exact Hb'in.
+      simpl. eapply Hbid; exact Hb'in.
   - (* asks side *)
-    intros a' Ha'in. simpl.
+    intros a' Ha'in.
+    fold ms.
+    fold m.
+    rewrite allocated_ask_app_single.
     destruct (ask_eq_dec (matched_ask m) a') as [Eeq|Eneq].
     + (* affected ask: matched_ask m = a' ; matched_ask m = a *)
       symmetry in Eeq; assert (a' = a) as ->.
       { unfold m, create_match in Eeq; simpl in Eeq. exact Eeq. }
-      simpl.
       set (A := allocated_ask a ms).
       set (Q := ask_quantity a).
       set (q := Nat.min (residual_bid b ms) (residual_ask a ms)).
@@ -393,19 +422,12 @@ Proof.
       { unfold q.
         apply Nat.le_min_r. }
       unfold residual_ask, A, Q, q in *.
-      simpl.
       unfold match_quantity, create_match; simpl.
-      destruct (ask_eq_dec a a) as [_|]; [|congruence].
       apply PeanoNat.Nat.add_le_mono_r with (p := allocated_ask a ms) in Hq_le_res.
       rewrite PeanoNat.Nat.sub_add in Hq_le_res by exact Hbound.
       exact Hq_le_res.
     + (* unaffected ask *)
-      simpl. destruct (ask_eq_dec (matched_ask m) a') as [|Hneq']; [congruence|].
-      destruct (ask_eq_dec a a') as [Heqa|Hneqa].
-      * (* a = a' contradicts Eneq: matched_ask m <> a' and matched_ask m = a *)
-        unfold m, create_match in Eneq; simpl in Eneq.
-        subst a'. congruence.
-      * eapply Hask; exact Ha'in.
+      simpl. eapply Hask; exact Ha'in.
 Qed.
 
 Lemma pick_ask_in :
