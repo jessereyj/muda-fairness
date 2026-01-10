@@ -1,8 +1,24 @@
-(**  MUDA/State.v **)
+(**  MUDA/State.v
+     State representation and allocation functions for MUDA.
+     
+     Thesis (Chapter 3) presents state as:
+       x = (B, S, orders, residuals, M, p*, phase)
+     
+     This implementation uses:
+       State = (bids, asks, matches, clearing_price, phase)
+     
+     Key difference: "residuals" in thesis are stored separately,
+     but here they are COMPUTED DYNAMICALLY via allocated_bid/allocated_ask.
+     This avoids redundancy and ensures consistency between matches and residuals.
+     
+     See NOTATION.md for complete thesis-to-code mapping.
+**)
 From Stdlib Require Import List Arith.
 Import ListNotations.
 From MUDA Require Import Types.
 
+(* Phase enumeration: P1 (submission) → P2 (sort) → P3 (match) → 
+   P4 (price) → P5 (notify) → P6 (settle) → P7 (terminal) *)
 Inductive Phase : Type :=
   | P1  (* Order submission *)
   | P2  (* Sorting *)
@@ -12,6 +28,17 @@ Inductive Phase : Type :=
   | P6  (* Settlement *)
   | P7. (* Terminal *)
 
+(* State record.
+   Thesis notation: x = (B, S, orders, residuals, M, p*, phase)
+   Mapping:
+     - bids = B (list of bids)
+     - asks = S (list of asks)
+     - matches = M (list of matches, append semantics: new matches added at tail)
+     - clearing_price = p* (determined in P4)
+     - phase = current protocol phase
+   Note: "residuals" from thesis are computed via residual_bid/residual_ask,
+         not stored as a separate field.
+*)
 Record State := {
   bids : list Bid;
   asks : list Ask;
@@ -27,6 +54,12 @@ Definition initial_state (bs : list Bid) (as_list : list Ask) : State :=
      clearing_price := None;
      phase := P1 |}.
 
+(* Allocation functions: sum of matched quantities.
+   Thesis (Definition 5): allocB(m, b) = Σ{q | (b, s, q) ∈ m}
+   
+   Implementation: structural recursion over match list with decidable equality.
+   These functions enable computing residuals dynamically without storing them.
+*)
 Fixpoint allocated_bid (b : Bid) (ms : list Match) : nat :=
   match ms with
   | [] => 0
@@ -45,6 +78,10 @@ Fixpoint allocated_ask (a : Ask) (ms : list Match) : nat :=
       else allocated_ask a ms'
   end.
 
+(* Residual computation: remaining unmatched quantity.
+   Thesis presents residuals as part of state, but computing them dynamically
+   ensures consistency: residual = initial quantity - allocated quantity.
+*)
 Definition residual_bid (b : Bid) (ms : list Match) : nat :=
   quantity b - allocated_bid b ms.
 

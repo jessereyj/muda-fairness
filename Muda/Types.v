@@ -1,9 +1,23 @@
-(*  MUDA/Types.v *)
+(*  MUDA/Types.v
+    Core data types for Multi-Unit Double Auction (MUDA).
+    
+    NOTE: The thesis (Chapters 3-4) uses simplified notation:
+      - Bids: bi = (pi, q⁰ᵢ, ti)  [3-tuple]
+      - Asks: sj = (aj, q⁰ⱼ, tj)  [3-tuple]
+    
+    This implementation extends the model with:
+      - Agent ownership (buyer/seller) for traceability
+      - Unique identifiers (bid_id/ask_id) for decidable equality
+    
+    These additions do not affect the protocol logic or fairness proofs.
+    See NOTATION.md for detailed thesis-to-code mapping.
+*)
 From Stdlib Require Export Arith List Bool PeanoNat.
 From MUDA Require Export Eqb.
 Import ListNotations.
 Local Open Scope bool_scope.
 
+(* Agent type: implementation detail not shown in thesis notation *)
 Inductive AgentType := Buyer | Seller.
 
 Definition agent_type_eqb (x y : AgentType) : bool :=
@@ -15,6 +29,8 @@ Proof.
   destruct x, y; simpl; split; intro H; try discriminate; try reflexivity; now inversion H.
 Qed.
 
+(* Agent record: enables ownership tracking and bid/ask partitioning.
+   Not explicitly modeled in thesis—agents are implicit in order ownership. *)
 Record Agent := { agent_id : nat; agent_type : AgentType }.
 
 Definition agent_eq (a1 a2 : Agent) : bool :=
@@ -38,6 +54,16 @@ Proof.
   + apply (proj2 (agent_type_eqb_spec t2 t2)). reflexivity.
 Qed.
 
+(* Bid record.
+   Thesis notation: bi = (pi, q⁰ᵢ, ti)
+   Mapping:
+     - price = pi (limit price)
+     - quantity = q⁰ᵢ (initial quantity)
+     - ts = ti (timestamp)
+   Additional fields:
+     - bid_id: unique identifier for decidable equality
+     - buyer: agent ownership (implementation bookkeeping)
+*)
 Record Bid := {
   bid_id : nat;
   buyer : Agent;
@@ -46,6 +72,16 @@ Record Bid := {
   ts : nat
 }.
 
+(* Ask record.
+   Thesis notation: sj = (aj, q⁰ⱼ, tj)
+   Mapping:
+     - ask_price = aj (ask price)
+     - ask_quantity = q⁰ⱼ (initial quantity)
+     - ask_ts = tj (timestamp)
+   Additional fields:
+     - ask_id: unique identifier for decidable equality
+     - seller: agent ownership (implementation bookkeeping)
+*)
 Record Ask := {
   ask_id : nat;
   seller : Agent;
@@ -54,6 +90,11 @@ Record Ask := {
   ask_ts : nat
 }.
 
+(* Match record.
+   Thesis notation: m = (b, s, q)
+   Direct correspondence: matched_bid = b, matched_ask = s, match_quantity = q.
+   Note: b and s are full Bid and Ask records, not just identifiers.
+*)
 Record Match := {
   matched_bid : Bid;
   matched_ask : Ask;

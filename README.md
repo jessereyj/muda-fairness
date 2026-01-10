@@ -69,6 +69,29 @@ Run `./stats.sh` to see up-to-date counts of files, lines, definitions, and admi
 	- Greedy priority respect lemmas for bids/asks
 	Fairness results depend on these axioms; constructive replacements are planned.
 
+### Thesis-to-Code Mapping
+
+The thesis (Chapters 3-4) presents a mathematical model focusing on economically relevant components, while the Rocq implementation includes additional bookkeeping for mechanical verification:
+
+- **State Components:**
+  - Thesis: `x = (B, S, orders, residuals, M, p*, phase)`
+  - Code: `State = (bids, asks, matches, clearing_price, phase)` where residuals are computed dynamically via `residual_bid` and `residual_ask` functions
+- **Bid/Ask Representation:**
+  - Thesis: `bi = (pi, q⁰ᵢ, ti)` and `sj = (aj, q⁰ⱼ, tj)` (3-tuple notation)
+  - Code: 5-field records including `bid_id`, `buyer : Agent`, and timestamp fields
+  - Agent ownership (`buyer`/`seller`) is an implementation detail for traceability
+- **Match Representation:**
+  - Thesis: `(b, s, q)` triples
+  - Code: `Match = (matched_bid, matched_ask, match_quantity)` where bid and ask are full records
+- **Allocation Functions:**
+  - Thesis: `allocB(m, b)` and `allocS(m, s)` presented abstractly
+  - Code: Explicit recursive `allocated_bid` and `allocated_ask` with decidable equality
+- **Trace Construction:**
+  - Thesis: Describes stuttering semantics conceptually
+  - Code: `CoFixpoint mu_trace` mechanizes coinductive traces in Coq
+
+See `NOTATION.md` for a detailed mapping between thesis symbols and Rocq definitions. This abstraction approach is standard practice in formal verification—mathematical models emphasize essential logic while implementations handle mechanical bookkeeping.
+
 ## Module Notes
 
 - **Price Fairness:** Consolidated in `Fairness/PriceFairness.v` as `priceOK := G (Atom p_bounds_cstar) ∧ G((phase≥4) → Atom p_has_cprice) ∧ G (Atom p_price_rule)`. Examples in `Example/CloudMarket.v` use `priceOK` and the theorem `uniform_price_fairness_LTL_initial`.

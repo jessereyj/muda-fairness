@@ -22,7 +22,29 @@
 </div>
 
 <div class="doc">
- MUDA/State.v 
+ MUDA/State.v
+     State representation and allocation functions for MUDA.
+
+<div class="paragraph"> </div>
+
+     Thesis (Chapter 3) presents state as:
+       x = (B, S, orders, residuals, M, p*, phase)
+
+<div class="paragraph"> </div>
+
+     This implementation uses:
+       State = (bids, asks, matches, clearing_price, phase)
+
+<div class="paragraph"> </div>
+
+     Key difference: "residuals" in thesis are stored separately,
+     but here they are COMPUTED DYNAMICALLY via allocated_bid/allocated_ask.
+     This avoids redundancy and ensures consistency between matches and residuals.
+
+<div class="paragraph"> </div>
+
+     See NOTATION.md for complete thesis-to-code mapping.
+
 </div>
 <div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Arith</span>.<br/>
