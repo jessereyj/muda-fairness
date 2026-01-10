@@ -379,7 +379,8 @@ Proof.
     intros b' Hb'in.
     fold ms.
     fold m.
-    rewrite allocated_bid_app_single.
+    change (allocated_bid b' (ms ++ [m]) <= quantity b').
+    rewrite (allocated_bid_app_single b' ms m).
     destruct (bid_eq_dec (matched_bid m) b') as [Eeq|Eneq].
     + (* affected bid: matched_bid m = b' ; but matched_bid m = b *)
       symmetry in Eeq; assert (b' = b) as ->.
@@ -397,6 +398,7 @@ Proof.
       unfold residual_bid, A, Q, q in *.
       (* show match_quantity m + allocated_bid b ms <= quantity b *)
       unfold match_quantity, create_match; simpl.
+      rewrite Nat.add_comm.
       (* Now: Nat.min ... + allocated_bid b ms <= quantity b *)
       (* We have: Nat.min ... <= quantity b - allocated_bid b ms *)
       (* and allocated_bid b ms <= quantity b *)
@@ -404,12 +406,13 @@ Proof.
       rewrite PeanoNat.Nat.sub_add in Hq_le_res by exact Hbound.
       exact Hq_le_res.
     + (* unaffected bid: allocation unchanged; reuse old bound *)
-      simpl. eapply Hbid; exact Hb'in.
+      simpl. rewrite Nat.add_0_r. eapply Hbid; exact Hb'in.
   - (* asks side *)
     intros a' Ha'in.
     fold ms.
     fold m.
-    rewrite allocated_ask_app_single.
+    change (allocated_ask a' (ms ++ [m]) <= ask_quantity a').
+    rewrite (allocated_ask_app_single a' ms m).
     destruct (ask_eq_dec (matched_ask m) a') as [Eeq|Eneq].
     + (* affected ask: matched_ask m = a' ; matched_ask m = a *)
       symmetry in Eeq; assert (a' = a) as ->.
@@ -423,11 +426,12 @@ Proof.
         apply Nat.le_min_r. }
       unfold residual_ask, A, Q, q in *.
       unfold match_quantity, create_match; simpl.
+      rewrite Nat.add_comm.
       apply PeanoNat.Nat.add_le_mono_r with (p := allocated_ask a ms) in Hq_le_res.
       rewrite PeanoNat.Nat.sub_add in Hq_le_res by exact Hbound.
       exact Hq_le_res.
     + (* unaffected ask *)
-      simpl. eapply Hask; exact Ha'in.
+      simpl. rewrite Nat.add_0_r. eapply Hask; exact Ha'in.
 Qed.
 
 Lemma pick_ask_in :

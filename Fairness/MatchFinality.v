@@ -17,8 +17,8 @@ Proof.
   intros s.
   unfold step.
   destruct (phase s) eqn:Hp; simpl.
-  - exists []; reflexivity.
-  - exists []; reflexivity.
+  - exists []; rewrite app_nil_r; reflexivity.
+  - exists []; rewrite app_nil_r; reflexivity.
   - (* P3 -> either match_step or finish_matching *)
     destruct (match_step s) eqn:Hms; simpl.
     + (* Some s' : match_step appends one match *)
@@ -26,11 +26,11 @@ Proof.
       destruct Hms as [b [a Hmatches]].
       rewrite Hmatches. exists [create_match b a (matches s)]. reflexivity.
     + (* None : finish_matching; matches unchanged *)
-      exists []; reflexivity.
-  - (* P4 *) exists []; reflexivity.
-  - (* P5 *) exists []; reflexivity.
-  - (* P6 *) exists []; reflexivity.
-  - (* P7 *) exists []; reflexivity.
+      exists []; rewrite app_nil_r; reflexivity.
+  - (* P4 *) exists []; rewrite app_nil_r; reflexivity.
+  - (* P5 *) exists []; rewrite app_nil_r; reflexivity.
+  - (* P6 *) exists []; rewrite app_nil_r; reflexivity.
+  - (* P7 *) exists []; rewrite app_nil_r; reflexivity.
 Qed.
 
 (* n-step: by simple induction using the one-step lemma. *)
@@ -38,12 +38,12 @@ Theorem match_finality_after_n : forall n s,
   prefix (matches s) (matches (execute n s)).
 Proof.
   induction n as [|n IH]; intros s; simpl.
-  - exists []; reflexivity.
+  - exists []; rewrite app_nil_r; reflexivity.
   - destruct (matches_prefix s) as [w' Hw'].
-    rewrite Hw'.
     specialize (IH (step s)).
-    destruct IH as [w'' Hw''].
+    destruct IH as [w'' Hw'' ].
     rewrite Hw''.
+    rewrite Hw'.
     exists (w' ++ w''). rewrite app_assoc. reflexivity.
 Qed.
 

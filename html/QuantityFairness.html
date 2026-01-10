@@ -31,7 +31,14 @@
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">quantityOK</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_allocOK</span>).<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">priceOK</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_bounds_cstar</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">phase_ge_4</span> : <span class="id" title="var">LTL_formula</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Atom</span> (<span class="id" title="var">p_phase</span> 4) ∨ <span class="id" title="var">Atom</span> (<span class="id" title="var">p_phase</span> 5) ∨ <span class="id" title="var">Atom</span> (<span class="id" title="var">p_phase</span> 6) ∨ <span class="id" title="var">Atom</span> (<span class="id" title="var">p_phase</span> 7).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">priceOK</span> : <span class="id" title="var">LTL_formula</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_bounds_cstar</span>)<br/>
+&nbsp;&nbsp;∧ <span class="id" title="var">G</span> (<span class="id" title="var">phase_ge_4</span> → <span class="id" title="var">Atom</span> <span class="id" title="var">p_has_cprice</span>)<br/>
+&nbsp;&nbsp;∧ <span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_price_rule</span>).<br/>
 
 <br/>
 <span class="id" title="keyword">Theorem</span> <span class="id" title="var">quantity_fairness_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
@@ -127,17 +134,103 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_4</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 4) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P4</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_5</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 5) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P5</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_6</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 6) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P6</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_7</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 7) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P7</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">phase_ge_4_implies_has_cprice</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> <span class="id" title="var">s</span>) <span class="id" title="var">i</span> (<span class="id" title="var">phase_ge_4</span> → <span class="id" title="var">Atom</span> <span class="id" title="var">p_has_cprice</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">phase_ge_4</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span> (<span class="id" title="var">p_phase</span> 4)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span> (<span class="id" title="var">p_phase</span> 5)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span> (<span class="id" title="var">p_phase</span> 6)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span> (<span class="id" title="var">p_phase</span> 7)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span> <span class="id" title="var">p_has_cprice</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">interp_atom_phase_4</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">interp_atom_phase_5</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">interp_atom_phase_6</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">interp_atom_phase_7</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">has_clearing_price_prop</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> <span class="id" title="var">i</span> <span class="id" title="var">s</span>)); <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">left</span>; <span class="id" title="tactic">intro</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H</span>|[<span class="id" title="var">H</span>|[<span class="id" title="var">H</span>|<span class="id" title="var">H</span>]]]; <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">left</span>; <span class="id" title="tactic">intro</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H</span>|[<span class="id" title="var">H</span>|[<span class="id" title="var">H</span>|<span class="id" title="var">H</span>]]]; <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">left</span>; <span class="id" title="tactic">intro</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H</span>|[<span class="id" title="var">H</span>|[<span class="id" title="var">H</span>|<span class="id" title="var">H</span>]]]; <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">right</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">right</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">right</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">right</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">price_rule_fairness_LTL_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) 0 (<span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_price_rule</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">mu_trace_atom_at_execute</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">price_rule_prop</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hphase</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;-  <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;-  <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;-  <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
 <span class="id" title="keyword">Theorem</span> <span class="id" title="var">uniform_price_fairness_LTL_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) 0 <span class="id" title="var">priceOK</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">priceOK</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">mu_trace_atom_at_execute</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">change</span> (<span class="id" title="var">bounds_cstar_prop</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))).<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">bounds_cstar_preserved_n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">mu_trace_atom_at_execute</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">change</span> (<span class="id" title="var">bounds_cstar_prop</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">bounds_cstar_preserved_n</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">phase_ge_4_implies_has_cprice</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">price_rule_fairness_LTL_initial</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 </div>
 </div>

@@ -102,7 +102,8 @@ Proof.
       unfold match_step in Hm.
       destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:?; try discriminate.
       inversion Hm; subst; clear Hm.
-      rewrite app_length. simpl. lia.
+      simpl.
+      rewrite length_app. simpl. lia.
     + (* None -> finish_matching, no change *)
       lia.
 Qed.
@@ -123,6 +124,7 @@ Proof.
       destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
       inversion Hm; subst s'; clear Hm.
       intros m Hin.
+      simpl in Hin.
       rewrite in_app_iff in Hin.
       destruct Hin as [Hin|Hin].
       * apply Hwf, Hin.

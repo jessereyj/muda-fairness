@@ -140,7 +140,14 @@ Proof.
   rewrite interp_atom_phase_6.
   rewrite interp_atom_phase_7.
   unfold interp_atom, has_clearing_price_prop.
-  destruct (phase (execute i s)); simpl; tauto.
+  destruct (phase (execute i s)); simpl.
+  - left; intro H; destruct H as [H|[H|[H|H]]]; discriminate.
+  - left; intro H; destruct H as [H|[H|[H|H]]]; discriminate.
+  - left; intro H; destruct H as [H|[H|[H|H]]]; discriminate.
+  - right; exact I.
+  - right; exact I.
+  - right; exact I.
+  - right; exact I.
 Qed.
 
 Lemma price_rule_fairness_LTL_initial : forall bs as_list,
@@ -153,10 +160,22 @@ Proof.
   unfold interp_atom.
   (* goal: price_rule_prop (execute j (initial_state bs as_list)) *)
   unfold price_rule_prop.
-  destruct (phase (execute j (initial_state bs as_list))) eqn:Hphase; simpl; auto.
-  destruct (marginal_pair (execute j (initial_state bs as_list))) as [[b a]|] eqn:Hmp; simpl; auto.
-  unfold determine_clearing_price.
-  rewrite Hmp. reflexivity.
+  destruct (phase (execute j (initial_state bs as_list))) eqn:Hphase; simpl.
+  - (* P1 *) exact I.
+  - (* P2 *) exact I.
+  - (* P3 *) exact I.
+  - (* P4 *)
+    destruct (marginal_pair (execute j (initial_state bs as_list))) as [[b a]|] eqn:Hmp; simpl; auto.
+    unfold determine_clearing_price. rewrite Hmp. reflexivity.
+  - (* P5 *)
+    destruct (marginal_pair (execute j (initial_state bs as_list))) as [[b a]|] eqn:Hmp; simpl; auto.
+    unfold determine_clearing_price. rewrite Hmp. reflexivity.
+  - (* P6 *)
+    destruct (marginal_pair (execute j (initial_state bs as_list))) as [[b a]|] eqn:Hmp; simpl; auto.
+    unfold determine_clearing_price. rewrite Hmp. reflexivity.
+  - (* P7 *)
+    destruct (marginal_pair (execute j (initial_state bs as_list))) as [[b a]|] eqn:Hmp; simpl; auto.
+    unfold determine_clearing_price. rewrite Hmp. reflexivity.
 Qed.
 
 Theorem uniform_price_fairness_LTL_initial : forall bs as_list,
@@ -164,7 +183,6 @@ Theorem uniform_price_fairness_LTL_initial : forall bs as_list,
 Proof.
   intros bs as_list.
   unfold priceOK.
-  simpl.
   split.
   - rewrite satisfies_always_unfold.
     intros j _.

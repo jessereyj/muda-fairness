@@ -9,6 +9,9 @@ Local Open Scope LTL_scope.
 
 Definition maximal : LTL_formula := F (And (Atom (p_phase 4)) (Atom p_no_feasible)).
 
+Lemma lt_add_pos_r : forall n p, 0 < p -> n < n + p.
+Proof. intros n p Hp; lia. Qed.
+
 Fixpoint sum_residual_bids (bs:list Bid) (ms:list Match) : nat :=
   match bs with
   | [] => 0
@@ -35,11 +38,12 @@ Proof.
   intros s s' b a Hstep Hf.
   unfold match_step in Hstep; rewrite Hf in Hstep; inversion Hstep; subst s'; clear Hstep.
   set (ms := matches s).
+  set (m := create_match b a ms).
   unfold residual_bid; simpl.
-  unfold create_match; simpl.
+  rewrite (allocated_bid_app_single b ms m).
+  unfold m, create_match; simpl.
   destruct (bid_eq_dec b b) as [_|Hneq]; [|congruence].
-  replace (quantity b - (Nat.min (residual_bid b ms) (residual_ask a ms) + allocated_bid b ms)) with
-          (quantity b - allocated_bid b ms - Nat.min (residual_bid b ms) (residual_ask a ms)) by lia.
+  simpl.
   (* get residual bounds from feasibility *)
   pose proof (find_feasible_spec (bids s) (asks s) ms b a Hf) as Hfeas.
   unfold is_feasible in Hfeas.
@@ -47,19 +51,27 @@ Proof.
   destruct Hfeas as [[_ Hrb] Hra].
   apply Nat.leb_le in Hrb.
   apply Nat.leb_le in Hra.
-  assert (Hmin1: 1 <= Nat.min (residual_bid b ms) (residual_ask a ms)).
-  { destruct (Nat.le_ge_cases (residual_bid b ms) (residual_ask a ms)) as [Hle|Hge].
+  assert (Hmin1: 1 <= match_quantity (create_match b a ms)).
+  { unfold match_quantity, create_match; simpl.
+    destruct (Nat.le_ge_cases (residual_bid b ms) (residual_ask a ms)) as [Hle|Hge].
     - rewrite Nat.min_l by exact Hle. lia.
     - rewrite Nat.min_r by lia. lia. }
   (* Rewrite goal using rb := residual_bid b ms *)
   remember (residual_bid b ms) as rb.
   remember (residual_ask a ms) as ra.
-  replace (quantity b - allocated_bid b ms) with rb by (subst rb; unfold residual_bid; lia).
-  replace (quantity b - allocated_bid b ms - Nat.min (residual_bid b ms) (residual_ask a ms))
-    with (rb - Nat.min rb ra) by (subst rb ra; unfold residual_bid, residual_ask; lia).
+  (* let A denote the prior allocation of b and q the matched quantity *)
+  set (A := allocated_bid b ms).
+  unfold match_quantity, create_match in *; simpl in *.
   set (q := Nat.min rb ra) in *.
   assert (Hqpos: 0 < q) by lia.
-  destruct q; [lia|]. simpl. lia.
+  (* Rewrite to X - q < X with X := quantity b - A *)
+  rewrite Nat.sub_add_distr.
+  set (XB := quantity b - A).
+  replace (quantity b - A) with XB by reflexivity.
+  assert (Hq_le_rb: q <= rb) by (subst q; apply Nat.le_min_l).
+  assert (HeqXB: XB = rb) by (subst XB rb A; unfold residual_bid; reflexivity).
+  assert (Hq_leXB: q <= XB) by (rewrite HeqXB; exact Hq_le_rb).
+  lia.
 Qed.
 
 Lemma residual_ask_drop : forall s s' b a,
@@ -70,29 +82,39 @@ Proof.
   intros s s' b a Hstep Hf.
   unfold match_step in Hstep; rewrite Hf in Hstep; inversion Hstep; subst s'; clear Hstep.
   set (ms := matches s).
+  set (m := create_match b a ms).
   unfold residual_ask; simpl.
-  unfold create_match; simpl.
+  rewrite (allocated_ask_app_single a ms m).
+  unfold m, create_match; simpl.
   destruct (ask_eq_dec a a) as [_|Hneq]; [|congruence].
-  replace (ask_quantity a - (Nat.min (residual_bid b ms) (residual_ask a ms) + allocated_ask a ms)) with
-          (ask_quantity a - allocated_ask a ms - Nat.min (residual_bid b ms) (residual_ask a ms)) by lia.
+  simpl.
   pose proof (find_feasible_spec (bids s) (asks s) ms b a Hf) as Hfeas.
   unfold is_feasible in Hfeas.
   repeat rewrite Bool.andb_true_iff in Hfeas.
   destruct Hfeas as [[_ Hrb] Hra].
   apply Nat.leb_le in Hrb.
   apply Nat.leb_le in Hra.
-  assert (Hmin1: 1 <= Nat.min (residual_bid b ms) (residual_ask a ms)).
-  { destruct (Nat.le_ge_cases (residual_bid b ms) (residual_ask a ms)) as [Hle|Hge].
+  assert (Hmin1: 1 <= match_quantity (create_match b a ms)).
+  { unfold match_quantity, create_match; simpl.
+    destruct (Nat.le_ge_cases (residual_bid b ms) (residual_ask a ms)) as [Hle|Hge].
     - rewrite Nat.min_l by exact Hle. lia.
     - rewrite Nat.min_r by lia. lia. }
   remember (residual_bid b ms) as rb.
   remember (residual_ask a ms) as ra.
-  replace (ask_quantity a - allocated_ask a ms) with ra by (subst ra; unfold residual_ask; lia).
-  replace (ask_quantity a - allocated_ask a ms - Nat.min (residual_bid b ms) (residual_ask a ms))
-    with (ra - Nat.min rb ra) by (subst rb ra; unfold residual_bid, residual_ask; lia).
+  (* let A denote the prior allocation of a and q the matched quantity *)
+  set (A := allocated_ask a ms).
+  replace (ask_quantity a - A) with ra by (subst A ra; unfold residual_ask; lia).
+  unfold match_quantity, create_match in *; simpl in *.
   set (q := Nat.min rb ra) in *.
   assert (Hqpos: 0 < q) by lia.
-  destruct q; [lia|]. simpl. lia.
+  (* Rewrite to Y - q < Y with Y := ask_quantity a - A *)
+  rewrite Nat.sub_add_distr.
+  set (YA := ask_quantity a - A).
+  replace (ask_quantity a - A) with YA by reflexivity.
+  assert (Hq_le_ra: q <= ra) by (subst q; apply Nat.le_min_r).
+  assert (HeqYA: YA = ra) by (subst YA A ra; unfold residual_ask; reflexivity).
+  assert (Hq_leYA: q <= YA) by (rewrite HeqYA; exact Hq_le_ra).
+  lia.
 Qed.
 
 Lemma residual_bid_unchanged : forall s s' b0 a b,
@@ -106,10 +128,12 @@ Proof.
   set (ms := matches s).
   set (m := create_match b0 a ms).
   unfold residual_bid. simpl.
-  change (matched_bid m) with b0.
+  rewrite (allocated_bid_app_single b ms m).
+  unfold m, create_match; simpl.
+  change (matched_bid (create_match b0 a ms)) with b0.
   destruct (bid_eq_dec b0 b) as [Eeq|Eneq].
   - subst b. contradiction.
-  - reflexivity.
+  - simpl. lia.
 Qed.
 
 Lemma residual_ask_unchanged : forall s s' b a0 a,
@@ -123,10 +147,12 @@ Proof.
   set (ms := matches s).
   set (m := create_match b a0 ms).
   unfold residual_ask. simpl.
-  change (matched_ask m) with a0.
+  rewrite (allocated_ask_app_single a ms m).
+  unfold m, create_match; simpl.
+  change (matched_ask (create_match b a0 ms)) with a0.
   destruct (ask_eq_dec a0 a) as [Eeq|Eneq].
   - subst a. contradiction.
-  - reflexivity.
+  - simpl. lia.
 Qed.
 
 (* Membership of the chosen bid in the bid list. *)

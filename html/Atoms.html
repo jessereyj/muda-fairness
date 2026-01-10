@@ -35,7 +35,10 @@
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">has_clearing_price_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">c</span>, <span class="id" title="var">determine_clearing_price</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">c</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">phase</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">P4</span> | <span class="id" title="var">P5</span> | <span class="id" title="var">P6</span> | <span class="id" title="var">P7</span> =&gt; <span class="id" title="var">True</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">bounds_cstar_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
@@ -46,21 +49,29 @@
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">price_rule_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">marginal_pair</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
-&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">True</span><br/>
-&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>) =&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">eb</span> := (<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) =? 0) <span class="id" title="tactic">in</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ea</span> := (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) =? 0) <span class="id" title="tactic">in</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">determine_clearing_price</span> <span class="id" title="var">s</span> =<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">if</span> <span class="id" title="var">eb</span> &amp;&amp; <span class="id" title="var">ea</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> <span class="id" title="var">eb</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> <span class="id" title="var">ea</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>))<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">phase</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">P1</span> | <span class="id" title="var">P2</span> | <span class="id" title="var">P3</span> =&gt; <span class="id" title="var">True</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">marginal_pair</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">True</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">eb</span> := (<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) =? 0) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ea</span> := (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) =? 0) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">determine_clearing_price</span> <span class="id" title="var">s</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">if</span> <span class="id" title="var">eb</span> &amp;&amp; <span class="id" title="var">ea</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> <span class="id" title="var">eb</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> <span class="id" title="var">ea</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
 &nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">matches_monotone_1_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">m</span>, <span class="id" title="var">In</span> <span class="id" title="var">m</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">In</span> <span class="id" title="var">m</span> (<span class="id" title="var">matches</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">prefix</span> {<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">l1</span> <span class="id" title="var">l2</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">w</span>, <span class="id" title="var">l2</span> = <span class="id" title="var">l1</span> ++ <span class="id" title="var">w</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">match_keep_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">prefix</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)).<br/>
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">rejected_bid_prop</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>

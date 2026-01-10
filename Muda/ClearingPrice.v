@@ -11,6 +11,18 @@ Definition wf_state (s : State) : Prop :=
   forall m, In m (matches s) ->
     ask_price (matched_ask m) <= price (matched_bid m).
 
+Lemma in_rev_l {A} (l : list A) (x : A) : In x (rev l) -> In x l.
+Proof.
+  induction l as [|h t IH]; simpl; intro H.
+  - contradiction.
+  - rewrite in_app_iff in H.
+    destruct H as [Hin | Hin].
+    + right. apply IH. exact Hin.
+    + simpl in Hin. destruct Hin as [Heq | Hnil].
+      * subst. left. reflexivity.
+      * contradiction.
+Qed.
+
 Lemma wf_state_initial : forall bs as_list,
   wf_state (initial_state bs as_list).
 Proof.
@@ -28,6 +40,9 @@ Proof.
   destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
   inversion Hms; subst s'; clear Hms.
   unfold wf_state in *. intros m Hin.
+  set (ms := matches s) in *.
+  set (m0 := create_match b a (matches s)) in *.
+  change (In m (ms ++ [m0])) in Hin.
   rewrite in_app_iff in Hin.
   destruct Hin as [Hin|Hin].
   - (* inherited *) apply Hwf, Hin.
@@ -59,7 +74,7 @@ Proof.
   inversion Hm; subst b a; clear Hm.
   (* Build In m (matches s) using Hms, then apply the invariant *)
   assert (Hin_rev : In m (rev (matches s))) by (rewrite <- Hms; simpl; left; reflexivity).
-  assert (Hin : In m (matches s)) by (apply (proj1 (in_rev m (matches s))); exact Hin_rev).
+  pose proof (in_rev_l (matches s) m Hin_rev) as Hin.
   specialize (Hwf m Hin).
   exact Hwf.
 Qed.
