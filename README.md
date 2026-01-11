@@ -1,130 +1,263 @@
 # MUDA Fairness Verification
 
-Temporal verification of fairness in Multi-Unit Double Auction (MUDA) using Rocq/Coq and Linear Temporal Logic (LTL).
+Temporal verification of fairness in the Multi-Unit Double Auction (MUDA) using Rocq and Linear Temporal Logic (LTL).
 
 ## Structure
+
 ```
 LTL/       - Linear Temporal Logic foundation
 MUDA/      - MUDA protocol model (state, sorting, matching, price)
 Fairness/  - Fairness property formulas and proofs
-Example/   - Validate the logical soundness and completeness. Cloud market scenarios exercising the proofs
+Example/   - Cloud market scenarios that exercise the definitions and fairness theorems
 ```
 
 ## Quick Start
 
 ### Build everything
+
 ```bash
 ./build.sh
 ```
 
 ### Clean build artifacts
+
 ```bash
 ./clean.sh
 ```
 
 ### Check for admitted lemmas
+
 ```bash
 ./check.sh
 ```
 
 ### Show project statistics
+
 ```bash
 ./stats.sh
 ```
 
 ## Requirements
 
-- **Rocq:** 9.1.0 (or compatible)
-- **Bash:** For build scripts
+- **Rocq** 9.1.0 or compatible
+- **Bash** for build scripts
 
 ## Build Process
 
-The `build.sh` script:
-1. Cleans old artifacts
+The `build.sh` script performs the following steps:
+
+1. Cleans old build artifacts
 2. Verifies directory structure
 3. Generates `_CoqProject`
 4. Creates a minimal `Makefile.rocq`
-5. Builds with parallel jobs using `rocq compile`
-6. Checks for admitted lemmas
+5. Builds the project using `rocq compile` with parallel jobs
+6. Runs a check to ensure no admitted lemmas remain
 
 ## Statistics
 
-Run `./stats.sh` to see up-to-date counts of files, lines, definitions, and admitted lemmas.
+Run `./stats.sh` to report:
+
+- Number of files per module
+- Lines of code
+- Definitions and inductive objects
+- Theorem and lemma declarations
+- Admitted lemmas
 
 ## Verification Results (high level)
 
-- Quantity Fairness: `quantityOK := G (Atom p_allocOK)` — proven for traces from initial states
-- Priority Fairness: `priorityOK := (G (Atom p_prioB_step)) ∧ (G (Atom p_prioS_step))`
-- Uniform Price Fairness: `priceOK := G (Atom p_bounds_cstar) ∧ G((phase≥4) → Atom p_has_cprice) ∧ G (Atom p_price_rule)` — proven for traces from initial states
-- Match Finality: `finalityOK := G (Atom p_match_keep)`
-- Maximality: `maximal := F (Atom (p_phase 4) ∧ Atom p_no_feasible)`
-- Rejection Fairness: `rejectionOK` (see `Fairness/JustifiedRejection.v`)
+### Quantity Fairness
 
-## Assumptions & Foundations
+`quantityOK := G (Atom p_allocOK)`
 
-- **Axiomatic LTL Core:** The project retains a Hilbert-style axiomatic foundation for LTL. Files `LTL/Axioms.v`, `LTL/Soundness.v`, and `LTL/Completeness.v` are available and registered; examples and fairness proofs use semantic satisfaction (`satisfies`) over traces and do not mix derivability judgments.
-- **Operational Invariants:** MUDA invariants (e.g., `wf_state`, match persistence, clearing price bounds) are proved constructively in `MUDA/*` and lifted to LTL via the interpretation of atomic predicates.
-- **Remaining MUDA Axioms:** Some protocol properties are currently axiomatized for build stability:
-	- Sorting bridges between strong sortedness and index-based priority
-	- Greedy priority respect lemmas for bids/asks
-	Fairness results depend on these axioms; constructive replacements are planned.
+Proven for traces starting from initial states.
 
-### Thesis-to-Code Mapping
+### Priority Fairness
 
-The thesis (Chapters 3-4) presents a mathematical model focusing on economically relevant components, while the Rocq implementation includes additional bookkeeping for mechanical verification:
+`priorityOK := G (Atom p_prioB_step) ∧ G (Atom p_prioS_step)`
 
-- **State Components:**
-  - Thesis: `x = (B, S, orders, residuals, M, p*, phase)`
-  - Code: `State = (bids, asks, matches, clearing_price, phase)` where residuals are computed dynamically via `residual_bid` and `residual_ask` functions
-- **Bid/Ask Representation:**
-  - Thesis: `bi = (pi, q⁰ᵢ, ti)` and `sj = (aj, q⁰ⱼ, tj)` (3-tuple notation)
-  - Code: 5-field records including `bid_id`, `buyer : Agent`, and timestamp fields
-  - Agent ownership (`buyer`/`seller`) is an implementation detail for traceability
-- **Match Representation:**
-  - Thesis: `(b, s, q)` triples
-  - Code: `Match = (matched_bid, matched_ask, match_quantity)` where bid and ask are full records
-- **Allocation Functions:**
-  - Thesis: `allocB(m, b)` and `allocS(m, s)` presented abstractly
-  - Code: Explicit recursive `allocated_bid` and `allocated_ask` with decidable equality
-- **Trace Construction:**
-  - Thesis: Describes stuttering semantics conceptually
-  - Code: `CoFixpoint mu_trace` mechanizes coinductive traces in Coq
+### Uniform Price Fairness
 
-See `NOTATION.md` for a detailed mapping between thesis symbols and Rocq definitions. This abstraction approach is standard practice in formal verification—mathematical models emphasize essential logic while implementations handle mechanical bookkeeping.
+`priceOK := G (Atom p_bounds_cstar) ∧ G (Atom p_has_cprice) ∧ G (Atom p_price_rule)`
+
+Proven for traces starting from initial states.
+
+### Match Finality
+
+`finalityOK := G (Atom p_match_keep)`
+
+### Maximality
+
+`maximal := F (Atom (p_phase 4) ∧ Atom p_no_feasible)`
+
+### Justified Rejection
+
+`rejectionOK`
+
+See `Fairness/JustifiedRejection.v`.
+
+## Verification Status
+
+### Proof Completeness
+
+- Lemmas and theorems closed with `Qed`, reported by `stats.sh`
+- Admitted lemmas: **0**, enforced by `check.sh`
+- Axioms and parameters, reported by `stats.sh`
+
+All fairness theorems are proven using `Qed`. No fairness proof uses `Admitted`.
+
+Fairness verification uses semantic satisfaction over traces and relies on LTL soundness only. Completeness axioms are present for the meta-theory and are not required by fairness proofs.
+
+### Axiomatized Components
+
+The development makes a small number of explicit axiomatic assumptions. These are documented and separated from admitted proofs.
+
+#### LTL Meta-Theory
+
+- Propositional tautologies as a meta-axiom schema
+- Canonical model construction
+- Weak completeness of LTL with X and U
+
+These are standard results adopted from the LTL literature. Fairness proofs depend only on soundness, which is fully proven.
+
+#### MUDA Sorting
+
+- Correctness of lexicographic bid sorting
+- Correctness of lexicographic ask sorting
+
+These formalize standard sorting properties. They could be discharged using Coq's verified sorting libraries. They are axiomatized to keep the focus on temporal verification.
+
+#### Greedy Matching Priority
+
+- Greedy matching respects bid priority ordering
+- Greedy matching respects ask priority ordering
+
+These follow from sorting correctness by construction. The greedy algorithm scans sorted lists in order.
+
+### Theorem Dependencies
+
+| Fairness Property | Depends on MUDA Axioms | Depends on LTL Meta-Axioms | Admitted |
+|-------------------|------------------------|----------------------------|----------|
+| Priority Fairness | Yes | A0 schema | 0 |
+| Quantity Fairness | No | A0 schema | 0 |
+| Price Fairness | No | A0 schema | 0 |
+| Match Finality | No | A0 schema | 0 |
+| Maximality | Yes | A0 schema | 0 |
+| Justified Rejection | No | A0 schema | 0 |
+
+**Summary:**
+
+- Four fairness theorems do not depend on MUDA algorithmic axioms
+- Two fairness theorems depend on sorting and greedy priority assumptions
+- All fairness theorems are proven with `Qed` and use no `Admitted`
+
+### Comparison to Standard Practice
+
+Axiomatizing well-known components is common in formal verification. This allows verification effort to focus on novel properties rather than re-proving standard algorithms.
+
+This work follows the same approach by isolating sorting and greedy correctness as explicit assumptions.
+
+### Verification Commands
+
+```bash
+# Check for admitted lemmas
+grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Example/
+
+# List axioms and parameters
+grep -rn "Axiom\|Parameter" LTL/ MUDA/ Fairness/
+
+# Show proof and definition statistics
+./stats.sh
+```
+
+## Assumptions and Foundations
+
+### Axiomatic LTL Core
+
+The project uses a Hilbert-style axiomatic foundation for LTL. Fairness proofs reason over semantic satisfaction on traces and do not mix derivability judgments.
+
+### Operational Invariants
+
+MUDA invariants such as well-formed states, match persistence, and clearing price bounds are proven constructively in `MUDA/*` and lifted to LTL via atomic predicate interpretation.
+
+### Remaining MUDA Axioms
+
+Sorting and greedy priority properties are axiomatized for build stability and scope control. Fairness results depend on these assumptions, which are explicit and documented.
+
+## Thesis-to-Code Mapping
+
+The thesis presents a mathematical model focused on economically relevant components. The Rocq implementation includes additional bookkeeping required for mechanical verification.
+
+### State
+
+- **Thesis:** `x = (B, S, orders, residuals, M, p*, phase)`
+- **Code:** `State = (bids, asks, matches, clearing_price, phase)`
+
+Residuals are computed dynamically using `residual_bid` and `residual_ask`.
+
+### Bids and Asks
+
+- **Thesis:** Uses 3-tuple notation `(price, quantity, time)`
+- **Code:** Uses records with identifiers and agent ownership for traceability
+
+### Matches
+
+- **Thesis:** Uses `(b, s, q)` triples
+- **Code:** Stores full bid and ask records with quantities
+
+### Allocation
+
+- **Thesis:** Presents abstract allocation functions
+- **Code:** Uses recursive functions with decidable equality
+
+### Traces
+
+- **Thesis:** Describes infinite executions conceptually
+- **Code:** Uses a coinductive trace construction via `mu_trace`
+
+This abstraction pattern is standard in formal verification. The mathematical model emphasizes logic. The implementation handles mechanical details.
 
 ## Module Notes
 
-- **Price Fairness:** Consolidated in `Fairness/PriceFairness.v` as `priceOK := G (Atom p_bounds_cstar) ∧ G((phase≥4) → Atom p_has_cprice) ∧ G (Atom p_price_rule)`. Examples in `Example/CloudMarket.v` use `priceOK` and the theorem `uniform_price_fairness_LTL_initial`.
-- **Fairness Export:** `Fairness/All.v` re-exports `Interpretation`, `PriorityFairness`, `QuantityFairness`, `PriceFairness`, `MatchFinality`, `Maximality`, and `JustifiedRejection` for convenience.
+### Price Fairness
+
+Defined in `Fairness/PriceFairness.v` as `priceOK`. Examples in `Example/CloudMarket.v` exercise the property from initial states.
+
+### Fairness Export
+
+`Fairness/All.v` re-exports all fairness properties for convenience.
 
 ## Future Work
 
-- Replace sorting and greedy priority axioms with constructive proofs and update fairness theorems accordingly.
-- Optional: add a phase-guarded price fairness variant (only required from `P4` onward) and prove it from initial states.
-- Trim example imports to the minimal needed LTL modules (e.g., `Syntax`, `Semantics`, `LTL`) while keeping axioms available.
+- Replace sorting and greedy priority axioms with constructive proofs
+- Add a phase-guarded price fairness variant if needed
+- Reduce example imports to the minimal LTL modules
 
 ## Development Workflow
 
 ### Edit a file
+
 ```bash
 vim MUDA/State.v
 ```
 
-### Compile just that file (optional)
+### Compile a single file
+
 ```bash
 rocq compile -R LTL LTL -R MUDA MUDA -R Fairness Fairness MUDA/State.v
 ```
 
 ### Full rebuild
+
 ```bash
 ./build.sh
 ```
 
-### Watch mode (auto-rebuild)
+### Watch mode
+
 ```bash
 ./watch.sh
 ```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
