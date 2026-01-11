@@ -127,4 +127,4 @@ rocq compile -R LTL LTL -R MUDA MUDA -R Fairness Fairness MUDA/State.v
 
 ## License
 
-MIT License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
