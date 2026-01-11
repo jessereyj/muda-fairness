@@ -1,16 +1,4 @@
 (**  MUDA/State.v
-     State representation and allocation functions for MUDA.
-     
-     Thesis (Chapter 3) presents state as:
-       x = (B, S, orders, residuals, M, p*, phase)
-     
-     This implementation uses:
-       State = (bids, asks, matches, clearing_price, phase)
-     
-     Key difference: "residuals" in thesis are stored separately,
-     but here they are COMPUTED DYNAMICALLY via allocated_bid/allocated_ask.
-     This avoids redundancy and ensures consistency between matches and residuals.
-     
      See NOTATION.md for complete thesis-to-code mapping.
 **)
 From Stdlib Require Import List Arith.

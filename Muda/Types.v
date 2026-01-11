@@ -1,15 +1,4 @@
 (*  MUDA/Types.v
-    Core data types for Multi-Unit Double Auction (MUDA).
-    
-    NOTE: The thesis (Chapters 3-4) uses simplified notation:
-      - Bids: bi = (pi, q⁰ᵢ, ti)  [3-tuple]
-      - Asks: sj = (aj, q⁰ⱼ, tj)  [3-tuple]
-    
-    This implementation extends the model with:
-      - Agent ownership (buyer/seller) for traceability
-      - Unique identifiers (bid_id/ask_id) for decidable equality
-    
-    These additions do not affect the protocol logic or fairness proofs.
     See NOTATION.md for detailed thesis-to-code mapping.
 *)
 From Stdlib Require Export Arith List Bool PeanoNat.
