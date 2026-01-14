@@ -1,57 +1,223 @@
 (* Fairness/JustifiedRejection.v *)
-From Stdlib Require Import List.
+From Stdlib Require Import List Arith.
 Import ListNotations.
 From LTL  Require Import LTL.
-From MUDA Require Import MUDA Atoms Matching.
-From Fairness Require Import Interpretation.
+From MUDA Require Import MUDA Atoms Matching Transitions.
+From Fairness Require Import Interpretation Maximality.
 Local Open Scope LTL_scope.
 
-Definition rejectionOK : LTL_formula :=
-  G ( (Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7))
-      → Atom p_rejection_justified ).
+Definition phase_ge_4 : LTL_formula :=
+  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
 
-Lemma no_feasible_pairs_gives_justification :
+Definition rejectionOK : LTL_formula := G (phase_ge_4 → Atom p_rejection_justified).
+
+Lemma rejection_justified_of_no_feasible_prop :
   forall s,
-    find_feasible (bids s) (asks s) (matches s) = None ->
+    no_feasible_prop s ->
     rejection_justified_prop s.
 Proof.
-  intros s Hnone.
+  intros s Hnf.
   split.
-  - (* rejected_bid side *)
-    intros b aa [Hb_in _] Haa_in.
-    pose proof (find_feasible_None_forall (bids s) (asks s) (matches s) Hnone b aa Hb_in Haa_in)
-      as Hinf.
-    right; exact Hinf.
-  - (* rejected_ask side *)
-    intros aa b [Haa_in _] Hb_in.
-    pose proof (find_feasible_None_forall (bids s) (asks s) (matches s) Hnone b aa Hb_in Haa_in)
-      as Hinf.
-    right; exact Hinf.
+  - intros b aa Hb_in Haa_in.
+    right.
+    destruct Hb_in as [Hb_in _].
+    specialize (Hnf b aa Hb_in Haa_in).
+    exact Hnf.
+  - intros aa b Haa_in Hb_in.
+    right.
+    destruct Haa_in as [Haa_in _].
+    specialize (Hnf b aa Hb_in Haa_in).
+    exact Hnf.
 Qed.
 
-Lemma match_step_None_iff :
-  forall s, match_step s = None <->
-            find_feasible (bids s) (asks s) (matches s) = None.
+Lemma step_P5_inversion : forall t,
+  phase (step t) = P5 -> phase t = P4.
 Proof.
-  intro s. unfold match_step.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf;
-    split; intro H; try reflexivity; try discriminate.
+  intros t H.
+  unfold step in H.
+  remember (phase t) as ph eqn:Hp.
+  destruct ph; simpl in H.
+  - discriminate H.
+  - discriminate H.
+  - (* P3 *)
+    destruct (match_step t) eqn:Hm; simpl in H.
+    + (* Some s' *)
+      pose proof (match_step_phase_invariant t s Hm) as Hph.
+      symmetry in Hp. rewrite Hp in Hph. rewrite Hph in H. discriminate.
+    + (* None *) discriminate H.
+  - (* P4 *) reflexivity.
+  - discriminate H.
+  - discriminate H.
+  - symmetry in Hp; rewrite Hp in H; discriminate H.
 Qed.
 
-Theorem justified_rejection_from_None :
-  forall s, match_step s = None -> rejection_justified_prop s.
+Lemma step_P6_inversion : forall t,
+  phase (step t) = P6 -> phase t = P5.
 Proof.
-  intros s Hms.
-  apply match_step_None_iff in Hms.
-  eapply no_feasible_pairs_gives_justification; eauto.
+  intros t H.
+  unfold step in H.
+  remember (phase t) as ph eqn:Hp.
+  destruct ph; simpl in H.
+  - discriminate H.
+  - discriminate H.
+  - (* P3 *)
+    destruct (match_step t) eqn:Hm; simpl in H.
+    + pose proof (match_step_phase_invariant t s Hm) as Hph.
+      symmetry in Hp. rewrite Hp in Hph. rewrite Hph in H. discriminate H.
+    + discriminate H.
+  - discriminate H.
+  - (* P5 *) reflexivity.
+  - discriminate H.
+  - (* P7 *) symmetry in Hp; rewrite Hp in H; discriminate H.
 Qed.
 
-Theorem justified_rejection :
-  forall s,
-    (phase s = P4 \/ phase s = P5 \/ phase s = P6 \/ phase s = P7) ->
-    find_feasible (bids s) (asks s) (matches s) = None ->
-    rejection_justified_prop s.
+Lemma step_P7_inversion : forall t,
+  phase (step t) = P7 -> phase t = P6 \/ phase t = P7.
 Proof.
-  intros s _ Hnone.
-  eapply no_feasible_pairs_gives_justification; eauto.
+  intros t H.
+  unfold step in H.
+  remember (phase t) as ph eqn:Hp.
+  destruct ph; simpl in H.
+  - discriminate H.
+  - discriminate H.
+  - (* P3 *)
+    destruct (match_step t) eqn:Hm; simpl in H.
+    + pose proof (match_step_phase_invariant t s Hm) as Hph.
+      symmetry in Hp. rewrite Hp in Hph. rewrite Hph in H. discriminate H.
+    + discriminate H.
+  - (* P4 *) discriminate H.
+  - (* P5 *) discriminate H.
+  - (* P6 *) now left.
+  - (* P7 *) now right.
 Qed.
+
+Lemma no_feasible_preserved_after_P4 : forall t,
+  (phase t = P4 \/ phase t = P5 \/ phase t = P6 \/ phase t = P7) ->
+  no_feasible_prop t -> no_feasible_prop (step t).
+Proof.
+  intros t Hph Hnf.
+  unfold no_feasible_prop in *.
+  intros b a Hb Ha.
+  pose proof (step_preserves_bids_asks t) as Hab.
+  assert (phase t <> P2) as Hneq2.
+  { intros Heq.
+    destruct Hph as [H4|[H5|[H6|H7]]]; congruence. }
+  assert (bids (step t) = bids t /\ asks (step t) = asks t) as [Hbids Hasks].
+  { apply Hab. exact Hneq2. }
+  rewrite Hbids in Hb. rewrite Hasks in Ha.
+  (* matches unchanged from P4 onward *)
+  unfold step.
+  destruct (phase t) eqn:Hp; simpl in *.
+  - destruct Hph as [H4|[H5|[H6|H7]]]; congruence.
+  - destruct Hph as [H4|[H5|[H6|H7]]]; congruence.
+  - destruct Hph as [H4|[H5|[H6|H7]]]; congruence.
+  - apply Hnf; assumption.
+  - apply Hnf; assumption.
+  - apply Hnf; assumption.
+  - apply Hnf; assumption.
+Qed.
+
+Lemma no_feasible_when_phase_ge4_initial :
+  forall bs as_list k,
+    (phase (execute (S k) (initial_state bs as_list)) = P4 \/
+     phase (execute (S k) (initial_state bs as_list)) = P5 \/
+     phase (execute (S k) (initial_state bs as_list)) = P6 \/
+     phase (execute (S k) (initial_state bs as_list)) = P7) ->
+    no_feasible_prop (execute (S k) (initial_state bs as_list)).
+Proof.
+  intros bs as_list k Hph.
+  set (s0 := initial_state bs as_list) in *.
+  induction k as [|k IH].
+  - (* k = 0 *)
+    simpl in Hph.
+    destruct Hph as [H4|[H5|[H6|H7]]].
+    all: unfold step in *; simpl in *; discriminate.
+  - (* k = S k, goal state is execute (S (S k)) s0 *)
+    set (t0 := execute (S k) s0).
+    assert (Hexec : execute (S (S k)) s0 = step t0).
+    { subst t0. rewrite execute_step_after. reflexivity. }
+
+    (* Rewrite the phase hypothesis so it talks about phase (step t0) *)
+    rewrite Hexec in Hph.
+
+    destruct Hph as [H4|[H5|[H6|H7]]].
+    + (* phase (step t0) = P4 *)
+      destruct (step_P4_inversion t0 H4) as [Ht0P3 Hnone].
+      rewrite Hexec.
+      subst t0.
+      apply no_feasible_step_from_None; assumption.
+    + (* phase (step t0) = P5, so phase t0 = P4 *)
+      pose proof (step_P5_inversion t0 H5) as Ht0P4.
+      assert (Hnf_t0 : no_feasible_prop t0).
+      { subst t0. eapply no_feasible_at_P4_index. exact Ht0P4. }
+      rewrite Hexec.
+      eapply no_feasible_preserved_after_P4.
+      * left. exact Ht0P4.
+      * exact Hnf_t0.
+    + (* phase (step t0) = P6, so phase t0 = P5 *)
+      pose proof (step_P6_inversion t0 H6) as Ht0P5.
+      assert (Hnf_t0 : no_feasible_prop t0).
+      { apply IH. right. left. subst t0. exact Ht0P5. }
+      rewrite Hexec.
+      eapply no_feasible_preserved_after_P4.
+      * right. left. exact Ht0P5.
+      * exact Hnf_t0.
+    + (* phase (step t0) = P7, so phase t0 = P6 or P7 *)
+      destruct (step_P7_inversion t0 H7) as [Ht0P6|Ht0P7].
+      * assert (Hnf_t0 : no_feasible_prop t0).
+        { apply IH. right. right. left. subst t0. exact Ht0P6. }
+        rewrite Hexec.
+        eapply no_feasible_preserved_after_P4.
+        { right. right. left. exact Ht0P6. }
+        exact Hnf_t0.
+      * assert (Hnf_t0 : no_feasible_prop t0).
+        { apply IH. right. right. right. subst t0. exact Ht0P7. }
+        rewrite Hexec.
+        eapply no_feasible_preserved_after_P4.
+        { right. right. right. exact Ht0P7. }
+        exact Hnf_t0.
+Qed.
+
+Lemma phase_ge_4_implies_rejection_justified :
+  forall bs as_list i,
+    satisfies (mu_trace (initial_state bs as_list)) i (phase_ge_4 → Atom p_rejection_justified).
+Proof.
+  intros bs as_list i.
+  unfold phase_ge_4.
+  simpl.
+  repeat rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i (p_phase 4)).
+  repeat rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i (p_phase 5)).
+  repeat rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i (p_phase 6)).
+  repeat rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i (p_phase 7)).
+  rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i p_rejection_justified).
+  unfold interp_atom.
+  destruct i as [|k].
+  - (* i = 0: initial phase is P1, implication holds trivially *)
+    unfold execute; unfold step; simpl. left. intro H. destruct H as [H|[H|[H|H]]]; discriminate.
+  - (* i = S k *)
+    destruct (phase (execute (S k) (initial_state bs as_list))) as [| | | | | |] eqn:Hph; simpl;
+      [ left; intro H; destruct H as [H|[H|[H|H]]]; discriminate   (* P1 *)
+      | left; intro H; destruct H as [H|[H|[H|H]]]; discriminate   (* P2 *)
+      | left; intro H; destruct H as [H|[H|[H|H]]]; discriminate   (* P3 *)
+      | right; apply rejection_justified_of_no_feasible_prop; 
+        eapply no_feasible_when_phase_ge4_initial; rewrite Hph; left; reflexivity   (* P4 *)
+      | right; apply rejection_justified_of_no_feasible_prop; 
+        eapply no_feasible_when_phase_ge4_initial; rewrite Hph; right; left; reflexivity   (* P5 *)
+      | right; apply rejection_justified_of_no_feasible_prop; 
+        eapply no_feasible_when_phase_ge4_initial; rewrite Hph; right; right; left; reflexivity   (* P6 *)
+      | right; apply rejection_justified_of_no_feasible_prop; 
+        eapply no_feasible_when_phase_ge4_initial; rewrite Hph; right; right; right; reflexivity   (* P7 *)
+      ].
+Qed.
+
+Theorem justified_rejection_LTL_initial :
+  forall bs as_list,
+    satisfies (mu_trace (initial_state bs as_list)) 0 rejectionOK.
+Proof.
+  intros bs as_list.
+  unfold rejectionOK.
+  rewrite satisfies_always_unfold.
+  intros n _.
+  apply phase_ge_4_implies_rejection_justified.
+Qed.
+

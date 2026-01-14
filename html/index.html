@@ -47,7 +47,7 @@
 <td>Z</td>
 <td>_</td>
 <td><a href="index.html#global_*">other</a></td>
-<td>(446 entries)</td>
+<td>(453 entries)</td>
 </tr>
 <tr>
 <td>Notation Index</td>
@@ -143,7 +143,7 @@
 <td>Z</td>
 <td>_</td>
 <td>other</td>
-<td>(130 entries)</td>
+<td>(134 entries)</td>
 </tr>
 <tr>
 <td>Axiom Index</td>
@@ -399,7 +399,7 @@
 <td>Z</td>
 <td>_</td>
 <td>other</td>
-<td>(183 entries)</td>
+<td>(186 entries)</td>
 </tr>
 <tr>
 <td>Record Index</td>
@@ -553,6 +553,7 @@
 <a href="Example.CloudMarket.html#Case1_UniformPrice">Case1_UniformPrice</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case1_Quantity">Case1_Quantity</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case1_Priority">Case1_Priority</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
+<a href="Example.CloudMarket.html#Case2_Rejection">Case2_Rejection</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case2_Maximality">Case2_Maximality</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case2_MatchFinality">Case2_MatchFinality</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case2_UniformPrice">Case2_UniformPrice</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
@@ -578,6 +579,7 @@
 <a href="Example.CloudMarket.html#Case6_UniformPrice">Case6_UniformPrice</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case6_Quantity">Case6_Quantity</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case6_Priority">Case6_Priority</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
+<a href="Example.CloudMarket.html#Case7_Rejection">Case7_Rejection</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case7_Maximality">Case7_Maximality</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case7_MatchFinality">Case7_MatchFinality</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case7_UniformPrice">Case7_UniformPrice</a> [definition, in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
@@ -658,8 +660,7 @@
 <a href="MUDA.Matching.html#is_feasible">is_feasible</a> [definition, in <a href="MUDA.Matching.html">MUDA.Matching</a>]<br/>
 <br/><br/><a id="global_J"></a><h2>J </h2>
 <a href="JustifiedRejection.html">JustifiedRejection</a> [library]<br/>
-<a href="Fairness.JustifiedRejection.html#justified_rejection">justified_rejection</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
-<a href="Fairness.JustifiedRejection.html#justified_rejection_from_None">justified_rejection_from_None</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#justified_rejection_LTL_initial">justified_rejection_LTL_initial</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <br/><br/><a id="global_L"></a><h2>L </h2>
 <a href="LogicalCompleteness.html">LogicalCompleteness</a> [library]<br/>
 <a href="LogicalSoundness.html">LogicalSoundness</a> [library]<br/>
@@ -703,7 +704,6 @@
 <a href="MUDA.Types.html#match_eqb">match_eqb</a> [instance, in <a href="MUDA.Types.html">MUDA.Types</a>]<br/>
 <a href="MUDA.Types.html#match_eq">match_eq</a> [definition, in <a href="MUDA.Types.html">MUDA.Types</a>]<br/>
 <a href="MUDA.Types.html#match_quantity">match_quantity</a> [projection, in <a href="MUDA.Types.html">MUDA.Types</a>]<br/>
-<a href="Fairness.JustifiedRejection.html#match_step_None_iff">match_step_None_iff</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="Fairness.Maximality.html#maximal">maximal</a> [definition, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Maximality.html">Maximality</a> [library]<br/>
 <a href="Fairness.Maximality.html#maximality_from_P1_or_P2">maximality_from_P1_or_P2</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
@@ -732,7 +732,8 @@
 <a href="Fairness.Maximality.html#no_feasible_at_P4_index">no_feasible_at_P4_index</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#no_feasible_step_from_None">no_feasible_step_from_None</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#no_feasible_from_None">no_feasible_from_None</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
-<a href="Fairness.JustifiedRejection.html#no_feasible_pairs_gives_justification">no_feasible_pairs_gives_justification</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#no_feasible_when_phase_ge4_initial">no_feasible_when_phase_ge4_initial</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#no_feasible_preserved_after_P4">no_feasible_preserved_after_P4</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="Fairness.Interpretation.html#nth_phase">nth_phase</a> [definition, in <a href="Fairness.Interpretation.html">Fairness.Interpretation</a>]<br/>
 <br/><br/><a id="global_O"></a><h2>O </h2>
 <a href="LTL.Completeness.html#ones">ones</a> [definition, in <a href="LTL.Completeness.html">LTL.Completeness</a>]<br/>
@@ -746,6 +747,8 @@
 <a href="MUDA.State.html#Phase_rec">Phase_rec</a> [definition, in <a href="MUDA.State.html">MUDA.State</a>]<br/>
 <a href="MUDA.State.html#Phase_ind">Phase_ind</a> [definition, in <a href="MUDA.State.html">MUDA.State</a>]<br/>
 <a href="MUDA.State.html#Phase_rect">Phase_rect</a> [definition, in <a href="MUDA.State.html">MUDA.State</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#phase_ge_4_implies_rejection_justified">phase_ge_4_implies_rejection_justified</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#phase_ge_4">phase_ge_4</a> [definition, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="MUDA.Matching.html#pick_ask_in">pick_ask_in</a> [lemma, in <a href="MUDA.Matching.html">MUDA.Matching</a>]<br/>
 <a href="MUDA.Matching.html#pick_ask_price_bound">pick_ask_price_bound</a> [lemma, in <a href="MUDA.Matching.html">MUDA.Matching</a>]<br/>
 <a href="MUDA.Matching.html#pick_ask_None_all_false">pick_ask_None_all_false</a> [lemma, in <a href="MUDA.Matching.html">MUDA.Matching</a>]<br/>
@@ -810,6 +813,7 @@
 <a href="MUDA.Atoms.html#rejected_bid_prop">rejected_bid_prop</a> [definition, in <a href="MUDA.Atoms.html">MUDA.Atoms</a>]<br/>
 <a href="Fairness.JustifiedRejection.html#rejectionOK">rejectionOK</a> [definition, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="MUDA.Atoms.html#rejection_justified_prop">rejection_justified_prop</a> [definition, in <a href="MUDA.Atoms.html">MUDA.Atoms</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#rejection_justified_of_no_feasible_prop">rejection_justified_of_no_feasible_prop</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="Fairness.Maximality.html#residual_ask_unchanged">residual_ask_unchanged</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#residual_bid_unchanged">residual_bid_unchanged</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#residual_ask_drop">residual_ask_drop</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
@@ -851,6 +855,9 @@
 <a href="Fairness.Maximality.html#step_P3_progress_or_exit">step_P3_progress_or_exit</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="MUDA.Transitions.html#step_monotone_matches">step_monotone_matches</a> [lemma, in <a href="MUDA.Transitions.html">MUDA.Transitions</a>]<br/>
 <a href="MUDA.Transitions.html#step_preserves_bids_asks">step_preserves_bids_asks</a> [lemma, in <a href="MUDA.Transitions.html">MUDA.Transitions</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#step_P7_inversion">step_P7_inversion</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#step_P6_inversion">step_P6_inversion</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#step_P5_inversion">step_P5_inversion</a> [lemma, in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="MUDA.Sorting.html#StronglySorted__asks_sorted">StronglySorted__asks_sorted</a> [axiom, in <a href="MUDA.Sorting.html">MUDA.Sorting</a>]<br/>
 <a href="MUDA.Sorting.html#StronglySorted__bids_sorted">StronglySorted__bids_sorted</a> [axiom, in <a href="MUDA.Sorting.html">MUDA.Sorting</a>]<br/>
 <a href="Fairness.Maximality.html#sum_residual_asks_drop">sum_residual_asks_drop</a> [lemma, in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
@@ -1023,8 +1030,7 @@
 <a href="Fairness.QuantityFairness.html#interp_atom_phase_4">interp_atom_phase_4</a> [in <a href="Fairness.QuantityFairness.html">Fairness.QuantityFairness</a>]<br/>
 <a href="MUDA.ClearingPrice.html#in_rev_l">in_rev_l</a> [in <a href="MUDA.ClearingPrice.html">MUDA.ClearingPrice</a>]<br/>
 <br/><br/><a id="lemma_J"></a><h2>J </h2>
-<a href="Fairness.JustifiedRejection.html#justified_rejection">justified_rejection</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
-<a href="Fairness.JustifiedRejection.html#justified_rejection_from_None">justified_rejection_from_None</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#justified_rejection_LTL_initial">justified_rejection_LTL_initial</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <br/><br/><a id="lemma_L"></a><h2>L </h2>
 <a href="Fairness.Maximality.html#lt_add_pos_r">lt_add_pos_r</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <br/><br/><a id="lemma_M"></a><h2>M </h2>
@@ -1044,7 +1050,6 @@
 <a href="Fairness.Maximality.html#match_step_bids_unchanged">match_step_bids_unchanged</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="MUDA.Types.html#match_eq_dec_spec">match_eq_dec_spec</a> [in <a href="MUDA.Types.html">MUDA.Types</a>]<br/>
 <a href="MUDA.Types.html#match_eq_spec">match_eq_spec</a> [in <a href="MUDA.Types.html">MUDA.Types</a>]<br/>
-<a href="Fairness.JustifiedRejection.html#match_step_None_iff">match_step_None_iff</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="Fairness.Maximality.html#maximality_from_P1_or_P2">maximality_from_P1_or_P2</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#maximality_eventually">maximality_eventually</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="LTL.Soundness.html#MP_valid">MP_valid</a> [in <a href="LTL.Soundness.html">LTL.Soundness</a>]<br/>
@@ -1060,9 +1065,11 @@
 <a href="Fairness.Maximality.html#no_feasible_at_P4_index">no_feasible_at_P4_index</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#no_feasible_step_from_None">no_feasible_step_from_None</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#no_feasible_from_None">no_feasible_from_None</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
-<a href="Fairness.JustifiedRejection.html#no_feasible_pairs_gives_justification">no_feasible_pairs_gives_justification</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#no_feasible_when_phase_ge4_initial">no_feasible_when_phase_ge4_initial</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#no_feasible_preserved_after_P4">no_feasible_preserved_after_P4</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <br/><br/><a id="lemma_P"></a><h2>P </h2>
 <a href="Fairness.QuantityFairness.html#phase_ge_4_implies_has_cprice">phase_ge_4_implies_has_cprice</a> [in <a href="Fairness.QuantityFairness.html">Fairness.QuantityFairness</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#phase_ge_4_implies_rejection_justified">phase_ge_4_implies_rejection_justified</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="MUDA.Matching.html#pick_ask_in">pick_ask_in</a> [in <a href="MUDA.Matching.html">MUDA.Matching</a>]<br/>
 <a href="MUDA.Matching.html#pick_ask_price_bound">pick_ask_price_bound</a> [in <a href="MUDA.Matching.html">MUDA.Matching</a>]<br/>
 <a href="MUDA.Matching.html#pick_ask_None_all_false">pick_ask_None_all_false</a> [in <a href="MUDA.Matching.html">MUDA.Matching</a>]<br/>
@@ -1079,6 +1086,7 @@
 <a href="Fairness.QuantityFairness.html#quantity_fairness_initial">quantity_fairness_initial</a> [in <a href="Fairness.QuantityFairness.html">Fairness.QuantityFairness</a>]<br/>
 <br/><br/><a id="lemma_R"></a><h2>R </h2>
 <a href="Fairness.Maximality.html#reach_P3_from_initial">reach_P3_from_initial</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#rejection_justified_of_no_feasible_prop">rejection_justified_of_no_feasible_prop</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="Fairness.Maximality.html#residual_ask_unchanged">residual_ask_unchanged</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#residual_bid_unchanged">residual_bid_unchanged</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#residual_ask_drop">residual_ask_drop</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
@@ -1095,6 +1103,9 @@
 <a href="Fairness.Maximality.html#step_P3_progress_or_exit">step_P3_progress_or_exit</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="MUDA.Transitions.html#step_monotone_matches">step_monotone_matches</a> [in <a href="MUDA.Transitions.html">MUDA.Transitions</a>]<br/>
 <a href="MUDA.Transitions.html#step_preserves_bids_asks">step_preserves_bids_asks</a> [in <a href="MUDA.Transitions.html">MUDA.Transitions</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#step_P7_inversion">step_P7_inversion</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#step_P6_inversion">step_P6_inversion</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#step_P5_inversion">step_P5_inversion</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="Fairness.Maximality.html#sum_residual_asks_drop">sum_residual_asks_drop</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#sum_residual_bids_drop">sum_residual_bids_drop</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
 <a href="Fairness.Maximality.html#sum_residual_asks_pointwise_strict">sum_residual_asks_pointwise_strict</a> [in <a href="Fairness.Maximality.html">Fairness.Maximality</a>]<br/>
@@ -1297,6 +1308,7 @@
 <a href="Example.CloudMarket.html#Case1_UniformPrice">Case1_UniformPrice</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case1_Quantity">Case1_Quantity</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case1_Priority">Case1_Priority</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
+<a href="Example.CloudMarket.html#Case2_Rejection">Case2_Rejection</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case2_Maximality">Case2_Maximality</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case2_MatchFinality">Case2_MatchFinality</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case2_UniformPrice">Case2_UniformPrice</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
@@ -1322,6 +1334,7 @@
 <a href="Example.CloudMarket.html#Case6_UniformPrice">Case6_UniformPrice</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case6_Quantity">Case6_Quantity</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case6_Priority">Case6_Priority</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
+<a href="Example.CloudMarket.html#Case7_Rejection">Case7_Rejection</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case7_Maximality">Case7_Maximality</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case7_MatchFinality">Case7_MatchFinality</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
 <a href="Example.CloudMarket.html#Case7_UniformPrice">Case7_UniformPrice</a> [in <a href="Example.CloudMarket.html">Example.CloudMarket</a>]<br/>
@@ -1390,6 +1403,7 @@
 <a href="MUDA.State.html#Phase_rec">Phase_rec</a> [in <a href="MUDA.State.html">MUDA.State</a>]<br/>
 <a href="MUDA.State.html#Phase_ind">Phase_ind</a> [in <a href="MUDA.State.html">MUDA.State</a>]<br/>
 <a href="MUDA.State.html#Phase_rect">Phase_rect</a> [in <a href="MUDA.State.html">MUDA.State</a>]<br/>
+<a href="Fairness.JustifiedRejection.html#phase_ge_4">phase_ge_4</a> [in <a href="Fairness.JustifiedRejection.html">Fairness.JustifiedRejection</a>]<br/>
 <a href="MUDA.Matching.html#pick_ask">pick_ask</a> [in <a href="MUDA.Matching.html">MUDA.Matching</a>]<br/>
 <a href="LTL.Syntax.html#predicate">predicate</a> [in <a href="LTL.Syntax.html">LTL.Syntax</a>]<br/>
 <a href="MUDA.Atoms.html#prefix">prefix</a> [in <a href="MUDA.Atoms.html">MUDA.Atoms</a>]<br/>
@@ -1494,7 +1508,7 @@
 <td>Z</td>
 <td>_</td>
 <td><a href="index.html#global_*">other</a></td>
-<td>(446 entries)</td>
+<td>(453 entries)</td>
 </tr>
 <tr>
 <td>Notation Index</td>
@@ -1590,7 +1604,7 @@
 <td>Z</td>
 <td>_</td>
 <td>other</td>
-<td>(130 entries)</td>
+<td>(134 entries)</td>
 </tr>
 <tr>
 <td>Axiom Index</td>
@@ -1846,7 +1860,7 @@
 <td>Z</td>
 <td>_</td>
 <td>other</td>
-<td>(183 entries)</td>
+<td>(186 entries)</td>
 </tr>
 <tr>
 <td>Record Index</td>

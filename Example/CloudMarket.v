@@ -1,4 +1,4 @@
-(** * CloudMarket*)
+(* Example/CloudMarket.v *)
 From MUDA Require Import Eqb Types State Sorting Matching ClearingPrice Transitions Atoms.
 From LTL Require Import Syntax Semantics Axioms Soundness Completeness LTL.
 From Stdlib Require Import List.
@@ -21,7 +21,8 @@ Definition A (id p q t: nat) : Ask :=
 
 
 Section Case_1.
-  (* Inputs: b1=(100,1,1), b2=(90,1,2), b3=(95,1,3); s1=(85,1,1) *)
+  (* Chapter 5 Case 1:
+     b1=(100,1,1), b2=(90,1,2), b3=(95,1,3); s1=(85,1,1) *)
   Definition bs1 : list Bid := [B 1 100 1 1; B 2 90 1 2; B 3 95 1 3].
   Definition as1 : list Ask := [A 1 85 1 1].
   Definition s0_case_1 : State := initial_state bs1 as1.
@@ -52,9 +53,10 @@ Section Case_1.
 End Case_1.
 
 Section Case_2.
-  (* Inputs: b1=(100,1,1), b2=(60,1,2); s1=(80,1,1) *)
-  Definition bs2 : list Bid := [B 1 100 1 1; B 2 60 1 2].
-  Definition as2 : list Ask := [A 1 80 1 1].
+  (* Chapter 5 Case 2:
+     b1=(80,1,1); s1=(85,1,1), s2=(90,1,2) *)
+  Definition bs2 : list Bid := [B 1 80 1 1].
+  Definition as2 : list Ask := [A 1 85 1 1; A 2 90 1 2].
   Definition s0_case_2 : State := initial_state bs2 as2.
   Definition run_case_2 : trace := mu_trace s0_case_2.
 
@@ -65,12 +67,16 @@ Section Case_2.
   Example Case2_Maximality: satisfies run_case_2 0 maximal.       Proof.
     apply maximality_from_P1_or_P2. left. reflexivity.
   Qed.
+  Example Case2_Rejection :
+    satisfies run_case_2 0 rejectionOK.
+  Proof. apply justified_rejection_LTL_initial. Qed.
 End Case_2.
 
 Section Case_3.
-  (* Inputs: b1=(100,2,1), b2=(90,1,2), b3=(85,1,3); s1=(80,1,1), s2=(85,1,2) *)
-  Definition bs3 : list Bid := [B 1 100 2 1; B 2 90 1 2; B 3 85 1 3].
-  Definition as3 : list Ask := [A 1 80 1 1; A 2 85 1 2].
+  (* Chapter 5 Case 3:
+     b1=(100,2,1), b2=(95,2,2); s1=(80,2,1), s2=(85,2,2) *)
+  Definition bs3 : list Bid := [B 1 100 2 1; B 2 95 2 2].
+  Definition as3 : list Ask := [A 1 80 2 1; A 2 85 2 2].
   Definition s0_case_3 : State := initial_state bs3 as3.
   Definition run_case_3 : trace := mu_trace s0_case_3.
 
@@ -83,9 +89,10 @@ Section Case_3.
 End Case_3.
 
 Section Case_4.
-  (* Inputs: b1=(90,1,2), b2=(90,1,3); s1=(80,1,1) *)
-  Definition bs4 : list Bid := [B 1 90 1 2; B 2 90 1 3].
-  Definition as4 : list Ask := [A 1 80 1 1].
+  (* Chapter 5 Case 4:
+     b1=(100,1,1), b2=(100,1,2); s1=(90,1,1) *)
+  Definition bs4 : list Bid := [B 1 100 1 1; B 2 100 1 2].
+  Definition as4 : list Ask := [A 1 90 1 1].
   Definition s0_case_4 : State := initial_state bs4 as4.
   Definition run_case_4 : trace := mu_trace s0_case_4.
 
@@ -100,9 +107,10 @@ Section Case_4.
 End Case_4.
 
 Section Case_5.
-  (* Inputs: b1=(100,5,1), b2=(95,1,2); s1=(80,1,1), s2=(85,1,2), s3=(90,1,3) *)
-  Definition bs5 : list Bid := [B 1 100 5 1; B 2 95 1 2].
-  Definition as5 : list Ask := [A 1 80 1 1; A 2 85 1 2; A 3 90 1 3].
+  (* Chapter 5 Case 5:
+     b1=(100,5,1); s1=(80,2,1) *)
+  Definition bs5 : list Bid := [B 1 100 5 1].
+  Definition as5 : list Ask := [A 1 80 2 1].
   Definition s0_case_5 : State := initial_state bs5 as5.
   Definition run_case_5 : trace := mu_trace s0_case_5.
 
@@ -117,9 +125,10 @@ Section Case_5.
 End Case_5.
 
 Section Case_6.
-  (* Inputs: b1=(100,1,1) (true need 2); s1=(80,2,1) *)
-  Definition bs6 : list Bid := [B 1 100 1 1].
-  Definition as6 : list Ask := [A 1 80 2 1].
+  (* Chapter 5 Case 6:
+     b1=(100,3,1), b2=(90,2,2); s1=(80,2,1), s2=(85,2,2) *)
+  Definition bs6 : list Bid := [B 1 100 3 1; B 2 90 2 2].
+  Definition as6 : list Ask := [A 1 80 2 1; A 2 85 2 2].
   Definition s0_case_6 : State := initial_state bs6 as6.
   Definition run_case_6 : trace := mu_trace s0_case_6.
 
@@ -134,9 +143,11 @@ Section Case_6.
 End Case_6.
 
 Section Case_7.
-  (* Inputs: b1=(100,1,1), b2=(90,1,2), b3=(85,1,3); s1=(80,1,1), s2=(95,1,2) *)
-  Definition bs7 : list Bid := [B 1 100 1 1; B 2 90 1 2; B 3 85 1 3].
-  Definition as7 : list Ask := [A 1 80 1 1; A 2 95 1 2].
+  (* Chapter 5 Case 7:
+     b1=(110,3,1), b2=(105,2,2), b3=(100,1,3);
+     s1=(85,2,1), s2=(90,2,2), s3=(95,1,3) *)
+  Definition bs7 : list Bid := [B 1 110 3 1; B 2 105 2 2; B 3 100 1 3].
+  Definition as7 : list Ask := [A 1 85 2 1; A 2 90 2 2; A 3 95 1 3].
   Definition s0_case_7 : State := initial_state bs7 as7.
   Definition run_case_7 : trace := mu_trace s0_case_7.
 
@@ -147,4 +158,7 @@ Section Case_7.
   Example Case7_Maximality: satisfies run_case_7 0 maximal.       Proof.
     apply maximality_from_P1_or_P2. left. reflexivity.
   Qed.
+  Example Case7_Rejection :
+    satisfies run_case_7 0 rejectionOK.
+  Proof. apply justified_rejection_LTL_initial. Qed.
 End Case_7.
