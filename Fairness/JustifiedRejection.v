@@ -200,13 +200,13 @@ Proof.
       | left; intro H; destruct H as [H|[H|[H|H]]]; discriminate   (* P2 *)
       | left; intro H; destruct H as [H|[H|[H|H]]]; discriminate   (* P3 *)
       | right; apply rejection_justified_of_no_feasible_prop; 
-        eapply no_feasible_when_phase_ge4_initial; rewrite Hph; left; reflexivity   (* P4 *)
+        eapply no_feasible_when_phase_ge4_initial; left; exact Hph   (* P4 *)
       | right; apply rejection_justified_of_no_feasible_prop; 
-        eapply no_feasible_when_phase_ge4_initial; rewrite Hph; right; left; reflexivity   (* P5 *)
+        eapply no_feasible_when_phase_ge4_initial; right; left; exact Hph   (* P5 *)
       | right; apply rejection_justified_of_no_feasible_prop; 
-        eapply no_feasible_when_phase_ge4_initial; rewrite Hph; right; right; left; reflexivity   (* P6 *)
+        eapply no_feasible_when_phase_ge4_initial; right; right; left; exact Hph   (* P6 *)
       | right; apply rejection_justified_of_no_feasible_prop; 
-        eapply no_feasible_when_phase_ge4_initial; rewrite Hph; right; right; right; reflexivity   (* P7 *)
+        eapply no_feasible_when_phase_ge4_initial; right; right; right; exact Hph   (* P7 *)
       ].
 Qed.
 
