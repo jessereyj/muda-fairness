@@ -9,9 +9,9 @@ Local Open Scope LTL_scope.
 Definition justified_rej : LTL_formula :=
   And (Atom (p_phase 4)) (Atom p_rejection_justified).
 
-(* Chapter 4: justified rejection is an eventuality property that holds at the
-   first post-matching state (xhalt, phase = P4). *)
-Definition rejectionOK : LTL_formula := F justified_rej.
+(* Chapter 5: justified rejection is a post-matching invariant: once the
+  protocol is in phases P4–P7, every rejection is justified. *)
+Definition rejectionOK : LTL_formula := G (phase_ge_4 → Atom p_rejection_justified).
 
 Lemma rejection_justified_of_no_feasible_prop :
   forall s,
@@ -183,25 +183,27 @@ Theorem justified_rejection_LTL_initial :
     satisfies (mu_trace (initial_state bs as_list)) 0 rejectionOK.
 Proof.
   intros bs as_list.
-  unfold rejectionOK, justified_rej.
-  rewrite satisfies_eventually_unfold.
-  (* Use maximality to obtain a witness index where phase=P4 and no_feasible hold. *)
+  unfold rejectionOK.
+  rewrite satisfies_always_unfold.
+  intros j Hj.
+  (* Use maximality (now a post-matching invariant) to obtain no_feasible whenever phase_ge_4 holds. *)
   pose proof (maximality_from_P1_or_P2 (initial_state bs as_list)) as Hmax.
   assert (Hinit : phase (initial_state bs as_list) = P1 \/ phase (initial_state bs as_list) = P2).
   { left. reflexivity. }
   specialize (Hmax Hinit).
   unfold maximal in Hmax.
-  rewrite satisfies_eventually_unfold in Hmax.
-  destruct Hmax as [k [Hk_ge [Hph4_atom Hnf_atom]]].
-  exists k. split; [exact Hk_ge|].
-  split.
-  - (* phase atom *)
-    exact Hph4_atom.
-  - (* rejection justified atom: derive from no_feasible_prop *)
-    apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) k p_rejection_justified)).
-    unfold interp_atom.
+  rewrite satisfies_always_unfold in Hmax.
+  pose proof (Hmax j Hj) as Hmax_j.
+  simpl in Hmax_j.
+  simpl.
+  destruct Hmax_j as [Hnot_ge4 | Hnf_atom].
+  - left. exact Hnot_ge4.
+  - right.
+    apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) j p_rejection_justified)).
+    unfold interp_atom. simpl.
     apply rejection_justified_of_no_feasible_prop.
-    (* extract no_feasible_prop from the atom *)
-    exact (proj1 (mu_trace_atom_at_execute (initial_state bs as_list) k p_no_feasible) Hnf_atom).
+    pose proof (proj1 (mu_trace_atom_at_execute (initial_state bs as_list) j p_no_feasible) Hnf_atom) as Hnf_interp.
+    unfold interp_atom in Hnf_interp. simpl in Hnf_interp.
+    exact Hnf_interp.
 Qed.
 

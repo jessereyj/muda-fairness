@@ -3,11 +3,36 @@ From Stdlib Require Import Arith List Lia.
 Import ListNotations.
 From LTL Require Import LTL.
 From Fairness Require Import Interpretation.
-From MUDA Require Import Types State Matching Transitions Atoms.
+From MUDA Require Import Types State Matching Sorting Transitions Atoms.
 
 Local Open Scope LTL_scope.
 
-Definition maximal : LTL_formula := F (And (Atom (p_phase 4)) (Atom p_no_feasible)).
+Definition phase_ge_4 : LTL_formula :=
+  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
+
+(* Chapter 5: maximality is a post-matching invariant: once the protocol has
+   terminated matching (P4–P7), no feasible buyer–seller pair remains. *)
+Definition maximal : LTL_formula := G (phase_ge_4 → Atom p_no_feasible).
+
+Lemma interp_atom_phase_4 : forall s, interp_atom s (p_phase 4) <-> phase s = P4.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_5 : forall s, interp_atom s (p_phase 5) <-> phase s = P5.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_6 : forall s, interp_atom s (p_phase 6) <-> phase s = P6.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_7 : forall s, interp_atom s (p_phase 7) <-> phase s = P7.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
 
 Lemma lt_add_pos_r : forall n p, 0 < p -> n < n + p.
 Proof. intros n p Hp; lia. Qed.
@@ -435,6 +460,88 @@ Proof.
   eapply find_feasible_None_forall; eauto.
 Qed.
 
+Lemma step_P5_inversion : forall t,
+  phase (step t) = P5 -> phase t = P4.
+Proof.
+  intros t H.
+  unfold step in H.
+  remember (phase t) as ph eqn:Hp.
+  destruct ph; simpl in H.
+  - discriminate H.
+  - discriminate H.
+  - destruct (match_step t) eqn:Hm; simpl in H.
+    + pose proof (match_step_phase_invariant t s Hm) as Hph.
+      symmetry in Hp. rewrite Hp in Hph. rewrite Hph in H. discriminate.
+    + discriminate H.
+  - reflexivity.
+  - discriminate H.
+  - discriminate H.
+  - symmetry in Hp; rewrite Hp in H; discriminate.
+Qed.
+
+Lemma step_P6_inversion : forall t,
+  phase (step t) = P6 -> phase t = P5.
+Proof.
+  intros t H.
+  unfold step in H.
+  remember (phase t) as ph eqn:Hp.
+  destruct ph; simpl in H.
+  - discriminate H.
+  - discriminate H.
+  - destruct (match_step t) eqn:Hm; simpl in H.
+    + pose proof (match_step_phase_invariant t s Hm) as Hph.
+      symmetry in Hp. rewrite Hp in Hph. rewrite Hph in H. discriminate.
+    + discriminate H.
+  - discriminate H.
+  - reflexivity.
+  - discriminate H.
+  - symmetry in Hp; rewrite Hp in H; discriminate.
+Qed.
+
+Lemma step_P7_inversion : forall t,
+  phase (step t) = P7 -> phase t = P6 \/ phase t = P7.
+Proof.
+  intros t H.
+  unfold step in H.
+  remember (phase t) as ph eqn:Hp.
+  destruct ph; simpl in H.
+  - discriminate H.
+  - discriminate H.
+  - destruct (match_step t) eqn:Hm; simpl in H.
+    + pose proof (match_step_phase_invariant t s Hm) as Hph.
+      symmetry in Hp. rewrite Hp in Hph. rewrite Hph in H. discriminate.
+    + discriminate H.
+  - discriminate H.
+  - discriminate H.
+  - now left.
+  - now right.
+Qed.
+
+Lemma no_feasible_preserved_after_P4 : forall t,
+  (phase t = P4 \/ phase t = P5 \/ phase t = P6 \/ phase t = P7) ->
+  no_feasible_prop t -> no_feasible_prop (step t).
+Proof.
+  intros t Hph Hnf.
+  unfold no_feasible_prop in *.
+  intros b a Hb Ha.
+  pose proof (step_preserves_bids_asks t) as Hab.
+  assert (phase t <> P2) as Hneq2.
+  { intros Heq.
+    destruct Hph as [H4|[H5|[H6|H7]]]; congruence. }
+  assert (bids (step t) = bids t /\ asks (step t) = asks t) as [Hbids Hasks].
+  { apply Hab. exact Hneq2. }
+  rewrite Hbids in Hb. rewrite Hasks in Ha.
+  unfold step.
+  destruct (phase t) eqn:Hp; simpl in *.
+  - destruct Hph as [H4|[H5|[H6|H7]]]; congruence.
+  - destruct Hph as [H4|[H5|[H6|H7]]]; congruence.
+  - destruct Hph as [H4|[H5|[H6|H7]]]; congruence.
+  - apply Hnf; assumption.
+  - apply Hnf; assumption.
+  - apply Hnf; assumption.
+  - apply Hnf; assumption.
+Qed.
+
 Lemma no_feasible_at_P4_index : forall s n,
   phase (execute (S n) s) = P4 -> no_feasible_prop (execute (S n) s).
 Proof.
@@ -449,6 +556,79 @@ Proof.
   pose proof (no_feasible_step_from_None (execute n s) Hp3 Hnone) as Hnf.
   rewrite <- (execute_step_after n s) in Hnf.
   exact Hnf.
+Qed.
+
+Lemma no_feasible_when_phase_ge4_from_P3 :
+  forall s k,
+    phase s = P3 ->
+    (phase (execute (S k) s) = P4 \/
+     phase (execute (S k) s) = P5 \/
+     phase (execute (S k) s) = P6 \/
+     phase (execute (S k) s) = P7) ->
+    no_feasible_prop (execute (S k) s).
+Proof.
+  intros s k Hp3 Hph.
+  induction k as [|k IH].
+  - simpl in Hph.
+    destruct Hph as [H4|[H5|[H6|H7]]].
+    + (* step s is P4 *)
+      destruct (step_P4_inversion s H4) as [_ Hnone].
+      apply no_feasible_step_from_None; assumption.
+    + (* step s cannot be P5 directly from P3 *)
+      unfold step in H5; rewrite Hp3 in H5; simpl in H5.
+      destruct (match_step s) eqn:Hm; simpl in H5.
+      * (* Some s0: phase stays P3 *)
+        pose proof (match_step_phase_invariant s s0 Hm) as Hph.
+        rewrite Hp3 in Hph. rewrite Hph in H5. discriminate.
+      * (* None: finish_matching -> P4 *)
+        discriminate.
+    + (* step s cannot be P6 directly from P3 *)
+      unfold step in H6; rewrite Hp3 in H6; simpl in H6.
+      destruct (match_step s) eqn:Hm; simpl in H6.
+      * pose proof (match_step_phase_invariant s s0 Hm) as Hph.
+        rewrite Hp3 in Hph. rewrite Hph in H6. discriminate.
+      * discriminate.
+    + (* step s cannot be P7 directly from P3 *)
+      unfold step in H7; rewrite Hp3 in H7; simpl in H7.
+      destruct (match_step s) eqn:Hm; simpl in H7.
+      * pose proof (match_step_phase_invariant s s0 Hm) as Hph.
+        rewrite Hp3 in Hph. rewrite Hph in H7. discriminate.
+      * discriminate.
+  - set (t0 := execute (S k) s).
+    assert (Hexec : execute (S (S k)) s = step t0).
+    { subst t0. rewrite execute_step_after. reflexivity. }
+    rewrite Hexec in Hph.
+    destruct Hph as [H4|[H5|[H6|H7]]].
+    + destruct (step_P4_inversion t0 H4) as [Ht0P3 Hnone].
+      rewrite Hexec. subst t0.
+      apply no_feasible_step_from_None; assumption.
+    + pose proof (step_P5_inversion t0 H5) as Ht0P4.
+      assert (Hnf_t0 : no_feasible_prop t0).
+      { subst t0. eapply no_feasible_at_P4_index. exact Ht0P4. }
+      rewrite Hexec.
+      eapply no_feasible_preserved_after_P4.
+      * left. exact Ht0P4.
+      * exact Hnf_t0.
+    + pose proof (step_P6_inversion t0 H6) as Ht0P5.
+      assert (Hnf_t0 : no_feasible_prop t0).
+      { apply IH. right. left. subst t0. exact Ht0P5. }
+      rewrite Hexec.
+      eapply no_feasible_preserved_after_P4.
+      * right. left. exact Ht0P5.
+      * exact Hnf_t0.
+    + destruct (step_P7_inversion t0 H7) as [Ht0P6|Ht0P7].
+      * assert (Hnf_t0 : no_feasible_prop t0).
+        { apply IH. right. right. left. subst t0. exact Ht0P6. }
+        rewrite Hexec.
+        eapply no_feasible_preserved_after_P4.
+        { right. right. left. exact Ht0P6. }
+        exact Hnf_t0.
+      * assert (Hnf_t0 : no_feasible_prop t0).
+        { apply IH. right. right. right. subst t0. exact Ht0P7. }
+        rewrite Hexec.
+        eapply no_feasible_preserved_after_P4.
+        { right. right. right. exact Ht0P7. }
+        exact Hnf_t0.
 Qed.
 
 Lemma eventually_P4_with_None : forall s,
@@ -480,10 +660,10 @@ Proof.
       assert (Hp3' : phase s' = P3).
       { pose proof (match_step_phase_invariant s s' Hm) as Hph.
         rewrite Hp3 in Hph. exact Hph. }
-  destruct (IH s' Hp3' Hle') as [n [HP4 Hnone]].
-  exists (S n). split.
-  * rewrite execute_S. unfold step; rewrite Hp3; simpl. rewrite Hm. exact HP4.
-  * rewrite execute_S. unfold step; rewrite Hp3; simpl. rewrite Hm. exact Hnone.
+      destruct (IH s' Hp3' Hle') as [n [HP4 Hnone]].
+      exists (S n). split.
+      * rewrite execute_S. unfold step; rewrite Hp3; simpl. rewrite Hm. exact HP4.
+      * rewrite execute_S. unfold step; rewrite Hp3; simpl. rewrite Hm. exact Hnone.
     + (* None case *)
       exists 0. simpl. split.
       * unfold step; rewrite Hp3, Hm. reflexivity.
@@ -494,33 +674,77 @@ Theorem maximality_eventually : forall s,
   phase s = P3 -> satisfies (mu_trace s) 0 maximal.
 Proof.
   intros s Hp3.
-  unfold maximal. rewrite satisfies_eventually_unfold.
-  destruct (eventually_P4_with_None s Hp3) as [n [HP4 Hnone]].
-  (* We'll produce witness (S n); need to transport atoms via mu_trace_atom_at_execute. *)
-  exists (S n). split; [lia|].
-  (* Show conjunction holds at index n: phase=4 and no_feasible *)
-  split.
-  - (* Atom (p_phase 4) *)
-    (* Use bridge lemma instead of manual trace_at unfolding. *)
-    apply (proj2 (mu_trace_atom_at_execute s (S n) (p_phase 4))).
-    (* Convert HP4 (phase (execute (S n) s)=P4) into interp_atom fact *)
-    unfold interp_atom.
-    (* Phase decoding path: ensure p_phase 4 inside range; we rely on direct equality path. *)
-    (* Evaluate phase predicate decoding condition *)
-    destruct (andb (Nat.leb (p_phase 1) (p_phase 4)) (Nat.leb (p_phase 4) (p_phase 7))) eqn:Hrange.
-    2:{ (* Unexpected fallthrough, but range holds; contradiction path *) discriminate. }
-    (* Range true: match branch uses nth_phase logic *)
-    simpl. (* nth_phase (p_phase 4 - 10) = P4 *)
-    (* Show resulting equality from HP4 *)
-    exact HP4.
-  - (* Atom p_no_feasible *)
-    apply (proj2 (mu_trace_atom_at_execute s (S n) p_no_feasible)).
-    (* Derive no_feasible_prop (execute (S n) s) as before *)
-    set (t := execute n s) in *.
-    assert (HstepP4 : phase (step t) = P4) by (subst t; rewrite (execute_step_after n s) in HP4; exact HP4).
-    destruct (step_P4_inversion t HstepP4) as [HtP3 HtNone].
-    assert (Hnf_step : no_feasible_prop (step t)) by (apply no_feasible_step_from_None; assumption).
-    subst t. rewrite <- (execute_step_after n s) in Hnf_step. exact Hnf_step.
+  unfold maximal.
+  rewrite satisfies_always_unfold.
+  intros j _.
+  destruct j as [|k].
+  - (* phase_ge_4 is false at P3 *)
+    left.
+    intro Hge.
+    simpl in Hge.
+    destruct Hge as [H4|[H5|[H6|H7]]].
+    + apply (proj1 (mu_trace_atom_at_execute s 0 (p_phase 4))) in H4.
+      apply (proj1 (interp_atom_phase_4 s)) in H4. congruence.
+    + apply (proj1 (mu_trace_atom_at_execute s 0 (p_phase 5))) in H5.
+      apply (proj1 (interp_atom_phase_5 s)) in H5. congruence.
+    + apply (proj1 (mu_trace_atom_at_execute s 0 (p_phase 6))) in H6.
+      apply (proj1 (interp_atom_phase_6 s)) in H6. congruence.
+    + apply (proj1 (mu_trace_atom_at_execute s 0 (p_phase 7))) in H7.
+      apply (proj1 (interp_atom_phase_7 s)) in H7. congruence.
+  - (* post-matching indices: if in P4..P7 then no_feasible holds *)
+    destruct (phase (execute (S k) s)) eqn:Hph.
+    + left.
+      intro Hge.
+      simpl in Hge.
+      destruct Hge as [H4|[H5|[H6|H7]]].
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 4))) in H4.
+        apply (proj1 (interp_atom_phase_4 (execute (S k) s))) in H4. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 5))) in H5.
+        apply (proj1 (interp_atom_phase_5 (execute (S k) s))) in H5. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 6))) in H6.
+        apply (proj1 (interp_atom_phase_6 (execute (S k) s))) in H6. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 7))) in H7.
+        apply (proj1 (interp_atom_phase_7 (execute (S k) s))) in H7. congruence.
+    + left.
+      intro Hge.
+      simpl in Hge.
+      destruct Hge as [H4|[H5|[H6|H7]]].
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 4))) in H4.
+        apply (proj1 (interp_atom_phase_4 (execute (S k) s))) in H4. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 5))) in H5.
+        apply (proj1 (interp_atom_phase_5 (execute (S k) s))) in H5. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 6))) in H6.
+        apply (proj1 (interp_atom_phase_6 (execute (S k) s))) in H6. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 7))) in H7.
+        apply (proj1 (interp_atom_phase_7 (execute (S k) s))) in H7. congruence.
+    + left.
+      intro Hge.
+      simpl in Hge.
+      destruct Hge as [H4|[H5|[H6|H7]]].
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 4))) in H4.
+        apply (proj1 (interp_atom_phase_4 (execute (S k) s))) in H4. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 5))) in H5.
+        apply (proj1 (interp_atom_phase_5 (execute (S k) s))) in H5. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 6))) in H6.
+        apply (proj1 (interp_atom_phase_6 (execute (S k) s))) in H6. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 7))) in H7.
+        apply (proj1 (interp_atom_phase_7 (execute (S k) s))) in H7. congruence.
+    + right.
+      apply (proj2 (mu_trace_atom_at_execute s (S k) p_no_feasible)).
+      apply (no_feasible_when_phase_ge4_from_P3 s k Hp3).
+      left; exact Hph.
+    + right.
+      apply (proj2 (mu_trace_atom_at_execute s (S k) p_no_feasible)).
+      apply (no_feasible_when_phase_ge4_from_P3 s k Hp3).
+      right; left; exact Hph.
+    + right.
+      apply (proj2 (mu_trace_atom_at_execute s (S k) p_no_feasible)).
+      apply (no_feasible_when_phase_ge4_from_P3 s k Hp3).
+      right; right; left; exact Hph.
+    + right.
+      apply (proj2 (mu_trace_atom_at_execute s (S k) p_no_feasible)).
+      apply (no_feasible_when_phase_ge4_from_P3 s k Hp3).
+      right; right; right; exact Hph.
 Qed.
 
 Lemma reach_P3_from_initial : forall s,
@@ -531,25 +755,124 @@ Proof.
   - exists 1. simpl. unfold step; rewrite Hp2. simpl. reflexivity.
 Qed.
 
+Lemma no_feasible_when_phase_ge4_from_P1_or_P2 :
+  forall s k,
+    (phase s = P1 \/ phase s = P2) ->
+    (phase (execute (S k) s) = P4 \/
+     phase (execute (S k) s) = P5 \/
+     phase (execute (S k) s) = P6 \/
+     phase (execute (S k) s) = P7) ->
+    no_feasible_prop (execute (S k) s).
+Proof.
+  intros s k Hinit Hph.
+  induction k as [|k IH].
+  - simpl in Hph.
+    destruct Hinit as [Hp1|Hp2].
+    + destruct Hph as [H4|[H5|[H6|H7]]]; unfold step in *; rewrite Hp1 in *; simpl in *; discriminate.
+    + destruct Hph as [H4|[H5|[H6|H7]]]; unfold step in *; rewrite Hp2 in *; unfold do_sorting in *; simpl in *; discriminate.
+  - set (t0 := execute (S k) s).
+    assert (Hexec : execute (S (S k)) s = step t0).
+    { subst t0. rewrite execute_step_after. reflexivity. }
+    rewrite Hexec in Hph.
+    destruct Hph as [H4|[H5|[H6|H7]]].
+    + destruct (step_P4_inversion t0 H4) as [Ht0P3 Hnone].
+      rewrite Hexec. subst t0.
+      apply no_feasible_step_from_None; assumption.
+    + pose proof (step_P5_inversion t0 H5) as Ht0P4.
+      assert (Hnf_t0 : no_feasible_prop t0).
+      { subst t0. eapply no_feasible_at_P4_index. exact Ht0P4. }
+      rewrite Hexec.
+      eapply no_feasible_preserved_after_P4.
+      * left. exact Ht0P4.
+      * exact Hnf_t0.
+    + pose proof (step_P6_inversion t0 H6) as Ht0P5.
+      assert (Hnf_t0 : no_feasible_prop t0).
+      { apply IH. subst t0. right. left. exact Ht0P5. }
+      rewrite Hexec.
+      eapply no_feasible_preserved_after_P4.
+      * right. left. exact Ht0P5.
+      * exact Hnf_t0.
+    + destruct (step_P7_inversion t0 H7) as [Ht0P6|Ht0P7].
+      * assert (Hnf_t0 : no_feasible_prop t0).
+        { apply IH. subst t0. right. right. left. exact Ht0P6. }
+        rewrite Hexec.
+        eapply no_feasible_preserved_after_P4.
+        { right. right. left. exact Ht0P6. }
+        exact Hnf_t0.
+      * assert (Hnf_t0 : no_feasible_prop t0).
+        { apply IH. subst t0. right. right. right. exact Ht0P7. }
+        rewrite Hexec.
+        eapply no_feasible_preserved_after_P4.
+        { right. right. right. exact Ht0P7. }
+        exact Hnf_t0.
+Qed.
+
 Theorem maximality_from_P1_or_P2 : forall s,
   (phase s = P1 \/ phase s = P2) -> satisfies (mu_trace s) 0 maximal.
 Proof.
   intros s Hinit.
-  destruct (reach_P3_from_initial s Hinit) as [n Hn].
-  pose proof (maximality_eventually (execute n s) Hn) as Hmax.
-  unfold maximal in *.
-  rewrite satisfies_eventually_unfold.
-  rewrite satisfies_eventually_unfold in Hmax.
-  destruct Hmax as [m [Hm_ge [Hph4 Hnf]]].
-  (* Shift the trace starting at (execute n s) by m back to original trace using execute_add_tail. *)
-  exists (n + m). split; [lia|]. split.
-  - (* phase 4 atom *)
-    apply (proj2 (mu_trace_atom_at_execute s (n+m) (p_phase 4))).
-    pose proof (proj1 (mu_trace_atom_at_execute (execute n s) m (p_phase 4)) Hph4) as Hph4_interp.
-    rewrite (execute_add_tail n m s) in Hph4_interp. exact Hph4_interp.
-  - (* no feasible atom *)
-    apply (proj2 (mu_trace_atom_at_execute s (n+m) p_no_feasible)).
-    pose proof (proj1 (mu_trace_atom_at_execute (execute n s) m p_no_feasible) Hnf) as Hnf_interp.
-    rewrite (execute_add_tail n m s) in Hnf_interp. exact Hnf_interp.
+  unfold maximal.
+  rewrite satisfies_always_unfold.
+  intros j _.
+  destruct j as [|k].
+  - left.
+    intro Hge.
+    simpl in Hge.
+    destruct Hge as [H4|[H5|[H6|H7]]].
+    + apply (proj1 (mu_trace_atom_at_execute s 0 (p_phase 4))) in H4.
+      apply (proj1 (interp_atom_phase_4 s)) in H4.
+      destruct Hinit as [Hp1|Hp2]; congruence.
+    + apply (proj1 (mu_trace_atom_at_execute s 0 (p_phase 5))) in H5.
+      apply (proj1 (interp_atom_phase_5 s)) in H5.
+      destruct Hinit as [Hp1|Hp2]; congruence.
+    + apply (proj1 (mu_trace_atom_at_execute s 0 (p_phase 6))) in H6.
+      apply (proj1 (interp_atom_phase_6 s)) in H6.
+      destruct Hinit as [Hp1|Hp2]; congruence.
+    + apply (proj1 (mu_trace_atom_at_execute s 0 (p_phase 7))) in H7.
+      apply (proj1 (interp_atom_phase_7 s)) in H7.
+      destruct Hinit as [Hp1|Hp2]; congruence.
+  - destruct (phase (execute (S k) s)) eqn:Hph.
+    + left; intro Hge; simpl in Hge.
+      destruct Hge as [H4|[H5|[H6|H7]]].
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 4))) in H4.
+        apply (proj1 (interp_atom_phase_4 (execute (S k) s))) in H4. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 5))) in H5.
+        apply (proj1 (interp_atom_phase_5 (execute (S k) s))) in H5. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 6))) in H6.
+        apply (proj1 (interp_atom_phase_6 (execute (S k) s))) in H6. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 7))) in H7.
+        apply (proj1 (interp_atom_phase_7 (execute (S k) s))) in H7. congruence.
+    + left; intro Hge; simpl in Hge.
+      destruct Hge as [H4|[H5|[H6|H7]]].
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 4))) in H4.
+        apply (proj1 (interp_atom_phase_4 (execute (S k) s))) in H4. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 5))) in H5.
+        apply (proj1 (interp_atom_phase_5 (execute (S k) s))) in H5. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 6))) in H6.
+        apply (proj1 (interp_atom_phase_6 (execute (S k) s))) in H6. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 7))) in H7.
+        apply (proj1 (interp_atom_phase_7 (execute (S k) s))) in H7. congruence.
+    + left; intro Hge; simpl in Hge.
+      destruct Hge as [H4|[H5|[H6|H7]]].
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 4))) in H4.
+        apply (proj1 (interp_atom_phase_4 (execute (S k) s))) in H4. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 5))) in H5.
+        apply (proj1 (interp_atom_phase_5 (execute (S k) s))) in H5. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 6))) in H6.
+        apply (proj1 (interp_atom_phase_6 (execute (S k) s))) in H6. congruence.
+      * apply (proj1 (mu_trace_atom_at_execute s (S k) (p_phase 7))) in H7.
+        apply (proj1 (interp_atom_phase_7 (execute (S k) s))) in H7. congruence.
+    + right.
+      apply (proj2 (mu_trace_atom_at_execute s (S k) p_no_feasible)).
+      eapply no_feasible_when_phase_ge4_from_P1_or_P2; eauto.
+    + right.
+      apply (proj2 (mu_trace_atom_at_execute s (S k) p_no_feasible)).
+      eapply no_feasible_when_phase_ge4_from_P1_or_P2; eauto.
+    + right.
+      apply (proj2 (mu_trace_atom_at_execute s (S k) p_no_feasible)).
+      eapply no_feasible_when_phase_ge4_from_P1_or_P2; eauto.
+    + right.
+      apply (proj2 (mu_trace_atom_at_execute s (S k) p_no_feasible)).
+      eapply no_feasible_when_phase_ge4_from_P1_or_P2; eauto.
 Qed.
 
