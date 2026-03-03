@@ -6,10 +6,12 @@ From MUDA Require Import MUDA Atoms Matching Transitions.
 From Fairness Require Import Interpretation Maximality.
 Local Open Scope LTL_scope.
 
-Definition phase_ge_4 : LTL_formula :=
-  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
+Definition justified_rej : LTL_formula :=
+  And (Atom (p_phase 4)) (Atom p_rejection_justified).
 
-Definition rejectionOK : LTL_formula := G (phase_ge_4 → Atom p_rejection_justified).
+(* Chapter 4: justified rejection is an eventuality property that holds at the
+   first post-matching state (xhalt, phase = P4). *)
+Definition rejectionOK : LTL_formula := F justified_rej.
 
 Lemma rejection_justified_of_no_feasible_prop :
   forall s,
@@ -19,12 +21,10 @@ Proof.
   intros s Hnf.
   split.
   - intros b aa Hb_in Haa_in.
-    right.
     destruct Hb_in as [Hb_in _].
     specialize (Hnf b aa Hb_in Haa_in).
     exact Hnf.
   - intros aa b Haa_in Hb_in.
-    right.
     destruct Haa_in as [Haa_in _].
     specialize (Hnf b aa Hb_in Haa_in).
     exact Hnf.
@@ -178,46 +178,30 @@ Proof.
         exact Hnf_t0.
 Qed.
 
-Lemma phase_ge_4_implies_rejection_justified :
-  forall bs as_list i,
-    satisfies (mu_trace (initial_state bs as_list)) i (phase_ge_4 → Atom p_rejection_justified).
-Proof.
-  intros bs as_list i.
-  unfold phase_ge_4.
-  simpl.
-  repeat rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i (p_phase 4)).
-  repeat rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i (p_phase 5)).
-  repeat rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i (p_phase 6)).
-  repeat rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i (p_phase 7)).
-  rewrite (mu_trace_atom_at_execute (initial_state bs as_list) i p_rejection_justified).
-  unfold interp_atom.
-  destruct i as [|k].
-  - (* i = 0: initial phase is P1, implication holds trivially *)
-    unfold execute; unfold step; simpl. left. intro H. destruct H as [H|[H|[H|H]]]; discriminate.
-  - (* i = S k *)
-    destruct (phase (execute (S k) (initial_state bs as_list))) as [| | | | | |] eqn:Hph; simpl;
-      [ left; intro H; destruct H as [H|[H|[H|H]]]; discriminate   (* P1 *)
-      | left; intro H; destruct H as [H|[H|[H|H]]]; discriminate   (* P2 *)
-      | left; intro H; destruct H as [H|[H|[H|H]]]; discriminate   (* P3 *)
-      | right; apply rejection_justified_of_no_feasible_prop; 
-        eapply no_feasible_when_phase_ge4_initial; left; exact Hph   (* P4 *)
-      | right; apply rejection_justified_of_no_feasible_prop; 
-        eapply no_feasible_when_phase_ge4_initial; right; left; exact Hph   (* P5 *)
-      | right; apply rejection_justified_of_no_feasible_prop; 
-        eapply no_feasible_when_phase_ge4_initial; right; right; left; exact Hph   (* P6 *)
-      | right; apply rejection_justified_of_no_feasible_prop; 
-        eapply no_feasible_when_phase_ge4_initial; right; right; right; exact Hph   (* P7 *)
-      ].
-Qed.
-
 Theorem justified_rejection_LTL_initial :
   forall bs as_list,
     satisfies (mu_trace (initial_state bs as_list)) 0 rejectionOK.
 Proof.
   intros bs as_list.
-  unfold rejectionOK.
-  rewrite satisfies_always_unfold.
-  intros n _.
-  apply phase_ge_4_implies_rejection_justified.
+  unfold rejectionOK, justified_rej.
+  rewrite satisfies_eventually_unfold.
+  (* Use maximality to obtain a witness index where phase=P4 and no_feasible hold. *)
+  pose proof (maximality_from_P1_or_P2 (initial_state bs as_list)) as Hmax.
+  assert (Hinit : phase (initial_state bs as_list) = P1 \/ phase (initial_state bs as_list) = P2).
+  { left. reflexivity. }
+  specialize (Hmax Hinit).
+  unfold maximal in Hmax.
+  rewrite satisfies_eventually_unfold in Hmax.
+  destruct Hmax as [k [Hk_ge [Hph4_atom Hnf_atom]]].
+  exists k. split; [exact Hk_ge|].
+  split.
+  - (* phase atom *)
+    exact Hph4_atom.
+  - (* rejection justified atom: derive from no_feasible_prop *)
+    apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) k p_rejection_justified)).
+    unfold interp_atom.
+    apply rejection_justified_of_no_feasible_prop.
+    (* extract no_feasible_prop from the atom *)
+    exact (proj1 (mu_trace_atom_at_execute (initial_state bs as_list) k p_no_feasible) Hnf_atom).
 Qed.
 

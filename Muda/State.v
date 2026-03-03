@@ -5,16 +5,18 @@ From Stdlib Require Import List Arith.
 Import ListNotations.
 From MUDA Require Import Types.
 
-(* Phase enumeration: P1 (submission) → P2 (sort) → P3 (match) → 
-   P4 (price) → P5 (notify) → P6 (settle) → P7 (terminal) *)
+(* Phase enumeration (Chapter 3):
+  P1 (submission) → P2 (sorting) → P3 (matching) →
+  P4 (clearing price) → P5 (finalization) → P6 (bookkeeping) → P7 (rejection/terminal)
+*)
 Inductive Phase : Type :=
   | P1  (* Order submission *)
   | P2  (* Sorting *)
   | P3  (* Matching *)
   | P4  (* Clearing price *)
-  | P5  (* Notification *)
-  | P6  (* Settlement *)
-  | P7. (* Terminal *)
+  | P5  (* Finalization *)
+  | P6  (* Bookkeeping *)
+  | P7. (* Rejection (terminal) *)
 
 (* State record.
    Thesis notation: x = (B, S, orders, residuals, M, p*, phase)

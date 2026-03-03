@@ -12,10 +12,11 @@ Definition no_feasible_prop (s : State) : Prop :=
               is_feasible b a (matches s) = false.
 
 Definition has_clearing_price_prop (s : State) : Prop :=
-  match phase s with
-  | P4 | P5 | P6 | P7 => True
-  | _ => False
-  end.
+  (* Chapter 4: has_cprice(x) iff the final match record is non-empty.
+     In this mechanization, this is equivalent to determine_clearing_price s
+     being defined (Some _), which happens exactly when a marginal pair exists.
+   *)
+  exists c, determine_clearing_price s = Some c.
 
 Definition bounds_cstar_prop (s : State) : Prop :=
   match marginal_pair s, determine_clearing_price s with
@@ -32,12 +33,10 @@ Definition price_rule_prop (s : State) : Prop :=
       match marginal_pair s with
       | None => True
       | Some (b, a) =>
-          let eb := (residual_bid b (matches s) =? 0) in
-          let ea := (residual_ask a (matches s) =? 0) in
+          (* Chapter 3: p* depends only on whether the marginal seller is exhausted. *)
           determine_clearing_price s =
-            (if eb && ea then Some (price b)
-             else if eb then Some (price b)
-             else if ea then Some (ask_price a)
+            (if (residual_ask a (matches s) =? 0)
+             then Some (ask_price a)
              else Some (price b))
       end
   end.
@@ -48,20 +47,34 @@ Definition prefix {A : Type} (l1 l2 : list A) : Prop :=
 Definition match_keep_prop (s : State) : Prop :=
   prefix (matches s) (matches (step s)).
 
+(* Chapter 4 match finality: after matching terminates (i.e., from P4 onward),
+   the match record is no longer modified by the transition function. *)
+Definition match_final_prop (s : State) : Prop :=
+  match phase s with
+  | P4 | P5 | P6 | P7 => matches (step s) = matches s
+  | _ => True
+  end.
+
+Definition occurs_bid (b : Bid) (ms : list Match) : Prop :=
+  exists m, In m ms /\ matched_bid m = b.
+
+Definition occurs_ask (a : Ask) (ms : list Match) : Prop :=
+  exists m, In m ms /\ matched_ask m = a.
+
 Definition rejected_bid_prop (b : Bid) (s : State) : Prop :=
-  In b (bids s) /\ residual_bid b (matches s) > 0.
+  In b (bids s) /\ ~ occurs_bid b (matches s).
 
 Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
-  In a (asks s) /\ residual_ask a (matches s) > 0.
+  In a (asks s) /\ ~ occurs_ask a (matches s).
 
 Definition rejection_justified_prop (s : State) : Prop :=
   (forall (b : Bid) (aa : Ask),
       rejected_bid_prop b s -> In aa (asks s) ->
-      residual_ask aa (matches s) = 0 \/ is_feasible b aa (matches s) = false)
+      is_feasible b aa (matches s) = false)
   /\
   (forall (aa : Ask) (b : Bid),
       rejected_ask_prop aa s -> In b (bids s) ->
-      residual_bid b (matches s) = 0 \/ is_feasible b aa (matches s) = false).
+      is_feasible b aa (matches s) = false).
 
 Definition priorityB_step_ok_prop (s: State) : Prop :=
   phase s = P3 ->

@@ -42,12 +42,10 @@
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">Hnf</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
 &nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">b</span> <span class="id" title="var">aa</span> <span class="id" title="var">Hb_in</span> <span class="id" title="var">Haa_in</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hb_in</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hb_in</span> <span class="id" title="var">_</span>].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">Hnf</span> <span class="id" title="var">b</span> <span class="id" title="var">aa</span> <span class="id" title="var">Hb_in</span> <span class="id" title="var">Haa_in</span>).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">Hnf</span>.<br/>
 &nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">aa</span> <span class="id" title="var">b</span> <span class="id" title="var">Haa_in</span> <span class="id" title="var">Hb_in</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Haa_in</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Haa_in</span> <span class="id" title="var">_</span>].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">Hnf</span> <span class="id" title="var">b</span> <span class="id" title="var">aa</span> <span class="id" title="var">Hb_in</span> <span class="id" title="var">Haa_in</span>).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">Hnf</span>.<br/>

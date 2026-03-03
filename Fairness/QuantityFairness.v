@@ -13,8 +13,10 @@ Definition phase_ge_4 : LTL_formula :=
   Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
 
 Definition priceOK : LTL_formula :=
+  (* Chapter 4: price fairness is the global conjunction of the boundedness and
+     the price-rule predicates. Totalisation for the undefined-price case is
+     built into the atoms. *)
   G (Atom p_bounds_cstar)
-  ∧ G (phase_ge_4 → Atom p_has_cprice)
   ∧ G (Atom p_price_rule).
 
 Theorem quantity_fairness_initial : forall bs as_list,
@@ -123,32 +125,6 @@ Proof.
   intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
 Qed.
 
-Lemma phase_ge_4_implies_has_cprice :
-  forall s i,
-    satisfies (mu_trace s) i (phase_ge_4 → Atom p_has_cprice).
-Proof.
-  intros s i.
-  unfold phase_ge_4.
-  simpl.
-  repeat rewrite (mu_trace_atom_at_execute s i (p_phase 4)).
-  repeat rewrite (mu_trace_atom_at_execute s i (p_phase 5)).
-  repeat rewrite (mu_trace_atom_at_execute s i (p_phase 6)).
-  repeat rewrite (mu_trace_atom_at_execute s i (p_phase 7)).
-  rewrite (mu_trace_atom_at_execute s i p_has_cprice).
-  rewrite interp_atom_phase_4.
-  rewrite interp_atom_phase_5.
-  rewrite interp_atom_phase_6.
-  rewrite interp_atom_phase_7.
-  unfold interp_atom, has_clearing_price_prop.
-  destruct (phase (execute i s)); simpl.
-  - left; intro H; destruct H as [H|[H|[H|H]]]; discriminate.
-  - left; intro H; destruct H as [H|[H|[H|H]]]; discriminate.
-  - left; intro H; destruct H as [H|[H|[H|H]]]; discriminate.
-  - right; exact I.
-  - right; exact I.
-  - right; exact I.
-  - right; exact I.
-Qed.
 
 Lemma price_rule_fairness_LTL_initial : forall bs as_list,
   satisfies (mu_trace (initial_state bs as_list)) 0 (G (Atom p_price_rule)).
@@ -185,15 +161,10 @@ Proof.
   unfold priceOK.
   split.
   - rewrite satisfies_always_unfold.
-    intros j _.
+    intros j _. 
     rewrite mu_trace_atom_at_execute.
     unfold interp_atom.
-    (* predicate 4 maps to bounds_cstar_prop; others irrelevant *)
     change (bounds_cstar_prop (execute j (initial_state bs as_list))).
     apply bounds_cstar_preserved_n.
-  - split.
-    + rewrite satisfies_always_unfold.
-      intros j _.
-      apply phase_ge_4_implies_has_cprice.
-    + apply price_rule_fairness_LTL_initial.
+  - apply price_rule_fairness_LTL_initial.
 Qed.

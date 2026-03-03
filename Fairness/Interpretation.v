@@ -17,6 +17,9 @@ Definition p_prioS_step   : predicate := 7.
 Definition p_rejection_justified : predicate := 8.
 Definition p_price_rule         : predicate := 9.
 
+(* Chapter 4 match-finality atom: matches are stable after matching ends. *)
+Definition p_match_final : predicate := 10.
+
 Definition p_phase (i : nat) : predicate := (10 + i)%nat.
 
 Definition nth_phase (i : nat) : Phase :=
@@ -38,6 +41,7 @@ Definition interp_atom (s : State) : predicate -> Prop :=
     | 7 => priorityS_step_ok_prop s
   | 8 => rejection_justified_prop s
     | 9 => price_rule_prop s
+    | 10 => match_final_prop s
     | p' =>
         (* decode phase atoms *)
         if andb (Nat.leb (p_phase 1) p') (Nat.leb p' (p_phase 7)) then

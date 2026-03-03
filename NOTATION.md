@@ -219,19 +219,42 @@ Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
   | Some (b, a) =>
-      let rb := residual_bid b (matches s) in
-      let ra := residual_ask a (matches s) in
-      Some (if (rb =? 0) && (ra =? 0) then price b
-            else if (rb =? 0) then price b
-            else if (ra =? 0) then ask_price a
-            else price b)
+      if (residual_ask a (matches s) =? 0)
+      then Some (ask_price a)
+      else Some (price b)
   end.
 ```
 
 **Mapping:**
 - Thesis "last match" ↔ Code `rev (matches s)` and pattern match on head
-- Thesis tie-breaking rule ↔ Code nested if-then-else structure
+- Thesis clearing-price rule ↔ Code test on marginal seller exhaustion (`residual_ask = 0`)
 - Thesis uses append semantics (matches grow at tail) ↔ Code `rev` retrieves last element
+
+---
+
+## Rejection
+
+**Thesis (Chapter 3, Definition 10):**
+- An agent is rejected at termination iff it does not appear in the final match record.
+
+**Code:** `MUDA/Atoms.v`
+```coq
+Definition occurs_bid (b : Bid) (ms : list Match) : Prop :=
+  exists m, In m ms /\ matched_bid m = b.
+
+Definition occurs_ask (a : Ask) (ms : list Match) : Prop :=
+  exists m, In m ms /\ matched_ask m = a.
+
+Definition rejected_bid_prop (b : Bid) (s : State) : Prop :=
+  In b (bids s) /\ ~ occurs_bid b (matches s).
+
+Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
+  In a (asks s) /\ ~ occurs_ask a (matches s).
+```
+
+**Mapping:**
+- Thesis “appears in final match record” ↔ Code `occurs_bid` / `occurs_ask` over `matches`
+- Thesis “rejected” ↔ Code `rejected_bid_prop` / `rejected_ask_prop`
 
 ---
 
@@ -269,10 +292,16 @@ Definition has_clearing_price_prop (s : State) : Prop := ...
 Definition interp_atom (s : State) (p : predicate) : Prop :=
   match p with
   | 0 => allocOK_prop s
-  | 1 => no_feasible_prop s
-  | 2 => phase s = P3
+  | 1 => phase s = P7
+  | 2 => no_feasible_prop s
   | 3 => has_clearing_price_prop s
-  (* ... *)
+  | 4 => bounds_cstar_prop s
+  | 5 => match_keep_prop s
+  | 6 => priorityB_step_ok_prop s
+  | 7 => priorityS_step_ok_prop s
+  | 8 => rejection_justified_prop s
+  | 9 => price_rule_prop s
+  (* phase atoms p_phase(k) are encoded separately *)
   end.
 ```
 
@@ -290,5 +319,6 @@ Definition interp_atom (s : State) (p : predicate) : Prop :=
 | Allocation sum | Set notation | Recursive function | Decidable, constructive |
 | Trace construction | Conceptual ω-run | `CoFixpoint` | Mechanized coinduction |
 | Match list | Abstract set `M` | `list Match` with append | Executable, provable monotonicity |
+| Rejection | Non-occurrence in `M_fin` | `occurs_*` over `matches` | Matches Chapter 3 definition |
 
 These choices are **standard practice in formal verification**: the thesis emphasizes mathematical clarity and essential logic, while the code provides a mechanically checkable implementation with necessary bookkeeping. The correctness of the formalization depends on faithful implementation of the thesis's core definitions (matching, feasibility, clearing price), which has been achieved.

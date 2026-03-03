@@ -83,12 +83,14 @@ Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
   | Some (b, a) =>
-      let eb := (residual_bid b (matches s) =? 0) in
-      let ea := (residual_ask a (matches s) =? 0) in
-      if eb && ea then Some (price b)
-      else if eb then Some (price b)
-      else if ea then Some (ask_price a)
-      else Some (price b) (* fallback: stays within bounds by wf_state *)
+      (* Chapter 3 clearing-price rule:
+         Let (b_star, a_star) be the marginal pair. If the marginal seller still has
+         positive residual quantity, then p* = p(b_star); otherwise p* = a(a_star).
+         (In particular, if both residuals are 0, pick the marginal ask.)
+       *)
+      if (residual_ask a (matches s) =? 0)
+      then Some (ask_price a)
+      else Some (price b)
   end.
 
 Definition do_clearing_price (s : State) : State :=
@@ -108,13 +110,12 @@ Proof.
   intros s b a c Hwf Hm Hc.
   pose proof (marginal_pair_price_bound s b a Hwf Hm) as Hab.
   unfold determine_clearing_price in Hc; rewrite Hm in Hc.
-  remember (residual_bid b (matches s) =? 0) as eb eqn:Heb.
   remember (residual_ask a (matches s) =? 0) as ea eqn:Hea.
-  destruct eb, ea;
+  destruct ea;
     simpl in Hc;
     inversion Hc; subst; clear Hc.
-  - split; [exact Hab | apply le_n].
-  - split; [exact Hab | apply le_n].
-  - split; [apply le_n | exact Hab].
-  - split; [exact Hab | apply le_n].
+  - (* seller residual = 0 -> clearing price is ask_price a *)
+    split; [apply le_n | exact Hab].
+  - (* seller residual > 0 -> clearing price is price b *)
+    split; [exact Hab | apply le_n].
 Qed.
