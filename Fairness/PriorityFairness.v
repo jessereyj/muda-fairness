@@ -1,4 +1,8 @@
-(* Fairness/PriorityFairness.v *)
+(** Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
+
+  Priority fairness: every matching step respects buyer/seller priority.
+  Expressed as a global LTL invariant over MUDA traces.
+*)
 From Stdlib Require Import List Bool PeanoNat Lia.
 Import ListNotations.
 From LTL  Require Import LTL.

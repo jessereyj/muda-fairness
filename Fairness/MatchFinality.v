@@ -1,4 +1,7 @@
-(* Fairness/MatchFinality.v *)
+(** Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
+
+  Match finality: once matching ends (P4–P7), the match record remains fixed.
+*)
 From Stdlib Require Import List.
 Import ListNotations.
 From LTL  Require Import LTL.

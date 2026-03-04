@@ -1,4 +1,13 @@
-(* Fairness/Interpretation.v *)
+(** Chapter 4 (MUDA Protocol Layer) — Section 4.1.3 / 4.2 (Traces + Atomic Predicates)
+
+    This file bridges MUDA executions (Chapter 3, deterministic `step`) to LTL
+    trace semantics (Chapter 4):
+
+    - Defines a fixed numbering of MUDA-specific atomic propositions `p_*`.
+    - Defines `interp_atom : State -> predicate -> Prop`.
+    - Defines the infinite trace `mu_trace` by iterating `step` and relying on
+      terminal stuttering (P7 is a fixed point of `step`).
+*)
 From Stdlib Require Import List Bool PeanoNat.
 From LTL  Require Import Syntax Semantics.
 From MUDA Require Import State Transitions Atoms.

@@ -1,4 +1,8 @@
-(* Fairness/Maximality.v *)
+(** Chapter 5 (Results) — Maximality
+
+  Maximality is stated in Chapter 5 as a post-matching property: once MUDA
+  has terminated matching (P4–P7), there is no feasible buyer–seller pair.
+*)
 From Stdlib Require Import Arith List Lia.
 Import ListNotations.
 From LTL Require Import LTL.

@@ -1,4 +1,10 @@
-(*  MUDA/Sorting.v *)
+(** Chapter 3 (Methodology) — Section 3.5.1 (Phase P2: Sorting)
+
+  Implements the priority relations (Definition-3) and axiomatizes sorting as
+  a permutation that produces priority-sorted bid/ask lists.
+
+  Note: sorting is axiomatized to keep focus on temporal verification.
+*)
 From Stdlib Require Import List Lia Arith Sorting Permutation Sorted.
 Import ListNotations.
 From MUDA Require Import Eqb Types State.

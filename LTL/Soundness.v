@@ -1,4 +1,10 @@
-(* LTL/Soundness.v *)
+(** Chapter 4 (Foundation Layer) — Section 4.1.5 (Meta-theoretic Properties)
+
+  Soundness: if ⊢ φ then ⊨ φ.
+
+  The only meta-assumption is A0_valid, which treats propositional tautologies
+  as semantically valid (as in the thesis discussion).
+*)
 From Stdlib Require Import Arith List Lia Classical.
 Import ListNotations.
 From LTL Require Import Syntax Semantics Axioms.

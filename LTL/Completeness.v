@@ -1,4 +1,11 @@
-(* LTL/Completeness.v *)
+(** Chapter 4 (Foundation Layer) — Section 4.1.5 (Meta-theoretic Properties)
+
+  Weak completeness and adequacy are treated as standard results.
+
+  This file keeps the fairness verification layer independent of proof-search:
+  - Soundness is proved in LTL/Soundness.v
+  - Completeness/adequacy are included as axioms (canonical countermodel / weak completeness)
+*)
 From Stdlib Require Import Classical Lia.
 From LTL Require Import Syntax Semantics Axioms Soundness.
 

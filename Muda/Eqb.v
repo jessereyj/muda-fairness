@@ -1,4 +1,8 @@
-(*  MUDA/Eqb.v *)
+(** Chapter 3 (Methodology) — Shared Infrastructure
+
+  Equality-by-computation interface (`Eqb`) used throughout MUDA to define
+  executable predicates (e.g., allocation sums over match records).
+*)
 From Stdlib Require Export Arith List Bool.
 Local Open Scope bool_scope.
 

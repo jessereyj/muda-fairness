@@ -1,4 +1,10 @@
-(*  MUDA/Matching.v *)
+(** Chapter 3 (Methodology) — Section 3.5.2 (Phase P3: Matching)
+
+  Executable greedy matching rule (Definition-6) based on:
+  - feasibility (Definition-1)
+  - traded quantity q = min(residuals) (Definition-2)
+  - match monotonicity (Definition-7)
+*)
 From Stdlib Require Import Arith List Bool PeanoNat Bool Lia.
 From MUDA Require Import Eqb Types State Sorting.
 Import ListNotations.

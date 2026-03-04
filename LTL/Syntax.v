@@ -1,4 +1,12 @@
-(* LTL/Syntax.v *)
+(** Chapter 4 (Foundation Layer) — Section 4.1.1 (Syntax)
+
+  This file defines the LTL language used throughout the development.
+
+  Thesis: PROP = N, and formulas are built from atomic propositions using
+  ¬, ∧, X, and U, with F and G as abbreviating operators.
+
+  Code: atomic propositions are indexed by `predicate := nat`.
+*)
 From Stdlib Require Import List Bool.
 Import List.ListNotations.
 

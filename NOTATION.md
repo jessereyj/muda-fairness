@@ -77,6 +77,44 @@ This section provides a stable cross-reference from Chapter 3 numbering (Structu
 7. **Justified Rejection at Termination**
   - Captured by [MUDA/Atoms.v](MUDA/Atoms.v) (`rejection_justified_prop`) and used in fairness proofs: [Fairness/JustifiedRejection.v](Fairness/JustifiedRejection.v).
 
+## Chapter 4 Index
+
+This section maps Chapter 4’s three-layer framework (foundation / MUDA trace interface / fairness verification) to the Rocq development.
+
+### 4.1 Foundation Layer
+
+4.1.1 **Syntax**
+- Atomic proposition index set PROP = N: [LTL/Syntax.v](LTL/Syntax.v) (`predicate := nat`, `LTL_formula`, `X`, `U`, and abbreviations `F`, `G`).
+
+4.1.2 **Semantics**
+- Infinite traces and satisfaction: [LTL/Semantics.v](LTL/Semantics.v) (`trace`, `trace_at`, `satisfies`, `models`, `valid`).
+- Lemma 1 (Semantics of F and G): [LTL/Semantics.v](LTL/Semantics.v) (`satisfies_eventually_unfold`, `satisfies_always_unfold`).
+
+4.1.4 **Axiomatic System**
+- Hilbert-style calculus (A0–A3, MP, necessitation restricted to tautologies): [LTL/Axioms.v](LTL/Axioms.v) (`Provable`, `Ax1`, `Ax2`, `Ax3`).
+
+4.1.5 **Meta-theoretic properties**
+- Soundness (Theorem 2): [LTL/Soundness.v](LTL/Soundness.v) (`soundness`).
+- Weak completeness / adequacy / consistency (Theorems 3–4, Corollary 1): [LTL/Completeness.v](LTL/Completeness.v) (`WeakCompleteness`, `Adequacy`, `Consistency`).
+
+### 4.2 MUDA Protocol Layer (Traces + Atomic Propositions)
+
+- Determinism (unique trace from an initial state): Chapter 3 `step : State -> State` used coinductively (by construction) in [MUDA/Transitions.v](MUDA/Transitions.v) (`step`).
+- Stuttering after termination (P7 fixed point): [MUDA/Transitions.v](MUDA/Transitions.v) (`step`, `P7 => s`).
+- MUDA execution as infinite valuation trace: [Fairness/Interpretation.v](Fairness/Interpretation.v) (`interp_atom`, `mu_trace`).
+- Trace identification lemma (link to i-fold execution): [Fairness/Interpretation.v](Fairness/Interpretation.v) (`mu_trace_at_execute`, `mu_trace_atom_at_execute`).
+
+### 4.3 Fairness Verification Layer (Atoms + LTL Theorems)
+
+- MUDA predicates as atoms (allocOK, no_feasible, has_cprice, bounds, etc.): [MUDA/Atoms.v](MUDA/Atoms.v) (state-level predicates) + [Fairness/Interpretation.v](Fairness/Interpretation.v) (atom numbering and interpretation).
+- Fairness LTL formulas and mechanically-checked proofs:
+  - [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
+  - [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
+  - [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
+  - [Fairness/MatchFinality.v](Fairness/MatchFinality.v)
+  - [Fairness/Maximality.v](Fairness/Maximality.v)
+  - [Fairness/JustifiedRejection.v](Fairness/JustifiedRejection.v)
+
 ## Core Data Types
 
 ### Agents (Implementation Detail)

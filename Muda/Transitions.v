@@ -1,4 +1,10 @@
-(** * MUDA/Transitions.v*)
+(** Chapter 3 (Methodology) — Section 3.2 / 3.5 (Deterministic STS + Phases)
+
+  The deterministic transition function δ from the thesis is `step`.
+  Executing MUDA for n steps is `execute n`.
+
+  Phase evolution matches the Chapter 3 phase diagram and stutters at P7.
+*)
 From Stdlib Require Import List Lia Sorting Permutation.
 Import ListNotations.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.

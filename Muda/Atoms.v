@@ -1,4 +1,9 @@
-(* MUDA/Atoms.v *)
+(** Chapter 4 (MUDA Protocol Layer) — Section 4.2 (Atomic Predicates)
+
+  Defines MUDA-specific state-level predicates used as atomic propositions in
+  LTL fairness formulas (allocOK, no_feasible, has_cprice, match finality,
+  rejection predicates, and priority-step predicates).
+*)
 From Stdlib Require Import List Arith Bool.
 Import ListNotations.
 From MUDA Require Import Types State Sorting Matching ClearingPrice Transitions.

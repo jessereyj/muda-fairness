@@ -1,4 +1,8 @@
-(* Fairness/JustifiedRejection.v *)
+(** Chapter 5 (Results) — Justified Rejection
+
+  Justified rejection is stated in Chapter 5 as a post-matching property:
+  in phases P4–P7, any rejected agent has no feasible counterparty.
+*)
 From Stdlib Require Import List Arith.
 Import ListNotations.
 From LTL  Require Import LTL.

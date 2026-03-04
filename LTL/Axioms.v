@@ -1,4 +1,11 @@
-(* LTL/Axioms.v *)
+(** Chapter 4 (Foundation Layer) — Section 4.1.4 (Axiomatic System)
+
+  Hilbert-style proof system for LTL with axiom schemes A0–A3 and inference
+  rules MP (modus ponens) and Nec (restricted necessitation).
+
+  The thesis states these as standard; the development uses them to connect
+  derivability (⊢) and semantic validity (⊨).
+*)
 From Stdlib Require Import List.
 From LTL Require Import Syntax.
 

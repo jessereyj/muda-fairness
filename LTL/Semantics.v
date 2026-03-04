@@ -1,4 +1,12 @@
-(* LTL/Semantics.v *)
+(** Chapter 4 (Foundation Layer) — Section 4.1.2 (Semantics)
+
+  This file defines satisfaction `satisfies` of LTL formulas over infinite
+  traces and proves the standard unfold lemmas for F, G, and U.
+
+  Note: the thesis uses boolean valuations v : PROP -> {true,false}; this
+  mechanization uses `state := predicate -> Prop`, which is equivalent for
+  expressing truth of atomic propositions.
+*)
 From Stdlib Require Import List Bool Arith Lia.
 Import List.ListNotations.
 From LTL Require Import Syntax.

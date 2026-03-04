@@ -1,4 +1,8 @@
-(* Fairness/PriceFairness.v *)
+(** Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
+
+  Price fairness: the clearing price (when defined) follows the rule and is
+  bounded by the marginal pair.
+*)
 From Stdlib Require Import List Nat.
 Import ListNotations.
 From LTL  Require Import Syntax Semantics.

@@ -1,4 +1,10 @@
-(** * MUDA/ClearingPrice.v*)
+(** Chapter 3 (Methodology) — Section 3.5.3 (Phase P4: Clearing Price)
+
+  - Definition-8 (marginal pair) and Definition-9 (uniform clearing price)
+  - Proposition-6 (clearing price boundedness)
+
+  Uses the final match record (the match list once matching terminates).
+*)
 From Stdlib Require Import Arith List.
 Import ListNotations.
 From LTL  Require Import Syntax Semantics.

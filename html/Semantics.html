@@ -19,6 +19,24 @@
 <h1 class="libtitle">Library Semantics</h1>
 
 <div class="code">
+</div>
+
+<div class="doc">
+Chapter 4 (Foundation Layer) — Section 4.1.2 (Semantics)
+
+<div class="paragraph"> </div>
+
+  This file defines satisfaction `satisfies` of LTL formulas over infinite
+  traces and proves the standard unfold lemmas for F, G, and U.
+
+<div class="paragraph"> </div>
+
+  Note: the thesis uses boolean valuations v : PROP -&gt; {true,false}; this
+  mechanization uses `state := predicate -&gt; Prop`, which is equivalent for
+  expressing truth of atomic propositions.
+
+</div>
+<div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">Arith</span> <span class="id" title="var">Lia</span>.<br/>
 <span class="id" title="keyword">Import</span> <span class="id" title="var">List.ListNotations</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span>.<br/>

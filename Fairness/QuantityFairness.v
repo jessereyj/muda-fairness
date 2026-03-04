@@ -1,4 +1,8 @@
-(* Fairness/QuantityFairness.v *)
+(** Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
+
+  Quantity fairness: allocation is consistent with residual quantities.
+  Proved as a global invariant over MUDA traces.
+*)
 From Stdlib Require Import Arith List Lia.
 Import ListNotations.
 From LTL      Require Import LTL.
