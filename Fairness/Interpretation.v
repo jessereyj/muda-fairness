@@ -58,6 +58,29 @@ Definition interp_atom (s : State) : predicate -> Prop :=
         else False
     end.
 
+Definition phase_ge_4 : LTL_formula :=
+  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
+
+Lemma interp_atom_phase_4 : forall s, interp_atom s (p_phase 4) <-> phase s = P4.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_5 : forall s, interp_atom s (p_phase 5) <-> phase s = P5.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_6 : forall s, interp_atom s (p_phase 6) <-> phase s = P6.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
+Lemma interp_atom_phase_7 : forall s, interp_atom s (p_phase 7) <-> phase s = P7.
+Proof.
+  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
+Qed.
+
 CoFixpoint mu_trace (s : State) : trace :=
   Trace (interp_atom s)
         (match phase s with

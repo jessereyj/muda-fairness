@@ -11,36 +11,9 @@ From MUDA Require Import Types State Matching Sorting Transitions Atoms.
 
 Local Open Scope LTL_scope.
 
-Definition phase_ge_4 : LTL_formula :=
-  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
-
 (* Chapter 5: maximality is a post-matching invariant: once the protocol has
    terminated matching (P4–P7), no feasible buyer–seller pair remains. *)
 Definition maximal : LTL_formula := G (phase_ge_4 → Atom p_no_feasible).
-
-Lemma interp_atom_phase_4 : forall s, interp_atom s (p_phase 4) <-> phase s = P4.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_5 : forall s, interp_atom s (p_phase 5) <-> phase s = P5.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_6 : forall s, interp_atom s (p_phase 6) <-> phase s = P6.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_7 : forall s, interp_atom s (p_phase 7) <-> phase s = P7.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma lt_add_pos_r : forall n p, 0 < p -> n < n + p.
-Proof. intros n p Hp; lia. Qed.
-
 Fixpoint sum_residual_bids (bs:list Bid) (ms:list Match) : nat :=
   match bs with
   | [] => 0
@@ -55,9 +28,6 @@ Fixpoint sum_residual_asks (as_list:list Ask) (ms:list Match) : nat :=
 
 Definition mu (s:State) : nat :=
   sum_residual_bids (bids s) (matches s) + sum_residual_asks (asks s) (matches s).
-
-Lemma mu_ge_0 : forall s, mu s >= 0.
-Proof. intros; unfold mu; lia. Qed.
 
 Lemma residual_bid_drop : forall s s' b a,
   match_step s = Some s' ->

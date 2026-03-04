@@ -13,9 +13,6 @@ Local Open Scope LTL_scope.
 
 Definition quantityOK : LTL_formula := G (Atom p_allocOK).
 
-Definition phase_ge_4 : LTL_formula :=
-  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
-
 Definition priceOK : LTL_formula :=
   (* Chapter 4: price fairness is the global conjunction of the boundedness and
      the price-rule predicates. Totalisation for the undefined-price case is
@@ -108,27 +105,6 @@ Proof.
   apply wf_state_execute_n.
   apply wf_state_initial.
 Qed.
-
-Lemma interp_atom_phase_4 : forall s, interp_atom s (p_phase 4) <-> phase s = P4.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_5 : forall s, interp_atom s (p_phase 5) <-> phase s = P5.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_6 : forall s, interp_atom s (p_phase 6) <-> phase s = P6.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_7 : forall s, interp_atom s (p_phase 7) <-> phase s = P7.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
 
 Lemma price_rule_fairness_LTL_initial : forall bs as_list,
   satisfies (mu_trace (initial_state bs as_list)) 0 (G (Atom p_price_rule)).

@@ -5,7 +5,7 @@
   - traded quantity q = min(residuals) (Definition-2)
   - match monotonicity (Definition-7)
 *)
-From Stdlib Require Import Arith List Bool PeanoNat Bool Lia.
+From Stdlib Require Import Arith List Bool PeanoNat Lia.
 From MUDA Require Import Eqb Types State Sorting.
 Import ListNotations.
 Local Open Scope nat_scope.
@@ -57,22 +57,6 @@ Proof.
   - destruct (is_feasible b ah ms) eqn:Hf.
     + injection H as ->. assumption.
     + apply IH. exact H.
-Qed.
-
-
-Lemma pick_ask_None_forall :
-  forall b as_list ms,
-    pick_ask b as_list ms = None ->
-    forall a, In a as_list -> is_feasible b a ms = false.
-Proof.
-  intros b as_list ms Hnone a Hin.
-  induction as_list as [|ah asx IH]; simpl in *.
-  - contradiction.
-  - destruct (is_feasible b ah ms) eqn:Hf.
-    + discriminate Hnone.
-    + destruct Hin as [Hin0|HinRest].
-      * subst; exact Hf.
-      * apply IH; assumption.
 Qed.
 
 Lemma pick_ask_None_all_false :
@@ -220,25 +204,6 @@ Proof.
   - inversion H. reflexivity.
   - inversion H. apply IH. assumption.
 Qed.
-
-
-Fixpoint matched_quantities (b : Bid) (ms : list Match) : nat :=
-  match ms with
-  | [] => 0
-  | m :: ms' =>
-      if matched_bid m =? b 
-      then match_quantity m + matched_quantities b ms'
-      else matched_quantities b ms'
-  end.
-
-Fixpoint matched_quantities_ask (a : Ask) (ms : list Match) : nat :=
-  match ms with
-  | [] => 0
-  | m :: ms' =>
-      if matched_ask m =? a 
-      then match_quantity m + matched_quantities_ask a ms'
-      else matched_quantities_ask a ms'
-  end.
 
 
 Lemma feasible_implies_pos :

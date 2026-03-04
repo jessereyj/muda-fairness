@@ -31,10 +31,8 @@ Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
 
 </div>
 <div class="code">
-<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Nat</span>.<br/>
-<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Matching</span> <span class="id" title="var">ClearingPrice</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LTL</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">State</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span> <span class="id" title="var">QuantityFairness</span>.<br/>
 
 <br/>
@@ -42,13 +40,6 @@ Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
 
 <br/>
 <span class="id" title="keyword">Notation</span> <span class="id" title="var">priceOK</span> := <span class="id" title="var">QuantityFairness.priceOK</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">bounds_cstar_prop_holds_all</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span>,<br/>
-&nbsp;&nbsp;<span class="id" title="var">wf_state</span> (<span class="id" title="var">execute</span> <span class="id" title="var">i</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">bounds_cstar_prop</span> (<span class="id" title="var">execute</span> <span class="id" title="var">i</span> <span class="id" title="var">s</span>).<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">i</span> <span class="id" title="var">Hwf</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">bounds_cstar_from_wf</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hwf</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">uniform_price_fairness_LTL_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>

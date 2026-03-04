@@ -41,41 +41,7 @@ Chapter 5 (Results) — Maximality
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">phase_ge_4</span> : <span class="id" title="var">LTL_formula</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">Atom</span> (<span class="id" title="var">p_phase</span> 4) ∨ <span class="id" title="var">Atom</span> (<span class="id" title="var">p_phase</span> 5) ∨ <span class="id" title="var">Atom</span> (<span class="id" title="var">p_phase</span> 6) ∨ <span class="id" title="var">Atom</span> (<span class="id" title="var">p_phase</span> 7).<br/>
-
-<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">maximal</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">G</span> (<span class="id" title="var">phase_ge_4</span> → <span class="id" title="var">Atom</span> <span class="id" title="var">p_no_feasible</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_4</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 4) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P4</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_5</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 5) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P5</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_6</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 6) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P6</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_7</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 7) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P7</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">lt_add_pos_r</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">p</span>, 0 &lt; <span class="id" title="var">p</span> -&gt; <span class="id" title="var">n</span> &lt; <span class="id" title="var">n</span> + <span class="id" title="var">p</span>.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">n</span> <span class="id" title="var">p</span> <span class="id" title="var">Hp</span>; <span class="id" title="var">lia</span>. <span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
 <span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">sum_residual_bids</span> (<span class="id" title="var">bs</span>:<span class="id" title="var">list</span> <span class="id" title="var">Bid</span>) (<span class="id" title="var">ms</span>:<span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">nat</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">bs</span> <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;| [] =&gt; 0<br/>
@@ -92,10 +58,6 @@ Chapter 5 (Results) — Maximality
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">mu</span> (<span class="id" title="var">s</span>:<span class="id" title="var">State</span>) : <span class="id" title="var">nat</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="var">sum_residual_bids</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) + <span class="id" title="var">sum_residual_asks</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_ge_0</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">mu</span> <span class="id" title="var">s</span> &gt;= 0.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">mu</span>; <span class="id" title="var">lia</span>. <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">residual_bid_drop</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
