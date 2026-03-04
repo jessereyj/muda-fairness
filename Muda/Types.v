@@ -226,30 +226,35 @@ Qed.
 Definition agent_type_eq_dec (x y : AgentType) : {x = y} + {x <> y}.
 Proof. decide equality. Defined.
 
+(* Use a computational nat equality decider (instead of Stdlib's Nat.eq_dec,
+   which may be opaque under vm_compute), so executions can be evaluated. *)
+Definition nat_eq_dec (x y : nat) : {x = y} + {x <> y}.
+Proof. decide equality. Defined.
+
 Definition agent_eq_dec (a1 a2 : Agent) : {a1 = a2} + {a1 <> a2}.
-Proof. decide equality. - apply agent_type_eq_dec. - apply Nat.eq_dec. Defined.
+Proof. decide equality. - apply agent_type_eq_dec. - apply nat_eq_dec. Defined.
 
 #[export] Hint Resolve agent_type_eq_dec agent_eq_dec : core.
 
 Lemma bid_eq_dec_spec : forall b1 b2 : Bid, {b1 = b2} + {b1 <> b2}.
 Proof.
   intros [bid_id1 buyer1 price1 quantity1] [bid_id2 buyer2 price2 quantity2].
-  decide equality; try apply agent_eq_dec; try apply Nat.eq_dec.
-Qed.
+  decide equality; try apply agent_eq_dec; try apply nat_eq_dec.
+Defined.
 Definition bid_eq_dec := bid_eq_dec_spec.
 
 Lemma ask_eq_dec_spec : forall a1 a2 : Ask, {a1 = a2} + {a1 <> a2}.
 Proof.
   intros [ask_id1 seller1 price1 quantity1] [ask_id2 seller2 price2 quantity2].
-  decide equality; try apply agent_eq_dec; try apply Nat.eq_dec.
-Qed.
+  decide equality; try apply agent_eq_dec; try apply nat_eq_dec.
+Defined.
 Definition ask_eq_dec := ask_eq_dec_spec.
 
 Lemma match_eq_dec_spec : forall m1 m2 : Match, {m1 = m2} + {m1 <> m2}.
 Proof.
   intros [bid1 ask1 q1] [bid2 ask2 q2].
-  decide equality; try apply bid_eq_dec; try apply ask_eq_dec; try apply Nat.eq_dec.
-Qed.
+  decide equality; try apply bid_eq_dec; try apply ask_eq_dec; try apply nat_eq_dec.
+Defined.
 Definition match_eq_dec := match_eq_dec_spec.
 
 #[global]

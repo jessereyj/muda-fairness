@@ -5,6 +5,10 @@ Import ListNotations.
 Local Open Scope nat_scope.
 Local Open Scope bool_scope.
 
+(** Definition-1 (Feasibility), boolean form.
+
+    This is the executable feasibility test used by the greedy matcher.
+*)
 Definition is_feasible (b : Bid) (a : Ask) (ms : list Match) : bool :=
   Nat.leb (ask_price a) (price b)
   && Nat.leb 1 (residual_bid b ms)
@@ -95,6 +99,12 @@ Proof.
     + apply (IH as_list ms b a). exact H.
 Qed.
 
+(** Proposition-3 (Halting Condition of Phase P3).
+
+    Matching halts exactly when there is no feasible buyer–seller pair.
+    This lemma is the “no feasible pair exists” direction for the executable
+    feasibility search `find_feasible`.
+*)
 Lemma find_feasible_None_forall :
   forall bs as_list ms,
     find_feasible bs as_list ms = None ->
@@ -112,6 +122,11 @@ Proof.
 Qed.
 
 
+(** Definition-2 (Traded Unit Quantity).
+
+    A trade quantity is the maximum feasible trade between the chosen buyer and
+    seller: q = min(residual_bid, residual_ask).
+*)
 Definition create_match (b : Bid) (a : Ask) (ms : list Match) : Match :=
   let q := Nat.min (residual_bid b ms) (residual_ask a ms) in
   {| matched_bid := b; matched_ask := a; match_quantity := q |}.
@@ -134,6 +149,11 @@ Proof.
 Qed.
 
 
+(** Definition-6 (Greedy Matching Rule).
+
+  One greedy round either appends exactly one trade to the match record, or
+  returns `None` to signal that no feasible pair exists.
+*)
 Definition match_step (s : State) : option State :=
   match find_feasible (bids s) (asks s) (matches s) with
   | Some (b,a) =>
@@ -146,6 +166,10 @@ Definition match_step (s : State) : option State :=
   | None => None
   end.
 
+(** Definition-7 (Match Monotonicity).
+
+    During matching, the match record grows monotonically.
+*)
 Lemma match_step_monotonic :
   forall s s',
     match_step s = Some s' ->

@@ -50,6 +50,11 @@ Definition initial_state (bs : list Bid) (as_list : list Ask) : State :=
    Implementation: structural recursion over match list with decidable equality.
    These functions enable computing residuals dynamically without storing them.
 *)
+  (** Definition-5 (Unit Allocation).
+
+    `allocated_bid` / `allocated_ask` compute total traded quantity for an
+    agent from the match record.
+  *)
 Fixpoint allocated_bid (b : Bid) (ms : list Match) : nat :=
   match ms with
   | [] => 0
@@ -72,6 +77,11 @@ Fixpoint allocated_ask (a : Ask) (ms : list Match) : nat :=
    Thesis presents residuals as part of state, but computing them dynamically
    ensures consistency: residual = initial quantity - allocated quantity.
 *)
+(** Proposition-1 (Residual Non-negativity) and Proposition-2 (Conservation).
+
+    Residuals are `nat`-valued and are defined by construction as initial
+    quantity minus allocated quantity.
+*)
 Definition residual_bid (b : Bid) (ms : list Match) : nat :=
   quantity b - allocated_bid b ms.
 
@@ -84,6 +94,11 @@ Definition allocOK (s : State) : Prop :=
   (forall a, In a (asks s) -> allocated_ask a (matches s) <= ask_quantity a).
 
 
+(** Definition-1 (Feasibility).
+
+    A buyer–seller pair is feasible when bid price is at least ask price and
+    both agents have positive residual quantities.
+*)
 Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
   price b >= ask_price a
   /\ residual_bid b ms > 0

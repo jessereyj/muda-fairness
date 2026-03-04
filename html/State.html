@@ -58,6 +58,18 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">phase</span> := <span class="id" title="var">P1</span> |}.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Definition-5 (Unit Allocation).
+
+<div class="paragraph"> </div>
+
+    `allocated_bid` / `allocated_ask` compute total traded quantity for an
+    agent from the match record.
+  
+</div>
+<div class="code">
 <span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">allocated_bid</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">nat</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">ms</span> <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;| [] =&gt; 0<br/>
@@ -78,6 +90,18 @@
 &nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Proposition-1 (Residual Non-negativity) and Proposition-2 (Conservation).
+
+<div class="paragraph"> </div>
+
+    Residuals are `nat`-valued and are defined by construction as initial
+    quantity minus allocated quantity.
+
+</div>
+<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">residual_bid</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">nat</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="var">quantity</span> <span class="id" title="var">b</span> - <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>.<br/>
 
@@ -91,6 +115,18 @@
 &nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span>).<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Definition-1 (Feasibility).
+
+<div class="paragraph"> </div>
+
+    A buyer–seller pair is feasible when bid price is at least ask price and
+    both agents have positive residual quantities.
+
+</div>
+<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">feasible_pair</span> (<span class="id" title="var">b</span>:<span class="id" title="var">Bid</span>) (<span class="id" title="var">a</span>:<span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span>:<span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="var">price</span> <span class="id" title="var">b</span> &gt;= <span class="id" title="var">ask_price</span> <span class="id" title="var">a</span><br/>
 &nbsp;&nbsp;/\ <span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span> &gt; 0<br/>

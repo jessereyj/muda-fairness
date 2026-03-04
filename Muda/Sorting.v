@@ -3,6 +3,14 @@ From Stdlib Require Import List Lia Arith Sorting Permutation Sorted.
 Import ListNotations.
 From MUDA Require Import Eqb Types State.
 
+(** Definition-3 (Priority Ordering).
+
+    Buyers are prioritized by higher bid price, then earlier timestamp.
+    Sellers are prioritized by lower ask price, then earlier timestamp.
+
+    The implementation refines tie-breaking further with unique identifiers to
+    obtain strict total orders.
+*)
 Definition prioB (b1 b2 : Bid) : Prop :=
   price b1 > price b2 \/
   (price b1 = price b2 /\ ts b1 < ts b2).

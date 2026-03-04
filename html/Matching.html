@@ -26,6 +26,17 @@
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Definition-1 (Feasibility), boolean form.
+
+<div class="paragraph"> </div>
+
+    This is the executable feasibility test used by the greedy matcher.
+
+</div>
+<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">is_feasible</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">bool</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="var">Nat.leb</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>) (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
 &nbsp;&nbsp;&amp;&amp; <span class="id" title="var">Nat.leb</span> 1 (<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>)<br/>
@@ -121,6 +132,19 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Proposition-3 (Halting Condition of Phase P3).
+
+<div class="paragraph"> </div>
+
+    Matching halts exactly when there is no feasible buyer–seller pair.
+    This lemma is the “no feasible pair exists” direction for the executable
+    feasibility search `find_feasible`.
+
+</div>
+<div class="code">
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_None_forall</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">None</span> -&gt;<br/>
@@ -138,6 +162,18 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Definition-2 (Traded Unit Quantity).
+
+<div class="paragraph"> </div>
+
+    A trade quantity is the maximum feasible trade between the chosen buyer and
+    seller: q = min(residual_bid, residual_ask).
+
+</div>
+<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">create_match</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="var">Match</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">q</span> := <span class="id" title="var">Nat.min</span> (<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> <span class="id" title="var">ms</span>) (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span>) <span class="id" title="tactic">in</span><br/>
 &nbsp;&nbsp;{| <span class="id" title="var">matched_bid</span> := <span class="id" title="var">b</span>; <span class="id" title="var">matched_ask</span> := <span class="id" title="var">a</span>; <span class="id" title="var">match_quantity</span> := <span class="id" title="var">q</span> |}.<br/>
@@ -160,6 +196,18 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Definition-6 (Greedy Matching Rule).
+
+<div class="paragraph"> </div>
+
+  One greedy round either appends exactly one trade to the match record, or
+  returns `None` to signal that no feasible pair exists.
+
+</div>
+<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">match_step</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) =&gt;<br/>
@@ -173,6 +221,17 @@
 &nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Definition-7 (Match Monotonicity).
+
+<div class="paragraph"> </div>
+
+    During matching, the match record grows monotonically.
+
+</div>
+<div class="code">
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_step_monotonic</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">match_step</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">s'</span> -&gt;<br/>

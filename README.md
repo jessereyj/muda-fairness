@@ -87,11 +87,15 @@ Proven for traces starting from initial states.
 
 ### Maximality
 
-`maximal := F (Atom (p_phase 4) ∧ Atom p_no_feasible)`
+Post-matching invariant form (Chapter 5):
+
+`phase_ge_4 := Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7)`
+
+`maximal := G (phase_ge_4 → Atom p_no_feasible)`
 
 ### Justified Rejection
 
-`rejectionOK`
+`rejectionOK := G (phase_ge_4 → Atom p_rejection_justified)`
 
 See `Fairness/JustifiedRejection.v`.
 
@@ -215,6 +219,11 @@ Residuals are computed dynamically using `residual_bid` and `residual_ask`.
 - **Code:** Uses a coinductive trace construction via `mu_trace`
 
 This abstraction pattern is standard in formal verification. The mathematical model emphasizes logic. The implementation handles mechanical details.
+
+**Note (Chapter 5 narrative):** The mechanization advances deterministically through phases `P4 → P5 → P6 → P7`,
+and then stutters forever at `P7` (because `step` is the identity in `P7`). If the thesis text informally describes
+“repeating xhalt at P4”, the mechanically precise reading is “we remain in the post-matching region forever”, which
+this development captures using the guard `phase_ge_4` (i.e., `P4`–`P7`).
 
 ## Module Notes
 

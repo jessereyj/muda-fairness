@@ -2,6 +2,81 @@
 
 This document maps mathematical notation from the thesis (Chapters 3-4) to the corresponding Rocq/Coq definitions in the codebase.
 
+## Chapter 3 Numbering Index
+
+This section provides a stable cross-reference from Chapter 3 numbering (Structural Assumptions / Definitions / Propositions) to the corresponding Rocq symbols. The code uses descriptive identifiers (not numeric labels); the numeric labels are recorded here and in Coqdoc comments in the relevant `.v` files.
+
+### Structural Assumptions (Chapter 3, Section 3.3)
+
+1. **Order components remain constant**
+  - Transitions never mutate `Bid`/`Ask` record fields; sorting only permutes lists.
+  - See [MUDA/Sorting.v](MUDA/Sorting.v) (`sort_bids`, `sort_asks`, `do_sorting`) and [MUDA/Matching.v](MUDA/Matching.v) (`match_step`).
+
+2. **Determinism (one successor)**
+  - `delta` is modeled as a function `step : State -> State`.
+  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`step`).
+
+3. **Terminal preservation**
+  - If `phase = P7` then `step s = s`.
+  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`step`, `P7` branch).
+
+### Definitions (Chapter 3)
+
+1. **Feasibility**
+  - [MUDA/State.v](MUDA/State.v) (`feasible_pair`), and boolean form [MUDA/Matching.v](MUDA/Matching.v) (`is_feasible`).
+
+2. **Traded Unit Quantity**
+  - [MUDA/Matching.v](MUDA/Matching.v) (`create_match` uses `Nat.min`).
+
+3. **Priority Ordering**
+  - [MUDA/Sorting.v](MUDA/Sorting.v) (`bid_priority`, `ask_priority`, `prioB`, `prioS`).
+
+4. **Priority-Consistent Selection**
+  - Encoded as priority-respecting axioms/predicates used in fairness:
+    [MUDA/Atoms.v](MUDA/Atoms.v) (`greedy_respects_priority_bids`, `greedy_respects_priority_asks`, `priorityB_step_ok_prop`, `priorityS_step_ok_prop`).
+
+5. **Unit Allocation**
+  - [MUDA/State.v](MUDA/State.v) (`allocated_bid`, `allocated_ask`, plus residuals `residual_bid`, `residual_ask`).
+
+6. **Greedy Matching Rule**
+  - [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `match_step`).
+
+7. **Match Monotonicity**
+  - [MUDA/Matching.v](MUDA/Matching.v) (`match_step_monotonic`) and post-matching stability via [MUDA/Atoms.v](MUDA/Atoms.v) (`match_final_prop`).
+
+8. **Last Marginal Pair**
+  - [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`marginal_pair`).
+
+9. **Uniform Clearing Price**
+  - [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`determine_clearing_price`).
+
+10. **Rejection at Termination**
+  - [MUDA/Atoms.v](MUDA/Atoms.v) (`occurs_bid`, `occurs_ask`, `rejected_bid_prop`, `rejected_ask_prop`).
+
+### Propositions (Chapter 3, Section 3.6)
+
+1. **Residual Non-negativity**
+  - Residuals are `nat`-valued: [MUDA/State.v](MUDA/State.v) (`residual_bid`, `residual_ask`).
+
+2. **Conservation of Quantity in Phase P3**
+  - Residuals are defined from allocation: [MUDA/State.v](MUDA/State.v) (`residual_* = initial - allocated_*`).
+
+3. **Halting Condition of Phase P3**
+  - Matching stops when no feasible pair is found: [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `find_feasible_None_forall`).
+
+4. **Transition from P3 to P4**
+  - Implemented in [MUDA/Transitions.v](MUDA/Transitions.v) (`step` uses `finish_matching` when `match_step` returns `None`).
+
+5. **Clearing Price Stability After Matching**
+  - Computed in P4 and preserved in later phases by `step`:
+    [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`do_clearing_price`), [MUDA/Transitions.v](MUDA/Transitions.v) (`step` cases for P5–P7).
+
+6. **Clearing Price Boundedness**
+  - Proved as [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`clearing_price_bounds`).
+
+7. **Justified Rejection at Termination**
+  - Captured by [MUDA/Atoms.v](MUDA/Atoms.v) (`rejection_justified_prop`) and used in fairness proofs: [Fairness/JustifiedRejection.v](Fairness/JustifiedRejection.v).
+
 ## Core Data Types
 
 ### Agents (Implementation Detail)
@@ -267,12 +342,17 @@ Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
 **Code:** `Fairness/Interpretation.v`
 ```coq
 CoFixpoint mu_trace (s : State) : trace :=
-  Trace (interp_atom s) (mu_trace (step s)).
+  Trace (interp_atom s)
+        (match phase s with
+         | P7 => mu_trace (step s)
+         | _  => mu_trace (step s)
+         end).
 ```
 
 **Mapping:**
 - Thesis `ω` ↔ Code `mu_trace s` (coinductive trace)
 - Thesis stuttering (implicit in `x₇ = x₈ = ...`) ↔ Code `step` becomes identity at `P7`
+- Thesis “xhalt” intuition (“post-matching forever”) ↔ Code guard `phase_ge_4` (phases `P4`–`P7`)
 
 **Note:** Coq's `CoFixpoint` mechanizes infinite traces. The thesis describes this conceptually without implementation syntax.
 

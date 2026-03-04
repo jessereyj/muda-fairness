@@ -61,12 +61,21 @@ Definition occurs_bid (b : Bid) (ms : list Match) : Prop :=
 Definition occurs_ask (a : Ask) (ms : list Match) : Prop :=
   exists m, In m ms /\ matched_ask m = a.
 
+(** Definition-10 (Rejection at Termination).
+
+    An agent is rejected iff it does not occur in the final match record.
+*)
 Definition rejected_bid_prop (b : Bid) (s : State) : Prop :=
   In b (bids s) /\ ~ occurs_bid b (matches s).
 
 Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
   In a (asks s) /\ ~ occurs_ask a (matches s).
 
+(** Proposition-7 (Justified Rejection at Termination).
+
+    A rejection is justified when a rejected agent has no feasible counterpart
+    in the terminal post-matching state.
+*)
 Definition rejection_justified_prop (s : State) : Prop :=
   (forall (b : Bid) (aa : Ask),
       rejected_bid_prop b s -> In aa (asks s) ->

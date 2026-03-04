@@ -220,8 +220,12 @@
 <span class="id" title="keyword">Proof</span>. <span class="id" title="var">decide</span> <span class="id" title="var">equality</span>. <span class="id" title="keyword">Defined</span>.<br/>
 
 <br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">nat_eq_dec</span> (<span class="id" title="var">x</span> <span class="id" title="var">y</span> : <span class="id" title="var">nat</span>) : {<span class="id" title="var">x</span> = <span class="id" title="var">y</span>} + {<span class="id" title="var">x</span> &lt;&gt; <span class="id" title="var">y</span>}.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="var">decide</span> <span class="id" title="var">equality</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">agent_eq_dec</span> (<span class="id" title="var">a1</span> <span class="id" title="var">a2</span> : <span class="id" title="var">Agent</span>) : {<span class="id" title="var">a1</span> = <span class="id" title="var">a2</span>} + {<span class="id" title="var">a1</span> &lt;&gt; <span class="id" title="var">a2</span>}.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="var">decide</span> <span class="id" title="var">equality</span>. - <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_type_eq_dec</span>. - <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eq_dec</span>. <span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="var">decide</span> <span class="id" title="var">equality</span>. - <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_type_eq_dec</span>. - <span class="id" title="tactic">apply</span> <span class="id" title="var">nat_eq_dec</span>. <span class="id" title="keyword">Defined</span>.<br/>
 
 <br/>
 #[<span class="id" title="var">export</span>] <span class="id" title="keyword">Hint</span> <span class="id" title="keyword">Resolve</span> <span class="id" title="var">agent_type_eq_dec</span> <span class="id" title="var">agent_eq_dec</span> : <span class="id" title="var">core</span>.<br/>
@@ -230,24 +234,24 @@
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">bid_eq_dec_spec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> : <span class="id" title="var">Bid</span>, {<span class="id" title="var">b1</span> = <span class="id" title="var">b2</span>} + {<span class="id" title="var">b1</span> &lt;&gt; <span class="id" title="var">b2</span>}.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">bid_id1</span> <span class="id" title="var">buyer1</span> <span class="id" title="var">price1</span> <span class="id" title="var">quantity1</span>] [<span class="id" title="var">bid_id2</span> <span class="id" title="var">buyer2</span> <span class="id" title="var">price2</span> <span class="id" title="var">quantity2</span>].<br/>
-&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eq_dec</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">nat_eq_dec</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">bid_eq_dec</span> := <span class="id" title="var">bid_eq_dec_spec</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">ask_eq_dec_spec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> : <span class="id" title="var">Ask</span>, {<span class="id" title="var">a1</span> = <span class="id" title="var">a2</span>} + {<span class="id" title="var">a1</span> &lt;&gt; <span class="id" title="var">a2</span>}.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">ask_id1</span> <span class="id" title="var">seller1</span> <span class="id" title="var">price1</span> <span class="id" title="var">quantity1</span>] [<span class="id" title="var">ask_id2</span> <span class="id" title="var">seller2</span> <span class="id" title="var">price2</span> <span class="id" title="var">quantity2</span>].<br/>
-&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eq_dec</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">nat_eq_dec</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">ask_eq_dec</span> := <span class="id" title="var">ask_eq_dec_spec</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_eq_dec_spec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">m1</span> <span class="id" title="var">m2</span> : <span class="id" title="var">Match</span>, {<span class="id" title="var">m1</span> = <span class="id" title="var">m2</span>} + {<span class="id" title="var">m1</span> &lt;&gt; <span class="id" title="var">m2</span>}.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">bid1</span> <span class="id" title="var">ask1</span> <span class="id" title="var">q1</span>] [<span class="id" title="var">bid2</span> <span class="id" title="var">ask2</span> <span class="id" title="var">q2</span>].<br/>
-&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">bid_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">ask_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eq_dec</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">bid_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">ask_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">nat_eq_dec</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">match_eq_dec</span> := <span class="id" title="var">match_eq_dec_spec</span>.<br/>
 
 <br/>

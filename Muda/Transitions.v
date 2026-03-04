@@ -3,13 +3,32 @@ From Stdlib Require Import List Lia Sorting Permutation.
 Import ListNotations.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
+(** Proposition-4 (Transition from P3 to P4).
+
+    When matching terminates because no feasible buyer–seller pair exists,
+    the protocol transitions from Phase P3 to Phase P4 without changing the
+    submitted orders or the match record.
+
+    Chapter 3 also specifies that the clearing price is determined in Phase P4;
+    therefore the P3 -> P4 transition preserves `clearing_price`.
+*)
 Definition finish_matching (s : State) : State :=
   {| bids := bids s;
      asks := asks s;
      matches := matches s;
-     clearing_price := determine_clearing_price s;
+    (* Chapter 3: clearing price is determined in Phase P4.
+      The P3 -> P4 transition preserves the other state components. *)
+    clearing_price := clearing_price s;
      phase := P4 |}.
 
+(** Structural Assumption-2 (Determinism) and Structural Assumption-3 (Terminal preservation).
+
+    The deterministic STS transition function `delta` from Chapter 3 is modeled
+    as `step : State -> State`. Determinism is by construction.
+
+    For Phase P7 (terminal), Chapter 3 requires `delta(x) = x`; this is the
+    `P7 => s` branch below.
+*)
 Definition step (s : State) : State :=
   match phase s with
   | P1 => {| bids := bids s;
@@ -23,6 +42,8 @@ Definition step (s : State) : State :=
           | None => finish_matching s
           end
   | P4 => do_clearing_price s
+    (* Proposition-5 (Clearing Price Stability After Matching).
+       After Phase P4 computes `p*`, subsequent phases preserve it. *)
   | P5 => {| bids := bids s;
              asks := asks s;
              matches := matches s;

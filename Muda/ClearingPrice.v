@@ -55,6 +55,12 @@ Proof.
     apply Nat.leb_le in Hp. simpl. exact Hp.
 Qed.
 
+(* Chapter 3 Definition numbering notes are recorded as Coqdoc comments below. *)
+
+(** Definition-8 (Last Marginal Pair).
+
+    The marginal pair is the last trade in the final match record.
+*)
 Definition marginal_pair (s : State) : option (Bid * Ask) :=
   match rev (matches s) with
   | [] => None
@@ -79,6 +85,11 @@ Proof.
   exact Hwf.
 Qed.
 
+(** Definition-9 (Uniform Clearing Price).
+
+    If the marginal seller is exhausted, use the marginal ask price; otherwise
+    use the marginal bid price.
+*)
 Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
@@ -100,6 +111,10 @@ Definition do_clearing_price (s : State) : State :=
    ; clearing_price := determine_clearing_price s
    ; phase := P5 |}.
 
+(** Proposition-6 (Clearing Price Boundedness).
+
+    The computed clearing price is within the marginal ask/bid bounds.
+*)
 Lemma clearing_price_bounds :
   forall s b a c,
     wf_state s ->
