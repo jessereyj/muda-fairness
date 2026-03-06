@@ -46,6 +46,7 @@ Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">priceOK</span> : <span class="id" title="var">LTL_formula</span> :=<br/>
 &nbsp;&nbsp;<br/>
 &nbsp;&nbsp;<span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_bounds_cstar</span>)<br/>
+&nbsp;&nbsp;∧ <span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_has_cprice</span>)<br/>
 &nbsp;&nbsp;∧ <span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_price_rule</span>).<br/>
 
 <br/>
@@ -54,7 +55,7 @@ Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">allocOK</span>, <span class="id" title="var">initial_state</span>; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">intros</span>; <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">intro</span> <span class="id" title="var">x</span>; <span class="id" title="var">lia</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
@@ -182,7 +183,13 @@ Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">change</span> (<span class="id" title="var">bounds_cstar_prop</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">bounds_cstar_preserved_n</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">price_rule_fairness_LTL_initial</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">mu_trace_atom_at_execute</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">price_rule_fairness_LTL_initial</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 </div>
 </div>

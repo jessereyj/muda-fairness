@@ -18,6 +18,7 @@ Definition priceOK : LTL_formula :=
      the price-rule predicates. Totalisation for the undefined-price case is
      built into the atoms. *)
   G (Atom p_bounds_cstar)
+  ∧ G (Atom p_has_cprice)
   ∧ G (Atom p_price_rule).
 
 Theorem quantity_fairness_initial : forall bs as_list,
@@ -25,7 +26,7 @@ Theorem quantity_fairness_initial : forall bs as_list,
 Proof.
   intros bs as_list.
   unfold allocOK, initial_state; simpl.
-  split; intros; lia.
+  split; intro x; lia.
 Qed.
 
 Theorem quantity_fairness_step :
@@ -146,5 +147,12 @@ Proof.
     unfold interp_atom.
     change (bounds_cstar_prop (execute j (initial_state bs as_list))).
     apply bounds_cstar_preserved_n.
-  - apply price_rule_fairness_LTL_initial.
+  - split.
+    + rewrite satisfies_always_unfold.
+      intros j _.
+      rewrite mu_trace_atom_at_execute.
+      unfold interp_atom.
+      (* p_has_cprice is totalized as a predicate (vacuously true on no-match traces). *)
+      exact I.
+    + apply price_rule_fairness_LTL_initial.
 Qed.

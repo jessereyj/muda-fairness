@@ -366,67 +366,49 @@ Proof.
   inversion Hstep; subst s'; clear Hstep.
   set (ms := matches s).
   set (m := create_match b a ms).
-  (* membership facts for b and a, needed to reuse Hbid/Hask bounds *)
-  (* Use earlier lemma find_feasible_in_lists (membership + feasibility) *)
-  pose proof (find_feasible_in_lists (bids s) (asks s) ms b a Hf) as [Hfeas [Hb_in Ha_in]].
   split.
   - (* bids side *)
-    intros b' Hb'in.
-    fold ms.
-    fold m.
+    intro b'.
     change (allocated_bid b' (ms ++ [m]) <= quantity b').
     rewrite (allocated_bid_app_single b' ms m).
-    destruct (bid_eq_dec (matched_bid m) b') as [Eeq|Eneq].
-    + (* affected bid: matched_bid m = b' ; but matched_bid m = b *)
-      symmetry in Eeq; assert (b' = b) as ->.
-      { unfold m, create_match in Eeq; simpl in Eeq. exact Eeq. }
-      (* abbreviations *)
+    destruct (bid_eq_dec (matched_bid m) b') as [Heq|Hneq].
+    + subst b'.
+      unfold m, create_match; simpl.
       set (A := allocated_bid b ms).
-      set (Q := quantity b).
-      set (q := Nat.min (residual_bid b ms) (residual_ask a ms)).
-      (* old bound *)
-      assert (Hbound : A <= Q) by (eapply Hbid; eauto).
-      (* q <= residual_bid b ms = Q - A *)
-      assert (Hq_le_res : q <= residual_bid b ms).
-      { unfold q.
-        apply Nat.le_min_l. }
-      unfold residual_bid, A, Q, q in *.
-      (* show match_quantity m + allocated_bid b ms <= quantity b *)
-      unfold match_quantity, create_match; simpl.
-      rewrite Nat.add_comm.
-      (* Now: Nat.min ... + allocated_bid b ms <= quantity b *)
-      (* We have: Nat.min ... <= quantity b - allocated_bid b ms *)
-      (* and allocated_bid b ms <= quantity b *)
-      apply PeanoNat.Nat.add_le_mono_r with (p := allocated_bid b ms) in Hq_le_res.
-      rewrite PeanoNat.Nat.sub_add in Hq_le_res by exact Hbound.
-      exact Hq_le_res.
-    + (* unaffected bid: allocation unchanged; reuse old bound *)
-      simpl. rewrite Nat.add_0_r. eapply Hbid; exact Hb'in.
+      set (rb := residual_bid b ms).
+      set (ra := residual_ask a ms).
+      assert (Hq_le_rb : Nat.min rb ra <= rb) by apply Nat.le_min_l.
+      assert (HA : A <= quantity b) by apply Hbid.
+      assert (Hrb_def : rb = quantity b - A).
+      { unfold rb, residual_bid, A. reflexivity. }
+      rewrite Hrb_def in Hq_le_rb.
+      lia.
+    + unfold m, create_match; simpl.
+      destruct (bid_eq_dec b b') as [Heq'|Hneq']; [subst; contradiction|].
+      unfold ms.
+      rewrite Nat.add_0_r.
+      apply Hbid.
   - (* asks side *)
-    intros a' Ha'in.
-    fold ms.
-    fold m.
+    intro a'.
     change (allocated_ask a' (ms ++ [m]) <= ask_quantity a').
     rewrite (allocated_ask_app_single a' ms m).
-    destruct (ask_eq_dec (matched_ask m) a') as [Eeq|Eneq].
-    + (* affected ask: matched_ask m = a' ; matched_ask m = a *)
-      symmetry in Eeq; assert (a' = a) as ->.
-      { unfold m, create_match in Eeq; simpl in Eeq. exact Eeq. }
+    destruct (ask_eq_dec (matched_ask m) a') as [Heq|Hneq].
+    + subst a'.
+      unfold m, create_match; simpl.
       set (A := allocated_ask a ms).
-      set (Q := ask_quantity a).
-      set (q := Nat.min (residual_bid b ms) (residual_ask a ms)).
-      assert (Hbound : A <= Q) by (eapply Hask; eauto).
-      assert (Hq_le_res : q <= residual_ask a ms).
-      { unfold q.
-        apply Nat.le_min_r. }
-      unfold residual_ask, A, Q, q in *.
-      unfold match_quantity, create_match; simpl.
-      rewrite Nat.add_comm.
-      apply PeanoNat.Nat.add_le_mono_r with (p := allocated_ask a ms) in Hq_le_res.
-      rewrite PeanoNat.Nat.sub_add in Hq_le_res by exact Hbound.
-      exact Hq_le_res.
-    + (* unaffected ask *)
-      simpl. rewrite Nat.add_0_r. eapply Hask; exact Ha'in.
+      set (rb := residual_bid b ms).
+      set (ra := residual_ask a ms).
+      assert (Hq_le_ra : Nat.min rb ra <= ra) by apply Nat.le_min_r.
+      assert (HA : A <= ask_quantity a) by apply Hask.
+      assert (Hra_def : ra = ask_quantity a - A).
+      { unfold ra, residual_ask, A. reflexivity. }
+      rewrite Hra_def in Hq_le_ra.
+      lia.
+    + unfold m, create_match; simpl.
+      destruct (ask_eq_dec a a') as [Heq'|Hneq']; [subst; contradiction|].
+      unfold ms.
+      rewrite Nat.add_0_r.
+      apply Hask.
 Qed.
 
 Lemma pick_ask_in :

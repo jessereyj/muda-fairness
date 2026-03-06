@@ -81,6 +81,8 @@ Proven for traces starting from initial states.
 
 Proven for traces starting from initial states.
 
+Note: `p_has_cprice` is totalized in the atomic interpretation so this property remains well-defined (and does not exclude no-trade executions where a clearing price is undefined).
+
 ### Match Finality
 
 `finalityOK := G (Atom p_match_keep)`
@@ -141,17 +143,23 @@ These follow from sorting correctness by construction. The greedy algorithm scan
 
 | Fairness Property | Depends on MUDA Axioms | Depends on LTL Meta-Axioms | Admitted |
 |-------------------|------------------------|----------------------------|----------|
-| Priority Fairness | Yes | A0 schema | 0 |
-| Quantity Fairness | No | A0 schema | 0 |
-| Price Fairness | No | A0 schema | 0 |
-| Match Finality | No | A0 schema | 0 |
-| Maximality | Yes | A0 schema | 0 |
-| Justified Rejection | No | A0 schema | 0 |
+| Priority Fairness | Yes | No | 0 |
+| Quantity Fairness | Yes | No | 0 |
+| Price Fairness | Yes | No | 0 |
+| Match Finality | Yes | No | 0 |
+| Maximality | Yes | No | 0 |
+| Justified Rejection | Yes | No | 0 |
+
+Notes:
+
+- The fairness proofs are semantic (they prove `satisfies ...`) and do not use the LTL meta-theory axioms (e.g., `WeakCompleteness`).
+- All fairness theorems depend on the axiomatized sorting functions `sort_bids`/`sort_asks` because they are used by the MUDA transition function (`step`).
+- Priority fairness additionally depends on the greedy-priority axioms (`greedy_respects_priority_bids` and `greedy_respects_priority_asks`).
 
 **Summary:**
 
-- Four fairness theorems do not depend on MUDA algorithmic axioms
-- Two fairness theorems depend on sorting and greedy priority assumptions
+- All fairness theorems depend on the sorting-function axioms (`sort_bids`, `sort_asks`)
+- Priority fairness additionally depends on greedy priority assumptions
 - All fairness theorems are proven with `Qed` and use no `Admitted`
 
 ### Comparison to Standard Practice

@@ -93,9 +93,18 @@ Definition residual_ask (a : Ask) (ms : list Match) : nat :=
   ask_quantity a - allocated_ask a ms.
 
 
+(* Quantity/accounting invariant used as an atomic predicate for fairness.
+
+   Thesis (Chapter 3, Proposition 2 / Chapter 4 quantity fairness): the allocated
+   quantity never exceeds the initial quantity for any agent.
+
+   We quantify over *all* bids/asks (not just list membership) so that this
+   invariant is insensitive to Phase P2 reordering and does not depend on any
+   sorting permutation assumptions.
+*)
 Definition allocOK (s : State) : Prop :=
-  (forall b, In b (bids s) -> allocated_bid b (matches s) <= quantity b) /\
-  (forall a, In a (asks s) -> allocated_ask a (matches s) <= ask_quantity a).
+  (forall b, allocated_bid b (matches s) <= quantity b) /\
+  (forall a, allocated_ask a (matches s) <= ask_quantity a).
 
 
 (** Definition-1 (Feasibility).

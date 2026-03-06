@@ -125,8 +125,8 @@ Proposition-1 (Residual Non-negativity) and Proposition-2 (Conservation).
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">allocOK</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span>, <span class="id" title="var">In</span> <span class="id" title="var">b</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">quantity</span> <span class="id" title="var">b</span>) /\<br/>
-&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span>).<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span>, <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">quantity</span> <span class="id" title="var">b</span>) /\<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span>).<br/>
 
 <br/>
 </div>

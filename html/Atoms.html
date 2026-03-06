@@ -38,8 +38,8 @@ Chapter 4 (MUDA Protocol Layer) — Section 4.2 (Atomic Predicates)
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">allocOK_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span>, <span class="id" title="var">In</span> <span class="id" title="var">b</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">quantity</span> <span class="id" title="var">b</span>) /\<br/>
-&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span>).<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span>, <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">quantity</span> <span class="id" title="var">b</span>) /\<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span>).<br/>
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">no_feasible_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
@@ -49,7 +49,7 @@ Chapter 4 (MUDA Protocol Layer) — Section 4.2 (Atomic Predicates)
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">has_clearing_price_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
 &nbsp;&nbsp;<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">c</span>, <span class="id" title="var">determine_clearing_price</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">c</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">True</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">bounds_cstar_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>

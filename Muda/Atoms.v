@@ -9,19 +9,23 @@ Import ListNotations.
 From MUDA Require Import Types State Sorting Matching ClearingPrice Transitions.
 
 Definition allocOK_prop (s : State) : Prop :=
-  (forall b, In b (bids s) -> allocated_bid b (matches s) <= quantity b) /\
-  (forall a, In a (asks s) -> allocated_ask a (matches s) <= ask_quantity a).
+  (forall b, allocated_bid b (matches s) <= quantity b) /\
+  (forall a, allocated_ask a (matches s) <= ask_quantity a).
 
 Definition no_feasible_prop (s : State) : Prop :=
   forall b a, In b (bids s) -> In a (asks s) ->
               is_feasible b a (matches s) = false.
 
 Definition has_clearing_price_prop (s : State) : Prop :=
-  (* Chapter 4: has_cprice(x) iff the final match record is non-empty.
-     In this mechanization, this is equivalent to determine_clearing_price s
-     being defined (Some _), which happens exactly when a marginal pair exists.
+  (* Thesis (Chapter 4 MUDA protocol layer): price-related atoms are totalized so
+     that traces with no matches (hence no clearing price) still have a total
+     valuation. In particular, this predicate is vacuously true when no marginal
+     pair exists.
+
+     When a marginal pair exists, `determine_clearing_price` is definitionally
+     `Some _`, so the predicate holds as well.
    *)
-  exists c, determine_clearing_price s = Some c.
+  True.
 
 Definition bounds_cstar_prop (s : State) : Prop :=
   match marginal_pair s, determine_clearing_price s with

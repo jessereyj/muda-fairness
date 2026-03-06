@@ -70,17 +70,9 @@ Lemma allocOK_after_sorting :
     allocOK s ->
     allocOK (step s).
 Proof.
-  intros s Hp2 [Hbid Hask].
+  intros s Hp2 H.
   unfold step; rewrite Hp2; unfold do_sorting; simpl.
-  split.
-  - intros b Hb_in_sorted.
-    pose proof (sort_bids_perm (bids s)) as Hperm.
-    assert (In b (bids s)) by (now apply (Permutation_in b Hperm)).
-    exact (Hbid b H).
-  - intros a Ha_in_sorted.
-    pose proof (sort_asks_perm (asks s)) as Hperm.
-    assert (In a (asks s)) by (now apply (Permutation_in a Hperm)).
-    exact (Hask a H).
+  exact H.
 Qed.
 
 
