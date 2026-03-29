@@ -17,9 +17,7 @@ Definition priceOK : LTL_formula :=
   (* Chapter 4: price fairness is the global conjunction of the boundedness and
      the price-rule predicates. Totalisation for the undefined-price case is
      built into the atoms. *)
-  G (Atom p_bounds_cstar)
-  ∧ G (Atom p_has_cprice)
-  ∧ G (Atom p_price_rule).
+  G (Atom p_has_cprice → (Atom p_bounds_cstar ∧ Atom p_price_rule)).
 
 Theorem quantity_fairness_initial : forall bs as_list,
   allocOK (initial_state bs as_list).
@@ -140,19 +138,24 @@ Theorem uniform_price_fairness_LTL_initial : forall bs as_list,
 Proof.
   intros bs as_list.
   unfold priceOK.
+  rewrite satisfies_always_unfold.
+  intros j _.
+  (* Prove the implication by establishing its consequent at every index.
+     This matches the intended reading: whenever a clearing price exists, it
+     follows the rule and is within bounds; the atoms are totalized so the
+     consequent is also well-defined on no-trade executions. *)
+  simpl.
+  right.
   split.
-  - rewrite satisfies_always_unfold.
-    intros j _. 
-    rewrite mu_trace_atom_at_execute.
+  - (* bounds_cstar *)
+    change (satisfies (mu_trace (initial_state bs as_list)) j (Atom p_bounds_cstar)).
+    apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) j p_bounds_cstar)).
     unfold interp_atom.
     change (bounds_cstar_prop (execute j (initial_state bs as_list))).
     apply bounds_cstar_preserved_n.
-  - split.
-    + rewrite satisfies_always_unfold.
-      intros j _.
-      rewrite mu_trace_atom_at_execute.
-      unfold interp_atom.
-      (* p_has_cprice is totalized as a predicate (vacuously true on no-match traces). *)
-      exact I.
-    + apply price_rule_fairness_LTL_initial.
+  - (* price_rule *)
+    change (satisfies (mu_trace (initial_state bs as_list)) j (Atom p_price_rule)).
+    pose proof (price_rule_fairness_LTL_initial bs as_list) as Hrule.
+    rewrite satisfies_always_unfold in Hrule.
+    exact (Hrule j (Nat.le_0_l j)).
 Qed.

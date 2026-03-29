@@ -17,15 +17,11 @@ Definition no_feasible_prop (s : State) : Prop :=
               is_feasible b a (matches s) = false.
 
 Definition has_clearing_price_prop (s : State) : Prop :=
-  (* Thesis (Chapter 4 MUDA protocol layer): price-related atoms are totalized so
-     that traces with no matches (hence no clearing price) still have a total
-     valuation. In particular, this predicate is vacuously true when no marginal
-     pair exists.
-
-     When a marginal pair exists, `determine_clearing_price` is definitionally
-     `Some _`, so the predicate holds as well.
-   *)
-  True.
+  (* Chapter 4 (derived predicate has_cprice): records whether the clearing price
+     is defined. In this development, the clearing price is defined exactly when
+     the marginal pair exists, i.e., when `determine_clearing_price` returns
+     `Some _`. *)
+  exists c, determine_clearing_price s = Some c.
 
 Definition bounds_cstar_prop (s : State) : Prop :=
   match marginal_pair s, determine_clearing_price s with

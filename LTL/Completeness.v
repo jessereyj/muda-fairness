@@ -45,7 +45,11 @@ Proof.
     apply IHi.
 Qed.
 
-Axiom WeakCompleteness : forall φ, valid φ -> Provable φ.
+Theorem WeakCompleteness : forall φ, valid φ -> Provable φ.
+Proof.
+  intros φ Hvalid.
+  apply completeness_valid; exact Hvalid.
+Qed.
 
 Theorem Consistency : ~ exists φ, Provable φ /\ Provable (Not φ).
 Proof.

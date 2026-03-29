@@ -2,6 +2,8 @@
 
 Temporal verification of fairness in the Multi-Unit Double Auction (MUDA) using Rocq and Linear Temporal Logic (LTL).
 
+If you’re looking for thesis defense/study notes (internal), see [docs/learning/README.md](docs/learning/README.md).
+
 ## Structure
 
 ```
@@ -10,6 +12,12 @@ MUDA/      - MUDA protocol model (state, sorting, matching, price)
 Fairness/  - Fairness property formulas and proofs
 Example/   - Cloud market scenarios that exercise the definitions and fairness theorems
 ```
+
+## Docs
+
+- Internal learning/defense pack: [docs/learning/README.md](docs/learning/README.md)
+- Text extraction of the thesis (for search/alignment): [docs/thesis.txt](docs/thesis.txt)
+- Exact trusted assumptions inventory: [docs/TRUSTED_ASSUMPTIONS.md](docs/TRUSTED_ASSUMPTIONS.md)
 
 ## Quick Start
 
@@ -77,11 +85,11 @@ Proven for traces starting from initial states.
 
 ### Uniform Price Fairness
 
-`priceOK := G (Atom p_bounds_cstar) ∧ G (Atom p_has_cprice) ∧ G (Atom p_price_rule)`
+`priceOK := G (Atom p_has_cprice → (Atom p_bounds_cstar ∧ Atom p_price_rule))`
 
 Proven for traces starting from initial states.
 
-Note: `p_has_cprice` is totalized in the atomic interpretation so this property remains well-defined (and does not exclude no-trade executions where a clearing price is undefined).
+Note: `p_has_cprice` reflects whether a clearing price exists (i.e., `Some _`). The implication form ensures no-trade executions are not excluded; the bound/rule atoms are also totalized to remain well-defined when no marginal pair exists.
 
 ### Match Finality
 
@@ -121,9 +129,9 @@ The development makes a small number of explicit axiomatic assumptions. These ar
 
 - Propositional tautologies as a meta-axiom schema
 - Canonical model construction
-- Weak completeness of LTL with X and U
+- Weak completeness of LTL with X and U (derived from the canonical-countermodel assumption)
 
-These are standard results adopted from the LTL literature. Fairness proofs depend only on soundness, which is fully proven.
+These are standard results adopted from the LTL literature. Fairness proofs depend only on soundness (proved modulo the standard propositional meta-assumption `A0_valid`).
 
 #### MUDA Sorting
 

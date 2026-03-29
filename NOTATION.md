@@ -11,6 +11,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Structu
 1. **Order components remain constant**
   - Transitions never mutate `Bid`/`Ask` record fields; sorting only permutes lists.
   - See [MUDA/Sorting.v](MUDA/Sorting.v) (`sort_bids`, `sort_asks`, `do_sorting`) and [MUDA/Matching.v](MUDA/Matching.v) (`match_step`).
+  - **Assumption note:** the *existence/correctness* of `sort_bids`/`sort_asks` is axiomatized (as permitted by the thesis scope). The rest of the protocol and all fairness theorems are proved relative to these sorting assumptions.
 
 2. **Determinism (one successor)**
   - `delta` is modeled as a function `step : State -> State`.
@@ -93,9 +94,13 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
 4.1.4 **Axiomatic System**
 - Hilbert-style calculus (A0–A3, MP, necessitation restricted to tautologies): [LTL/Axioms.v](LTL/Axioms.v) (`Provable`, `Ax1`, `Ax2`, `Ax3`).
 
+**Assumption note:** the propositional-tautology predicate `IsPropTaut` is left abstract, and the semantic validity of tautologies is assumed as `A0_valid` (see [LTL/Soundness.v](LTL/Soundness.v)). This matches the thesis treatment of propositional reasoning as standard background.
+
 4.1.5 **Meta-theoretic properties**
 - Soundness (Theorem 2): [LTL/Soundness.v](LTL/Soundness.v) (`soundness`).
 - Weak completeness / adequacy / consistency (Theorems 3–4, Corollary 1): [LTL/Completeness.v](LTL/Completeness.v) (`WeakCompleteness`, `Adequacy`, `Consistency`).
+
+**Assumption note:** weak completeness is obtained from a canonical-countermodel assumption (`canonical_countermodel`) in [LTL/Completeness.v](LTL/Completeness.v), consistent with the thesis’s “standard completeness” positioning.
 
 ### 4.2 MUDA Protocol Layer (Traces + Atomic Propositions)
 
