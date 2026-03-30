@@ -22,13 +22,37 @@
 </div>
 
 <div class="doc">
-Chapter 4 (MUDA Protocol Layer) — Section 4.2 (Atomic Predicates)
+MUDA/Atoms.v — Chapter 4 (MUDA Protocol Layer): Atomic Predicates
 
 <div class="paragraph"> </div>
 
-  Defines MUDA-specific state-level predicates used as atomic propositions in
-  LTL fairness formulas (allocOK, no_feasible, has_cprice, match finality,
-  rejection predicates, and priority-step predicates).
+  This project focuses on Chapters 3–5 only:
+<ul class="doclist">
+<li> Chapter 3: operational semantics (phases + deterministic transitions)
+
+</li>
+<li> Chapter 4: LTL semantics over MUDA traces
+
+</li>
+<li> Chapter 5: concrete executions + fairness validation
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  Atomic predicates are therefore restricted to those needed for:
+<ul class="doclist">
+<li> Priority fairness
+
+</li>
+<li> Quantity fairness
+
+</li>
+<li> Uniform price fairness
+
+</li>
+</ul>
 
 </div>
 <div class="code">
@@ -42,13 +66,7 @@ Chapter 4 (MUDA Protocol Layer) — Section 4.2 (Atomic Predicates)
 &nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;= <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span>).<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">no_feasible_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">b</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) -&gt; <span class="id" title="var">In</span> <span class="id" title="var">a</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) = <span class="id" title="var">false</span>.<br/>
-
-<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">has_clearing_price_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">c</span>, <span class="id" title="var">determine_clearing_price</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">c</span>.<br/>
 
 <br/>
@@ -66,117 +84,37 @@ Chapter 4 (MUDA Protocol Layer) — Section 4.2 (Atomic Predicates)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">marginal_pair</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">True</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>) =&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">determine_clearing_price</span> <span class="id" title="var">s</span> =<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">if</span> (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) =? 0)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>))<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
 &nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">prefix</span> {<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">l1</span> <span class="id" title="var">l2</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">w</span>, <span class="id" title="var">l2</span> = <span class="id" title="var">l1</span> ++ <span class="id" title="var">w</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">match_keep_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">prefix</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)).<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">match_final_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">phase</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
-&nbsp;&nbsp;| <span class="id" title="var">P4</span> | <span class="id" title="var">P5</span> | <span class="id" title="var">P6</span> | <span class="id" title="var">P7</span> =&gt; <span class="id" title="var">matches</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>) = <span class="id" title="var">matches</span> <span class="id" title="var">s</span><br/>
-&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">True</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">priorityB_step_ok_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P3</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">True</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">_</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">b'</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prioB</span> <span class="id" title="var">b'</span> <span class="id" title="var">b</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id" title="tactic">exists</span> <span class="id" title="var">a'</span>, <span class="id" title="var">In</span> <span class="id" title="var">a'</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) /\ <span class="id" title="var">feasible</span> <span class="id" title="var">b'</span> <span class="id" title="var">a'</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">occurs_bid</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">m</span>, <span class="id" title="var">In</span> <span class="id" title="var">m</span> <span class="id" title="var">ms</span> /\ <span class="id" title="var">matched_bid</span> <span class="id" title="var">m</span> = <span class="id" title="var">b</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">occurs_ask</span> (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">ms</span> : <span class="id" title="var">list</span> <span class="id" title="var">Match</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">m</span>, <span class="id" title="var">In</span> <span class="id" title="var">m</span> <span class="id" title="var">ms</span> /\ <span class="id" title="var">matched_ask</span> <span class="id" title="var">m</span> = <span class="id" title="var">a</span>.<br/>
-
-<br/>
-</div>
-
-<div class="doc">
-Definition-10 (Rejection at Termination).
-
-<div class="paragraph"> </div>
-
-    An agent is rejected iff it does not occur in the final match record.
-
-</div>
-<div class="code">
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">rejected_bid_prop</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">b</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) /\ ~ <span class="id" title="var">occurs_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">rejected_ask_prop</span> (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">a</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) /\ ~ <span class="id" title="var">occurs_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>).<br/>
-
-<br/>
-</div>
-
-<div class="doc">
-Proposition-7 (Justified Rejection at Termination).
-
-<div class="paragraph"> </div>
-
-    A rejection is justified when a rejected agent has no feasible counterpart
-    in the terminal post-matching state.
-
-</div>
-<div class="code">
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">rejection_justified_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">aa</span> : <span class="id" title="var">Ask</span>),<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">rejected_bid_prop</span> <span class="id" title="var">b</span> <span class="id" title="var">s</span> -&gt; <span class="id" title="var">In</span> <span class="id" title="var">aa</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">aa</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) = <span class="id" title="var">false</span>)<br/>
-&nbsp;&nbsp;/\<br/>
-&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> (<span class="id" title="var">aa</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>),<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">rejected_ask_prop</span> <span class="id" title="var">aa</span> <span class="id" title="var">s</span> -&gt; <span class="id" title="var">In</span> <span class="id" title="var">b</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">aa</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) = <span class="id" title="var">false</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">priorityB_step_ok_prop</span> (<span class="id" title="var">s</span>: <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">priorityS_step_ok_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P3</span> -&gt;<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">a</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prioB</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">feasible</span> <span class="id" title="var">b1</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">b2</span>, <span class="id" title="var">a</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">priorityS_step_ok_prop</span> (<span class="id" title="var">s</span>: <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P3</span> -&gt;<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">b</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prioS</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a1</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a2</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Axiom</span> <span class="id" title="var">bids_sorted_in_P3</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>,<br/>
-&nbsp;&nbsp;<span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P3</span> -&gt; <span class="id" title="var">bids_sorted</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Axiom</span> <span class="id" title="var">asks_sorted_in_P3</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>,<br/>
-&nbsp;&nbsp;<span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P3</span> -&gt; <span class="id" title="var">asks_sorted</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Axiom</span> <span class="id" title="var">greedy_respects_priority_bids</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">a</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P3</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prioB</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">feasible</span> <span class="id" title="var">b1</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">b2</span>,<span class="id" title="var">a</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Axiom</span> <span class="id" title="var">greedy_respects_priority_asks</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">b</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P3</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prioS</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a1</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) &lt;&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a2</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">True</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">a'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">a'</span> (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prioS</span> <span class="id" title="var">a'</span> <span class="id" title="var">a</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a'</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 </div>
 </div>
 

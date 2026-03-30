@@ -4,20 +4,19 @@ This document maps mathematical notation from the thesis (Chapters 3-4) to the c
 
 ## Chapter 3 Numbering Index
 
-This section provides a stable cross-reference from Chapter 3 numbering (Structural Assumptions / Definitions / Propositions) to the corresponding Rocq symbols. The code uses descriptive identifiers (not numeric labels); the numeric labels are recorded here and in Coqdoc comments in the relevant `.v` files.
+This section provides a stable cross-reference from Chapter 3 numbering (Definitions / Propositions / phase rules) to the corresponding Rocq symbols. The code uses descriptive identifiers (not numeric labels); the numeric labels are recorded here and in Coqdoc comments in the relevant `.v` files.
 
-### Structural Assumptions (Chapter 3, Section 3.3)
+### Structural Properties (Chapter 3)
 
 1. **Order components remain constant**
   - Transitions never mutate `Bid`/`Ask` record fields; sorting only permutes lists.
   - See [MUDA/Sorting.v](MUDA/Sorting.v) (`sort_bids`, `sort_asks`, `do_sorting`) and [MUDA/Matching.v](MUDA/Matching.v) (`match_step`).
-  - **Assumption note:** the *existence/correctness* of `sort_bids`/`sort_asks` is axiomatized (as permitted by the thesis scope). The rest of the protocol and all fairness theorems are proved relative to these sorting assumptions.
 
 2. **Determinism (one successor)**
   - `delta` is modeled as a function `step : State -> State`.
   - See [MUDA/Transitions.v](MUDA/Transitions.v) (`step`).
 
-3. **Terminal preservation**
+3. **Terminal state preservation**
   - If `phase = P7` then `step s = s`.
   - See [MUDA/Transitions.v](MUDA/Transitions.v) (`step`, `P7` branch).
 
@@ -25,6 +24,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Structu
 
 1. **Feasibility**
   - [MUDA/State.v](MUDA/State.v) (`feasible_pair`), and boolean form [MUDA/Matching.v](MUDA/Matching.v) (`is_feasible`).
+  - **Scenario 1 convention (Chapter 5):** the executable matcher enforces **single-match per order** by requiring the bid and ask have not appeared in the match record yet (implemented as `allocated_bid b ms = 0` and `allocated_ask a ms = 0` inside `is_feasible`).
 
 2. **Traded Unit Quantity**
   - [MUDA/Matching.v](MUDA/Matching.v) (`create_match` uses `Nat.min`).
@@ -33,8 +33,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Structu
   - [MUDA/Sorting.v](MUDA/Sorting.v) (`bid_priority`, `ask_priority`, `prioB`, `prioS`).
 
 4. **Priority-Consistent Selection**
-  - Encoded as priority-respecting axioms/predicates used in fairness:
-    [MUDA/Atoms.v](MUDA/Atoms.v) (`greedy_respects_priority_bids`, `greedy_respects_priority_asks`, `priorityB_step_ok_prop`, `priorityS_step_ok_prop`).
+  - Encoded by the deterministic greedy selector in [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `best_feasible_ask`) and exposed as step-level predicates in [MUDA/Atoms.v](MUDA/Atoms.v) (`priorityB_step_ok_prop`, `priorityS_step_ok_prop`).
 
 5. **Unit Allocation**
   - [MUDA/State.v](MUDA/State.v) (`allocated_bid`, `allocated_ask`, plus residuals `residual_bid`, `residual_ask`).
@@ -43,7 +42,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Structu
   - [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `match_step`).
 
 7. **Match Monotonicity**
-  - [MUDA/Matching.v](MUDA/Matching.v) (`match_step_monotonic`) and post-matching stability via [MUDA/Atoms.v](MUDA/Atoms.v) (`match_final_prop`).
+  - [MUDA/Matching.v](MUDA/Matching.v) (`match_step_monotonic`).
 
 8. **Last Marginal Pair**
   - [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`marginal_pair`).
@@ -76,7 +75,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Structu
   - Proved as [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`clearing_price_bounds`).
 
 7. **Justified Rejection at Termination**
-  - Captured by [MUDA/Atoms.v](MUDA/Atoms.v) (`rejection_justified_prop`) and used in fairness proofs: [Fairness/JustifiedRejection.v](Fairness/JustifiedRejection.v).
+  - Out of scope for the refactored Chapter 3–5 fairness layer (this repo version focuses on priority/quantity/price fairness only).
 
 ## Chapter 4 Index
 
@@ -85,22 +84,13 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
 ### 4.1 Foundation Layer
 
 4.1.1 **Syntax**
-- Atomic proposition index set PROP = N: [LTL/Syntax.v](LTL/Syntax.v) (`predicate := nat`, `LTL_formula`, `X`, `U`, and abbreviations `F`, `G`).
+- Atomic proposition index set PROP = N: [LTL/Syntax.v](LTL/Syntax.v) (`predicate := nat`, `LTL_formula`, `X`, `F`, `G`).
 
 4.1.2 **Semantics**
 - Infinite traces and satisfaction: [LTL/Semantics.v](LTL/Semantics.v) (`trace`, `trace_at`, `satisfies`, `models`, `valid`).
 - Lemma 1 (Semantics of F and G): [LTL/Semantics.v](LTL/Semantics.v) (`satisfies_eventually_unfold`, `satisfies_always_unfold`).
 
-4.1.4 **Axiomatic System**
-- Hilbert-style calculus (A0–A3, MP, necessitation restricted to tautologies): [LTL/Axioms.v](LTL/Axioms.v) (`Provable`, `Ax1`, `Ax2`, `Ax3`).
-
-**Assumption note:** the propositional-tautology predicate `IsPropTaut` is left abstract, and the semantic validity of tautologies is assumed as `A0_valid` (see [LTL/Soundness.v](LTL/Soundness.v)). This matches the thesis treatment of propositional reasoning as standard background.
-
-4.1.5 **Meta-theoretic properties**
-- Soundness (Theorem 2): [LTL/Soundness.v](LTL/Soundness.v) (`soundness`).
-- Weak completeness / adequacy / consistency (Theorems 3–4, Corollary 1): [LTL/Completeness.v](LTL/Completeness.v) (`WeakCompleteness`, `Adequacy`, `Consistency`).
-
-**Assumption note:** weak completeness is obtained from a canonical-countermodel assumption (`canonical_countermodel`) in [LTL/Completeness.v](LTL/Completeness.v), consistent with the thesis’s “standard completeness” positioning.
+**Note:** This repository version keeps the Chapter 4 *semantic* satisfaction layer only (syntax + semantics + derived operators in [LTL/LTL.v](LTL/LTL.v)). It intentionally does not include a Hilbert-style proof system, soundness, or completeness development.
 
 ### 4.2 MUDA Protocol Layer (Traces + Atomic Propositions)
 
@@ -116,9 +106,28 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
   - [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
   - [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
   - [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
-  - [Fairness/MatchFinality.v](Fairness/MatchFinality.v)
-  - [Fairness/Maximality.v](Fairness/Maximality.v)
-  - [Fairness/JustifiedRejection.v](Fairness/JustifiedRejection.v)
+
+#### Chapter 4 Atomic Proposition Notation
+
+The thesis presents atomic propositions using mathematical predicate notation.
+In the Rocq development, these are state-level predicates derived from the MUDA
+state components (orders, residuals, match record, clearing price).
+
+- `matched(b, s, q)` — true iff `(b, s, q)` is in the match record:
+  [MUDA/State.v](MUDA/State.v) (`matched`) over `matches`.
+- `residualB(b) = r` — true iff buyer order `b` has residual `r`:
+  [MUDA/State.v](MUDA/State.v) (`residualB`) defined via `residual_bid`.
+- `residualS(s) = r` — true iff seller order `s` has residual `r`:
+  [MUDA/State.v](MUDA/State.v) (`residualS`) defined via `residual_ask`.
+- `price(x) = c` — true iff the clearing price stored in state `x` is `c`:
+  [MUDA/State.v](MUDA/State.v) (`price_at`) over `clearing_price`.
+- `feasible(b, s)` — true iff `p(b) ≥ a(s)` and both residuals are positive:
+  [MUDA/State.v](MUDA/State.v) (`feasible`) / `feasible_pair`.
+
+The LTL layer then assigns truth values to a fixed set of *named* predicates
+(e.g., priority step correctness, quantity allocation bounds, clearing price
+bounds/rule) using [Fairness/Interpretation.v](Fairness/Interpretation.v)
+(`interp_atom`, `mu_trace`).
 
 ## Core Data Types
 
@@ -132,7 +141,24 @@ Record Agent := { agent_id : nat; agent_type : AgentType }.
 
 **Thesis:** Not explicitly modeled—agents are implicit in bid/ask ownership.
 
+**Chapter 3 note (one order per agent):** The thesis states “Each agent submits exactly one order.”
+
+- **Modeling choice:** this development represents the submitted orders as lists `bids : list Bid` and `asks : list Ask` inside the MUDA state.
+- **What is enforced:** order *immutability* is enforced by transitions (orders are not mutated).
+- **What is not enforced by the core model:** uniqueness (“one order per agent”) is not encoded as a global invariant; instead it is a property of the concrete inputs used in examples/scenarios.
+
 **Note:** The `Agent` type enables tracking ownership and partitioning bids/asks by participant. This is an implementation refinement that doesn't affect the protocol logic described in the thesis.
+
+---
+
+## Order Immutability
+
+**Thesis (Definition 3):** Once an order is submitted, its components remain unchanged throughout the execution trace.
+
+**Code:** Transitions never mutate the contents of `Bid`/`Ask` records; the only Phase that changes order presentation is P2 sorting, which reorders the lists.
+
+- Sorting step: [MUDA/Sorting.v](MUDA/Sorting.v) (`do_sorting`)
+- Deterministic transition: [MUDA/Transitions.v](MUDA/Transitions.v) (`step`) preserves `bids`/`asks` outside of Phase P2
 
 ---
 
@@ -338,8 +364,8 @@ Definition determine_clearing_price (s : State) : option nat :=
   | None => None
   | Some (b, a) =>
       if (residual_ask a (matches s) =? 0)
-      then Some (ask_price a)
-      else Some (price b)
+      then Some (price b)
+      else Some (ask_price a)
   end.
 ```
 
@@ -395,7 +421,8 @@ CoFixpoint mu_trace (s : State) : trace :=
 **Mapping:**
 - Thesis `ω` ↔ Code `mu_trace s` (coinductive trace)
 - Thesis stuttering (implicit in `x₇ = x₈ = ...`) ↔ Code `step` becomes identity at `P7`
-- Thesis “xhalt” intuition (“post-matching forever”) ↔ Code guard `phase_ge_4` (phases `P4`–`P7`)
+
+**Note:** `mu_trace` always advances by `step`; terminal stuttering is ensured because `step s = s` when `phase s = P7`.
 
 **Note:** Coq's `CoFixpoint` mechanizes infinite traces. The thesis describes this conceptually without implementation syntax.
 
@@ -408,27 +435,31 @@ CoFixpoint mu_trace (s : State) : trace :=
 **Code:** `MUDA/Atoms.v` and `Fairness/Interpretation.v`
 ```coq
 Definition allocOK_prop (s : State) : Prop := ...
-Definition no_feasible_prop (s : State) : Prop := ...
 Definition has_clearing_price_prop (s : State) : Prop := ...
 (* etc. *)
 
 Definition interp_atom (s : State) (p : predicate) : Prop :=
   match p with
   | 0 => allocOK_prop s
-  | 1 => phase s = P7
-  | 2 => no_feasible_prop s
-  | 3 => has_clearing_price_prop s
-  | 4 => bounds_cstar_prop s
-  | 5 => match_keep_prop s
-  | 6 => priorityB_step_ok_prop s
-  | 7 => priorityS_step_ok_prop s
-  | 8 => rejection_justified_prop s
-  | 9 => price_rule_prop s
-  (* phase atoms p_phase(k) are encoded separately *)
+  | 1 => has_clearing_price_prop s
+  | 2 => bounds_cstar_prop s
+  | 3 => price_rule_prop s
+  | 4 => priorityB_step_ok_prop s
+  | 5 => priorityS_step_ok_prop s
+  | p' =>
+      (* phase atoms: p_phase(i) = 10+i, for i in {1..7} *)
+      if andb (Nat.leb (10 + 1) p') (Nat.leb p' (10 + 7)) then
+        let i := (p' - 10) in
+        phase s =
+          match i with
+          | 1 => P1 | 2 => P2 | 3 => P3 | 4 => P4
+          | 5 => P5 | 6 => P6 | _ => P7
+          end
+      else False
   end.
 ```
 
-**Mapping:** Thesis uses informal predicates; code defines them as computable `Prop` values and maps them to LTL predicates via a numbered encoding.
+**Mapping:** Thesis uses informal predicates; code defines them as computable `Prop` values and maps them to LTL predicates via a numbered encoding. This repo version includes only the atoms needed for priority/quantity/price fairness.
 
 ---
 

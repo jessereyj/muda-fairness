@@ -98,9 +98,9 @@ Definition residual_ask (a : Ask) (ms : list Match) : nat :=
    Thesis (Chapter 3, Proposition 2 / Chapter 4 quantity fairness): the allocated
    quantity never exceeds the initial quantity for any agent.
 
-   We quantify over *all* bids/asks (not just list membership) so that this
-   invariant is insensitive to Phase P2 reordering and does not depend on any
-   sorting permutation assumptions.
+  We quantify over *all* bids/asks (not just list membership) so that this
+  invariant is insensitive to Phase P2 reordering and does not depend on any
+  sorting permutation lemmas.
 *)
 Definition allocOK (s : State) : Prop :=
   (forall b, allocated_bid b (matches s) <= quantity b) /\
@@ -116,3 +116,30 @@ Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
   price b >= ask_price a
   /\ residual_bid b ms > 0
   /\ residual_ask a ms > 0.
+
+
+(* Chapter 4 (Atomic proposition interpretation) — math-friendly predicates.
+
+   These are *state-level* predicates mirroring the thesis notation.
+   The LTL layer in this repo interprets a fixed set of named atoms via
+   `Fairness/Interpretation.v`, but the underlying predicates are defined here.
+*)
+
+Definition matched (b : Bid) (a : Ask) (q : nat) (x : State) : Prop :=
+  exists m,
+    In m (matches x)
+    /\ matched_bid m = b
+    /\ matched_ask m = a
+    /\ match_quantity m = q.
+
+Definition residualB (b : Bid) (x : State) : nat :=
+  residual_bid b (matches x).
+
+Definition residualS (a : Ask) (x : State) : nat :=
+  residual_ask a (matches x).
+
+Definition price_at (x : State) (c : nat) : Prop :=
+  clearing_price x = Some c.
+
+Definition feasible (b : Bid) (a : Ask) (x : State) : Prop :=
+  feasible_pair b a (matches x).

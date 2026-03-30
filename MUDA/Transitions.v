@@ -27,7 +27,7 @@ Definition finish_matching (s : State) : State :=
     clearing_price := clearing_price s;
      phase := P4 |}.
 
-(** Structural Assumption-2 (Determinism) and Structural Assumption-3 (Terminal preservation).
+(** Chapter 3 properties: determinism and terminal preservation.
 
     The deterministic STS transition function `delta` from Chapter 3 is modeled
     as `step : State -> State`. Determinism is by construction.

@@ -16,18 +16,11 @@ Local Open Scope LTL_scope.
 Local Open Scope bool_scope.  
 
 Definition p_allocOK      : predicate := 0.
-Definition p_terminal     : predicate := 1.
-Definition p_no_feasible  : predicate := 2.
-Definition p_has_cprice   : predicate := 3.
-Definition p_bounds_cstar : predicate := 4.
-Definition p_match_keep   : predicate := 5.
-Definition p_prioB_step   : predicate := 6.
-Definition p_prioS_step   : predicate := 7.
-Definition p_rejection_justified : predicate := 8.
-Definition p_price_rule         : predicate := 9.
-
-(* Chapter 4 match-finality atom: matches are stable after matching ends. *)
-Definition p_match_final : predicate := 10.
+Definition p_has_cprice   : predicate := 1.
+Definition p_bounds_cstar : predicate := 2.
+Definition p_price_rule   : predicate := 3.
+Definition p_prioB_step   : predicate := 4.
+Definition p_prioS_step   : predicate := 5.
 
 Definition p_phase (i : nat) : predicate := (10 + i)%nat.
 
@@ -41,25 +34,17 @@ Definition interp_atom (s : State) : predicate -> Prop :=
   fun p =>
     match p with
     | 0 => allocOK_prop s
-    | 1 => phase s = P7
-    | 2 => no_feasible_prop s
-    | 3 => has_clearing_price_prop s
-    | 4 => bounds_cstar_prop s
-    | 5 => match_keep_prop s
-    | 6 => priorityB_step_ok_prop s
-    | 7 => priorityS_step_ok_prop s
-  | 8 => rejection_justified_prop s
-    | 9 => price_rule_prop s
-    | 10 => match_final_prop s
+    | 1 => has_clearing_price_prop s
+    | 2 => bounds_cstar_prop s
+    | 3 => price_rule_prop s
+    | 4 => priorityB_step_ok_prop s
+    | 5 => priorityS_step_ok_prop s
     | p' =>
         (* decode phase atoms *)
         if andb (Nat.leb (p_phase 1) p') (Nat.leb p' (p_phase 7)) then
           let i := (p' - 10)%nat in phase s = nth_phase i
         else False
     end.
-
-Definition phase_ge_4 : LTL_formula :=
-  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
 
 Lemma interp_atom_phase_4 : forall s, interp_atom s (p_phase 4) <-> phase s = P4.
 Proof.

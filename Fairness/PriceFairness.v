@@ -2,6 +2,10 @@
 
   Price fairness: the clearing price (when defined) follows the rule and is
   bounded by the marginal pair.
+
+  Chapter 4 math notation view:
+  whenever `matched(b, s, q)` holds in a state, trades are evaluated against the
+  clearing price `price(x) = c` produced by MUDA.
 *)
 From LTL  Require Import LTL.
 From MUDA Require Import State.

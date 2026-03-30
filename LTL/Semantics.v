@@ -1,7 +1,7 @@
 (** Chapter 4 (Foundation Layer) — Section 4.1.2 (Semantics)
 
   This file defines satisfaction `satisfies` of LTL formulas over infinite
-  traces and proves the standard unfold lemmas for F, G, and U.
+  traces and proves the standard unfold lemmas for F and G.
 
   Note: the thesis uses boolean valuations v : PROP -> {true,false}; this
   mechanization uses `state := predicate -> Prop`, which is equivalent for
@@ -38,9 +38,6 @@ Fixpoint satisfies (σ : trace) (i : nat) (φ : LTL_formula) : Prop :=
   | Next φ'            => satisfies σ (S i) φ'
   | Always φ'          => forall j, j >= i -> satisfies σ j φ'
   | Eventually φ'      => exists j, j >= i /\ satisfies σ j φ'
-  | Until φ₁ φ₂        =>
-      exists j, j >= i /\ satisfies σ j φ₂ /\
-                (forall k, i <= k < j -> satisfies σ k φ₁)
   end.
 
 Definition models (σ : trace) (φ : LTL_formula) : Prop := satisfies σ 0 φ.
@@ -61,34 +58,6 @@ Lemma satisfies_always_unfold :
     <-> forall j, j >= i -> satisfies σ j φ.
 Proof. intros; simpl; tauto. Qed.
 
-Lemma satisfies_until_unfold :
-  forall σ i φ ψ,
-    satisfies σ i (Until φ ψ)
-    <-> (satisfies σ i ψ \/
-         (satisfies σ i φ /\ satisfies σ (S i) (Until φ ψ))).
-Proof.
-  intros σ i φ ψ; split.
-  - (* → *)
-    simpl. intros (j & Hj & Hψ & Hseg).
-    destruct (Nat.eq_dec j i) as [Heq|Hneq].
-    + subst; left; exact Hψ.
-    + assert (i < j) as Hlt by lia.
-      right. split.
-      * specialize (Hseg i); apply Hseg; lia.
-      * simpl. exists j. split; [lia|]. split; [assumption|].
-        intros k Hk; apply Hseg; lia.
-  - (* ← *)
-    simpl. intros [Hψ | [Hφ Hnext]].
-    + exists i; repeat split; try lia; exact Hψ.
-    + simpl in Hnext.
-      destruct Hnext as (j & Hj & Hψj & HsegSi).
-      exists j; repeat split; try lia; [assumption|].
-      intros k Hk.
-      destruct (Nat.eq_dec k i) as [->|Hneq]; [exact Hφ|].
-      apply HsegSi; lia.
-Qed.
-
-
 Lemma satisfies_shift_tail :
   forall (s : state) (σ' : trace) (i : nat) (φ : LTL_formula),
     satisfies (Trace s σ') (S i) φ <-> satisfies σ' i φ.
@@ -103,7 +72,6 @@ Proof.
       | φ IHφ                               (* Next *)
       | φ IHφ                               (* Always *)
       | φ IHφ                               (* Eventually *)
-      | φ1 IH1 φ2 IH2                       (* Until *)
       ]; intros s0 σ0 i0; simpl.
   - (* Atom *)
     tauto.
@@ -144,29 +112,4 @@ Proof.
       intros (k & Hk & Hsat0).
       exists (S k). split; [lia|].
       apply (proj2 (IHφ s0 σ0 k)); exact Hsat0.
-  - (* Until (U) *)
-    split.
-    + (* → *)
-      intros (j & Hj & Hψ & Hseg).
-      destruct j as [|k]; [lia|].
-      exists k. repeat split; try (apply le_S_n in Hj; exact Hj).
-      * (* shift ψ from head at S k to tail at k *)
-        simpl in Hψ. apply (proj1 (IH2 s0 σ0 k)) in Hψ. exact Hψ.
-      * (* shift the segment *)
-        intros k0 Hrange.
-  specialize (Hseg (S k0)).
-  assert (S i0 <= S k0 < S k) as H0 by lia.
-  specialize (Hseg H0).
-        apply (proj1 (IH1 s0 σ0 k0)) in Hseg. exact Hseg.
-    + (* ← *)
-      intros (k & Hk & Hψ0 & Hseg0).
-      exists (S k). repeat split; try lia.
-      * (* shift ψ from tail at k to head at S k *)
-        apply (proj2 (IH2 s0 σ0 k)) in Hψ0. exact Hψ0.
-      * (* for any j with i0 ≤ j < S k *)
-        intros j Hj.
-  destruct j as [|k']; [lia|].
-  assert (i0 <= k' < k) as Hrange by lia.
-  specialize (Hseg0 k' Hrange).
-        apply (proj2 (IH1 s0 σ0 k')) in Hseg0. exact Hseg0.
 Qed.

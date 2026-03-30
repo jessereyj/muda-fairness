@@ -93,21 +93,22 @@ Qed.
 
 (** Definition-9 (Uniform Clearing Price).
 
-    If the marginal seller is exhausted, use the marginal ask price; otherwise
-    use the marginal bid price.
+  Chapter 5 scenarios use the convention:
+  - if the marginal seller is exhausted, use the marginal bid price
+  - otherwise, use the marginal ask price.
 *)
 Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
   | Some (b, a) =>
-      (* Chapter 3 clearing-price rule:
-         Let (b_star, a_star) be the marginal pair. If the marginal seller still has
-         positive residual quantity, then p* = p(b_star); otherwise p* = a(a_star).
-         (In particular, if both residuals are 0, pick the marginal ask.)
-       *)
-      if (residual_ask a (matches s) =? 0)
-      then Some (ask_price a)
-      else Some (price b)
+        (* Clearing price convention used by this development:
+           Let (b_star, a_star) be the marginal pair from the final match record.
+           We deterministically select either the marginal bid price or the
+           marginal ask price based on whether the marginal seller is exhausted.
+         *)
+        if (residual_ask a (matches s) =? 0)
+        then Some (price b)
+        else Some (ask_price a)
   end.
 
 Definition do_clearing_price (s : State) : State :=
@@ -135,8 +136,8 @@ Proof.
   destruct ea;
     simpl in Hc;
     inversion Hc; subst; clear Hc.
-  - (* seller residual = 0 -> clearing price is ask_price a *)
-    split; [apply le_n | exact Hab].
-  - (* seller residual > 0 -> clearing price is price b *)
+  - (* seller residual = 0 -> clearing price is price b *)
     split; [exact Hab | apply le_n].
+  - (* seller residual > 0 -> clearing price is ask_price a *)
+    split; [apply le_n | exact Hab].
 Qed.

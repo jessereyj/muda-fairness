@@ -2,6 +2,10 @@
 
   Quantity fairness: allocation is consistent with residual quantities.
   Proved as a global invariant over MUDA traces.
+
+  Chapter 4 math notation view:
+  - `matched(b, s, q)` ranges over the match record
+  - `residualB(b)` / `residualS(s)` are the remaining quantities
 *)
 From Stdlib Require Import Arith List Lia.
 Import ListNotations.

@@ -2,22 +2,14 @@
 
 Temporal verification of fairness in the Multi-Unit Double Auction (MUDA) using Rocq and Linear Temporal Logic (LTL).
 
-If you’re looking for thesis defense/study notes (internal), see [docs/README.md](docs/README.md).
-
 ## Structure
 
 ```
 LTL/       - Linear Temporal Logic foundation
 MUDA/      - MUDA protocol model (state, sorting, matching, price)
 Fairness/  - Fairness property formulas and proofs
-Example/   - Cloud market scenarios that exercise the definitions and fairness theorems
+Example/   - Chapter 5 Scenario 1 (executable trace checks)
 ```
-
-## Docs
-
-- Internal defense pack: [docs/README.md](docs/README.md)
-- Text extraction of the thesis (for search/alignment): [docs/thesis.txt](docs/thesis.txt)
-- Exact trusted assumptions inventory: [docs/TRUSTED_ASSUMPTIONS.md](docs/TRUSTED_ASSUMPTIONS.md)
 
 ## Quick Start
 
@@ -75,39 +67,27 @@ Run `./stats.sh` to report:
 
 ### Quantity Fairness
 
-`quantityOK := G (Atom p_allocOK)`
+Quantity fairness is evaluated over the MUDA execution trace using the Chapter 4
+state predicates (math notation): residual conservation via `residualB(b)` and
+the match record (i.e., `matched(b, s, q)` entries).
 
-Proven for traces starting from initial states.
+Proven for traces starting from initial states (as an invariant lifted to LTL).
 
 ### Priority Fairness
 
-`priorityOK := G (Atom p_prioB_step) ∧ G (Atom p_prioS_step)`
+Priority fairness states that during matching, the selected feasible pair does
+not skip any higher-priority feasible buyer/seller (using `feasible(b, s)` and
+the priority orderings).
 
 ### Uniform Price Fairness
 
-`priceOK := G (Atom p_has_cprice → (Atom p_bounds_cstar ∧ Atom p_price_rule))`
+Uniform price fairness states that trades recorded in the match record are
+priced consistently with the clearing price `price(x) = c` determined by MUDA.
 
 Proven for traces starting from initial states.
 
-Note: `p_has_cprice` reflects whether a clearing price exists (i.e., `Some _`). The implication form ensures no-trade executions are not excluded; the bound/rule atoms are also totalized to remain well-defined when no marginal pair exists.
-
-### Match Finality
-
-`finalityOK := G (Atom p_match_keep)`
-
-### Maximality
-
-Post-matching invariant form (Chapter 5):
-
-`phase_ge_4 := Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7)`
-
-`maximal := G (phase_ge_4 → Atom p_no_feasible)`
-
-### Justified Rejection
-
-`rejectionOK := G (phase_ge_4 → Atom p_rejection_justified)`
-
-See `Fairness/JustifiedRejection.v`.
+See the Chapter 4 predicate notation mapping in [NOTATION.md](NOTATION.md) and
+the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 
 ## Verification Status
 
@@ -115,66 +95,9 @@ See `Fairness/JustifiedRejection.v`.
 
 - Lemmas and theorems closed with `Qed`, reported by `stats.sh`
 - Admitted lemmas: **0**, enforced by `check.sh`
-- Axioms and parameters, reported by `stats.sh`
-
 All fairness theorems are proven using `Qed`. No fairness proof uses `Admitted`.
 
-Fairness verification uses semantic satisfaction over traces and relies on LTL soundness only. Completeness axioms are present for the meta-theory and are not required by fairness proofs.
-
-### Axiomatized Components
-
-The development makes a small number of explicit axiomatic assumptions. These are documented and separated from admitted proofs.
-
-#### LTL Meta-Theory
-
-- Propositional tautologies as a meta-axiom schema
-- Canonical model construction
-- Weak completeness of LTL with X and U (derived from the canonical-countermodel assumption)
-
-These are standard results adopted from the LTL literature. Fairness proofs depend only on soundness (proved modulo the standard propositional meta-assumption `A0_valid`).
-
-#### MUDA Sorting
-
-- Correctness of lexicographic bid sorting
-- Correctness of lexicographic ask sorting
-
-These formalize standard sorting properties. They could be discharged using Coq's verified sorting libraries. They are axiomatized to keep the focus on temporal verification.
-
-#### Greedy Matching Priority
-
-- Greedy matching respects bid priority ordering
-- Greedy matching respects ask priority ordering
-
-These follow from sorting correctness by construction. The greedy algorithm scans sorted lists in order.
-
-### Theorem Dependencies
-
-| Fairness Property | Depends on MUDA Axioms | Depends on LTL Meta-Axioms | Admitted |
-|-------------------|------------------------|----------------------------|----------|
-| Priority Fairness | Yes | No | 0 |
-| Quantity Fairness | Yes | No | 0 |
-| Price Fairness | Yes | No | 0 |
-| Match Finality | Yes | No | 0 |
-| Maximality | Yes | No | 0 |
-| Justified Rejection | Yes | No | 0 |
-
-Notes:
-
-- The fairness proofs are semantic (they prove `satisfies ...`) and do not use the LTL meta-theory axioms (e.g., `WeakCompleteness`).
-- All fairness theorems depend on the axiomatized sorting functions `sort_bids`/`sort_asks` because they are used by the MUDA transition function (`step`).
-- Priority fairness additionally depends on the greedy-priority axioms (`greedy_respects_priority_bids` and `greedy_respects_priority_asks`).
-
-**Summary:**
-
-- All fairness theorems depend on the sorting-function axioms (`sort_bids`, `sort_asks`)
-- Priority fairness additionally depends on greedy priority assumptions
-- All fairness theorems are proven with `Qed` and use no `Admitted`
-
-### Comparison to Standard Practice
-
-Axiomatizing well-known components is common in formal verification. This allows verification effort to focus on novel properties rather than re-proving standard algorithms.
-
-This work follows the same approach by isolating sorting and greedy correctness as explicit assumptions.
+This refactored version introduces no unproven postulates in the `.v` sources under `LTL/`, `MUDA/`, `Fairness/`, and `Example/`.
 
 ### Verification Commands
 
@@ -182,26 +105,15 @@ This work follows the same approach by isolating sorting and greedy correctness 
 # Check for admitted lemmas
 grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Example/
 
-# List axioms and parameters
-grep -rn "Axiom\|Parameter" LTL/ MUDA/ Fairness/
-
 # Show proof and definition statistics
 ./stats.sh
 ```
 
-## Assumptions and Foundations
-
-### Axiomatic LTL Core
-
-The project uses a Hilbert-style axiomatic foundation for LTL. Fairness proofs reason over semantic satisfaction on traces and do not mix derivability judgments.
+## Foundations
 
 ### Operational Invariants
 
 MUDA invariants such as well-formed states, match persistence, and clearing price bounds are proven constructively in `MUDA/*` and lifted to LTL via atomic predicate interpretation.
-
-### Remaining MUDA Axioms
-
-Sorting and greedy priority properties are axiomatized for build stability and scope control. Fairness results depend on these assumptions, which are explicit and documented.
 
 ## Thesis-to-Code Mapping
 
@@ -236,16 +148,11 @@ Residuals are computed dynamically using `residual_bid` and `residual_ask`.
 
 This abstraction pattern is standard in formal verification. The mathematical model emphasizes logic. The implementation handles mechanical details.
 
-**Note (Chapter 5 narrative):** The mechanization advances deterministically through phases `P4 → P5 → P6 → P7`,
-and then stutters forever at `P7` (because `step` is the identity in `P7`). If the thesis text informally describes
-“repeating xhalt at P4”, the mechanically precise reading is “we remain in the post-matching region forever”, which
-this development captures using the guard `phase_ge_4` (i.e., `P4`–`P7`).
-
 ## Module Notes
 
 ### Price Fairness
 
-Defined in `Fairness/PriceFairness.v` as `priceOK`. Examples in `Example/CloudMarket.v` exercise the property from initial states.
+Defined in `Fairness/PriceFairness.v` as `priceOK`. The Chapter 5 executable trace checks are in `Example/Scenario1.v`.
 
 ### Fairness Export
 
@@ -253,8 +160,7 @@ Defined in `Fairness/PriceFairness.v` as `priceOK`. Examples in `Example/CloudMa
 
 ## Future Work
 
-- Replace sorting and greedy priority axioms with constructive proofs
-- Add a phase-guarded price fairness variant if needed
+- Add more Chapter 5 scenarios
 - Reduce example imports to the minimal LTL modules
 
 ## Development Workflow

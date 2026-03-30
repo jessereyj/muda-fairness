@@ -147,8 +147,15 @@ Definition-9 (Uniform Clearing Price).
 
 <div class="paragraph"> </div>
 
-    If the marginal seller is exhausted, use the marginal ask price; otherwise
-    use the marginal bid price.
+  Chapter 5 scenarios use the convention:
+<ul class="doclist">
+<li> if the marginal seller is exhausted, use the marginal bid price
+
+</li>
+<li> otherwise, use the marginal ask price.
+
+</li>
+</ul>
 
 </div>
 <div class="code">
@@ -156,10 +163,10 @@ Definition-9 (Uniform Clearing Price).
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">marginal_pair</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
 &nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>) =&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) =? 0)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) =? 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">price</span> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>)<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 
 <br/>
@@ -197,9 +204,9 @@ Proposition-6 (Clearing Price Boundedness).
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hc</span>;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hc</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">Hc</span>.<br/>
 &nbsp;&nbsp;- <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">apply</span> <span class="id" title="var">le_n</span> | <span class="id" title="tactic">exact</span> <span class="id" title="var">Hab</span>].<br/>
-&nbsp;&nbsp;- <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">exact</span> <span class="id" title="var">Hab</span> | <span class="id" title="tactic">apply</span> <span class="id" title="var">le_n</span>].<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">apply</span> <span class="id" title="var">le_n</span> | <span class="id" title="tactic">exact</span> <span class="id" title="var">Hab</span>].<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 </div>
 </div>

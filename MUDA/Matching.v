@@ -23,57 +23,67 @@ Definition is_feasible (b : Bid) (a : Ask) (ms : list Match) : bool :=
 Definition feasible (b : Bid) (a : Ask) (ms : list Match) : Prop :=
   is_feasible b a ms = true.
 
-Fixpoint pick_ask (b : Bid) (as_list : list Ask) (ms : list Match)
+(* Greedy selection (Chapter 3 Definition 8):
+
+   - select the highest-priority feasible buyer (using the deterministic
+     tie-broken ordering from MUDA/Sorting.v)
+   - then select the highest-priority feasible seller for that buyer
+*)
+
+Definition better_bid (b1 b2 : Bid) : Bid :=
+  if bid_priorityb b1 b2 then b1 else b2.
+
+Definition better_ask (a1 a2 : Ask) : Ask :=
+  if ask_priorityb a1 a2 then a1 else a2.
+
+Fixpoint best_feasible_ask (b : Bid) (as_list : list Ask) (ms : list Match)
   : option Ask :=
   match as_list with
   | [] => None
   | a :: as' =>
-      if is_feasible b a ms
-      then Some a
-      else pick_ask b as' ms
+      let rest := best_feasible_ask b as' ms in
+      if is_feasible b a ms then
+        match rest with
+        | None => Some a
+        | Some a' => Some (better_ask a a')
+        end
+      else rest
   end.
-
 
 Fixpoint find_feasible (bs : list Bid) (as_list : list Ask) (ms : list Match)
   : option (Bid * Ask) :=
   match bs with
   | [] => None
   | b :: bs' =>
-      match pick_ask b as_list ms with
-      | Some a => Some (b, a)
-      | None => find_feasible bs' as_list ms
+      let rest := find_feasible bs' as_list ms in
+      match best_feasible_ask b as_list ms with
+      | None => rest
+      | Some a =>
+          match rest with
+          | None => Some (b, a)
+          | Some (b2, a2) =>
+        if bid_priorityb b b2 then Some (b, a) else Some (b2, a2)
+          end
       end
   end.
 
-
-Lemma pick_ask_spec :
+Lemma best_feasible_ask_spec :
   forall b as_list ms a,
-    pick_ask b as_list ms = Some a ->
+    best_feasible_ask b as_list ms = Some a ->
     is_feasible b a ms = true.
 Proof.
-  intros b as_list ms a H.
-  induction as_list as [|ah asx IH]; simpl in H.
+  intros b as_list ms.
+  induction as_list as [|ah asx IH]; intros a H; simpl in H.
   - discriminate.
-  - destruct (is_feasible b ah ms) eqn:Hf.
-    + injection H as ->. assumption.
-    + apply IH. exact H.
-Qed.
-
-Lemma pick_ask_None_all_false :
-  forall b as_list ms,
-    pick_ask b as_list ms = None ->
-    forall a, In a as_list -> is_feasible b a ms = false.
-Proof.
-  intros b as_list ms Hnone a Hin.
-  revert a Hin.
-  induction as_list as [|ah asx IH]; simpl in *; intros a Hin; try contradiction.
-  destruct (is_feasible b ah ms) eqn:Hf.
-  - discriminate Hnone.
-  - destruct Hin as [Hin0|HinRest].
-    + subst; exact Hf.
-    + eapply IH.
-      * exact Hnone.
-      * exact HinRest.
+  - remember (best_feasible_ask b asx ms) as rest eqn:Hrest.
+    destruct (is_feasible b ah ms) eqn:Hf.
+    + destruct rest as [a0|].
+      * inversion H; subst a; clear H.
+        unfold better_ask.
+        destruct (ask_priorityb ah a0) eqn:Hprio; [exact Hf|].
+        apply (IH a0). reflexivity.
+      * inversion H; subst a; exact Hf.
+    + apply (IH a). exact H.
 Qed.
 
 Lemma find_feasible_spec :
@@ -83,33 +93,19 @@ Lemma find_feasible_spec :
 Proof.
   induction bs as [|b0 bs IH]; intros as_list ms b a H; simpl in H.
   - discriminate.
-  - destruct (pick_ask b0 as_list ms) as [a0|] eqn:Hpick.
-    + inversion H; subst b a. clear H.
-      apply (pick_ask_spec b0 as_list ms a0). exact Hpick.
-    + apply (IH as_list ms b a). exact H.
+  - destruct (best_feasible_ask b0 as_list ms) as [a0|] eqn:Hask.
+    + destruct (find_feasible bs as_list ms) as [[b2 a2]|] eqn:Hrest.
+      * destruct (bid_priorityb b0 b2) eqn:Hprio.
+        -- inversion H; subst b a; clear H.
+           apply (best_feasible_ask_spec b0 as_list ms a0). exact Hask.
+        -- inversion H; subst b a; clear H.
+           eapply (IH as_list ms b2 a2). exact Hrest.
+      * inversion H; subst b a; clear H.
+        apply (best_feasible_ask_spec b0 as_list ms a0). exact Hask.
+    + eapply (IH as_list ms b a). exact H.
+
 Qed.
 
-(** Proposition-3 (Halting Condition of Phase P3).
-
-    Matching halts exactly when there is no feasible buyer–seller pair.
-    This lemma is the “no feasible pair exists” direction for the executable
-    feasibility search `find_feasible`.
-*)
-Lemma find_feasible_None_forall :
-  forall bs as_list ms,
-    find_feasible bs as_list ms = None ->
-    forall b a, In b bs -> In a as_list -> is_feasible b a ms = false.
-Proof.
-  induction bs as [|b0 bs IH]; intros as_list ms Hnone b a Hb Ha.
-  - contradiction.
-  - simpl in Hnone.
-    destruct (pick_ask b0 as_list ms) as [a0|] eqn:Hpick.
-    + discriminate Hnone.
-    + (* In this branch Hpick = None, and Hnone simplifies to find_feasible bs as_list ms = None *)
-      destruct Hb as [Hb0|HbRest].
-      * subst b. eapply pick_ask_None_all_false; eauto.
-      * eapply IH; eauto.
-Qed.
 
 
 (** Definition-2 (Traded Unit Quantity).
@@ -217,18 +213,6 @@ Proof.
   split; apply Nat.leb_le; assumption.
 Qed.
 
-Lemma pick_ask_price_bound :
-  forall b as_list ms a,
-    pick_ask b as_list ms = Some a ->
-    ask_price a <= price b.
-Proof.
-  intros b as_list ms a H.
-  apply pick_ask_spec in H.
-  unfold is_feasible in H.
-  repeat rewrite Bool.andb_true_iff in H.
-  destruct H as [[Hp _] _]. now apply Nat.leb_le in Hp.
-Qed.
-
 Lemma find_feasible_price_bound :
   forall bs as_list ms b a,
     find_feasible bs as_list ms = Some (b,a) ->
@@ -300,29 +284,6 @@ Proof.
   apply feasible_price_bounds.
 Qed.
 
-
-Lemma find_feasible_in_lists :
-  forall bs as_list ms b a,
-    find_feasible bs as_list ms = Some (b,a) ->
-    is_feasible b a ms = true /\
-    In b bs /\ In a as_list.
-Proof.
-  induction bs as [|b0 bs IH]; intros as_list ms b a H; simpl in H.
-  - discriminate.
-  - destruct (pick_ask b0 as_list ms) as [a0|] eqn:Hpick.
-    + inversion H; subst b a; clear H.
-      split.
-      * eapply pick_ask_spec; eauto.
-      * split; [left; reflexivity|].
-        (* pick_ask returns Some a0 means a0 ∈ as_list *)
-        (* simple membership proof by scanning as_list as pick_ask does *)
-        revert as_list Hpick; induction as_list as [|ah asx IHas]; simpl; intro Hpick.
-        { discriminate. }
-        destruct (is_feasible b0 ah ms) eqn:?; [inversion Hpick; subst; now left|].
-        right. apply IHas; exact Hpick.
-    + apply IH in H. destruct H as [Hf [HinB HinA]].
-      split; [assumption|]. split; [right; exact HinB | exact HinA].
-Qed.
 
 Lemma match_step_head_is_create :
   forall s s',
@@ -411,25 +372,4 @@ Proof.
       apply Hask.
 Qed.
 
-Lemma pick_ask_in :
-  forall b as_list ms a,
-    pick_ask b as_list ms = Some a -> In a as_list.
-Proof.
-  intros b as_list ms a H.
-  induction as_list as [|ah asx IH]; simpl in H; try discriminate.
-  destruct (is_feasible b ah ms) eqn:Hf.
-  - inversion H; subst; now left.
-  - right; eauto.
-Qed.
 
-Lemma find_feasible_in :
-  forall bs as_list ms b a,
-    find_feasible bs as_list ms = Some (b,a) ->
-    In b bs /\ In a as_list.
-Proof.
-  induction bs as [|b0 bs IH]; simpl; intros as_list ms b a H; try discriminate.
-  destruct (pick_ask b0 as_list ms) as [a0|] eqn:Hpick.
-  - inversion H; subst; split; [now left |].
-    apply pick_ask_in in Hpick; exact Hpick.
-  - apply IH in H; destruct H as [Hb Ha]; split; [right; exact Hb | exact Ha].
-Qed.
