@@ -2,7 +2,7 @@
 
 Temporal verification of fairness in the Multi-Unit Double Auction (MUDA) using Rocq and Linear Temporal Logic (LTL).
 
-If you’re looking for thesis defense/study notes (internal), see [docs/learning/README.md](docs/learning/README.md).
+If you’re looking for thesis defense/study notes (internal), see [docs/README.md](docs/README.md).
 
 ## Structure
 
@@ -15,7 +15,7 @@ Example/   - Cloud market scenarios that exercise the definitions and fairness t
 
 ## Docs
 
-- Internal learning/defense pack: [docs/learning/README.md](docs/learning/README.md)
+- Internal defense pack: [docs/README.md](docs/README.md)
 - Text extraction of the thesis (for search/alignment): [docs/thesis.txt](docs/thesis.txt)
 - Exact trusted assumptions inventory: [docs/TRUSTED_ASSUMPTIONS.md](docs/TRUSTED_ASSUMPTIONS.md)
 
