@@ -14,9 +14,16 @@ From Stdlib Require Import List Arith Bool.
 Import ListNotations.
 From MUDA Require Import Types State Sorting Matching ClearingPrice Transitions.
 
+(* Chapter 4 quantity fairness notation:
+     initial(b) = sum_matches(b, x) + residualB(b, x)
+
+   In this mechanization:
+   - `sum_matches` is `allocated_*`
+   - residuals are `residual_* = initial - allocated_*` (computed, not stored)
+*)
 Definition allocOK_prop (s : State) : Prop :=
-  (forall b, allocated_bid b (matches s) <= quantity b) /\
-  (forall a, allocated_ask a (matches s) <= ask_quantity a).
+  (forall b, quantity b = allocated_bid b (matches s) + residual_bid b (matches s)) /\
+  (forall a, ask_quantity a = allocated_ask a (matches s) + residual_ask a (matches s)).
 
 Definition has_clearing_price_prop (s : State) : Prop :=
   exists c, determine_clearing_price s = Some c.

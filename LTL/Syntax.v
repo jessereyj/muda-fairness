@@ -25,6 +25,10 @@ Inductive LTL_formula : Type :=
   | Always     : LTL_formula -> LTL_formula
   | Eventually : LTL_formula -> LTL_formula.
 
+(* Chapter 4 core grammar uses ¬, ∧, X, F, G. For convenience in proofs and
+   specifications, we also include ∨ and → as derived connectives with their
+   standard semantics (not as axioms). *)
+
 Definition top : LTL_formula := Or (Atom 0) (Not (Atom 0)).
 
 

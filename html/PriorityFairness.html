@@ -47,6 +47,36 @@ Chapter 4 (Fairness Verification Layer)
 
 <div class="paragraph"> </div>
 
+  Chapter 4 notation (as in the thesis text):
+
+<div class="paragraph"> </div>
+
+    φ<i>prio = G(
+      selected(b, s, x) -&gt;
+      ¬ ∃ b', higher_priority(b', b) ∧ feasible(b', s, x)
+    )
+
+<div class="paragraph"> </div>
+
+  Mechanization note:
+<ul class="doclist">
+<li> `selected(b,s,x)` is represented via the deterministic greedy selection
+    computed in Phase P3 (see `find_feasible` / `best_feasible_ask`).
+
+</li>
+<li> `higher_priority` and `feasible` use the Chapter 3 orders and residuals.
+
+</li>
+<li> We expose this as two step-level atomic propositions:
+      `p_prioB_step` (no higher-priority feasible buyer skipped)
+      `p_prioS_step` (no higher-priority feasible seller skipped)
+    and set `φ<i>prio := G(p_prioB_step) ∧ G(p_prioS_step)`.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
   No unproven postulates and no admitted proofs.
 
 </div>
@@ -66,6 +96,9 @@ Chapter 4 (Fairness Verification Layer)
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">priorityOK</span> : <span class="id" title="var">LTL_formula</span> :=<br/>
 &nbsp;&nbsp;(<span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_prioB_step</span>)) ∧ (<span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_prioS_step</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">phi_prio</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">priorityOK</span>.<br/>
 
 <br/>
 

@@ -7,6 +7,44 @@
     - Defines `interp_atom : State -> predicate -> Prop`.
     - Defines the infinite trace `mu_trace` by iterating `step` and relying on
       terminal stuttering (P7 is a fixed point of `step`).
+
+    Chapter 4 symbols and notation (bridge to code)
+    ------------------------------------------------
+
+    MUDA execution (Chapter 3):
+      x0, x1, x2, ...  where  xi+1 = δ(xi)
+
+    LTL trace (Chapter 4):
+      σ = (v0, v1, v2, ...)
+      where each vi assigns truth values to atomic propositions.
+
+    In this development:
+      - `mu_trace x0` is the infinite trace σ induced by repeatedly applying
+        `step` (deterministic transition), with terminal stuttering at P7.
+      - `trace_at (mu_trace x0) i` is the valuation vi.
+      - `interp_atom x` is the valuation [[x]] : PROP -> Prop.
+
+    Chapter 4 state-level atomic predicates are available (math notation):
+      - matched(b, s, q, x)   (match record membership)
+      - residualB(b, x) = r   (buyer residual)
+      - residualS(s, x) = r   (seller residual)
+      - price(x) = c          (clearing price)
+      - feasible(b, s, x)     (price bound + positive residuals)
+    These are defined in MUDA/State.v as:
+      - `matched`    (match record membership)
+      - `residualB`  (buyer residual)
+      - `residualS`  (seller residual)
+      - `price_at`   (clearing price equality)
+      - `feasible`   (feasibility predicate)
+
+    Fairness proofs in this repo evaluate a fixed set of *named* predicates
+    (indexed as naturals) via `interp_atom`:
+      p_allocOK      : quantity accounting predicate (Chapter 4 φ_qty)
+      p_prioB_step   : buyer-side priority step predicate (part of Chapter 4 φ_prio)
+      p_prioS_step   : seller-side priority step predicate (part of Chapter 4 φ_prio)
+      p_has_cprice   : clearing price exists
+      p_bounds_cstar : clearing price bounded by marginal pair
+      p_price_rule   : clearing price follows protocol rule
 *)
 From Stdlib Require Import List Bool PeanoNat.
 From LTL  Require Import Syntax Semantics.
