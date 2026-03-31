@@ -65,8 +65,8 @@ Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
 </div>
 <div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LTL</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">MUDA</span> <span class="id" title="var">Atoms</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Matching</span> <span class="id" title="var">ClearingPrice</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span>.<br/>
 
 <br/>
@@ -76,9 +76,6 @@ Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">priceOK</span> : <span class="id" title="var">LTL_formula</span> :=<br/>
 &nbsp;&nbsp;<br/>
 &nbsp;&nbsp;<span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_has_cprice</span> → (<span class="id" title="var">Atom</span> <span class="id" title="var">p_bounds_cstar</span> ∧ <span class="id" title="var">Atom</span> <span class="id" title="var">p_price_rule</span>)).<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">phi_price</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">priceOK</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">bounds_cstar_from_wf</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>,<br/>

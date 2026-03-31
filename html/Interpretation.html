@@ -22,110 +22,61 @@
 </div>
 
 <div class="doc">
-Chapter 4 (MUDA Protocol Layer) — Section 4.1.3 / 4.2 (Traces + Atomic Predicates)
+Chapter 4 (MUDA trace interpretation layer)
 
 <div class="paragraph"> </div>
 
-    This file bridges MUDA executions (Chapter 3, deterministic `step`) to LTL
-    trace semantics (Chapter 4):
+    This file connects the deterministic MUDA execution from Chapter 3
+    with the LTL trace semantics from Chapter 4.
 
 <div class="paragraph"> </div>
 
 <ul class="doclist">
-<li> Defines a fixed numbering of MUDA-specific atomic propositions `p*`.
+<li> It fixes the numbering of MUDA-specific atomic predicates p*.
 
 </li>
-<li> Defines `interp_atom : State -&gt; predicate -&gt; Prop`.
+<li> It defines interp_atom : State -&gt; predicate -&gt; Prop, the valuation <span class="inlinecode">[<span class="id" title="var">x</span>]</span>.
 
 </li>
-<li> Defines the infinite trace `mu_trace` by iterating `step` and relying on
-      terminal stuttering (P7 is a fixed point of `step`).
+<li> It defines the infinite trace mu_trace by iterating step.
+
+</li>
+<li> Terminal stuttering is obtained because step s = s when phase s = P7.
 
 </li>
 </ul>
 
 <div class="paragraph"> </div>
 
-    Chapter 4 symbols and notation (bridge to code)
-<hr/>
-
-
-<div class="paragraph"> </div>
-
-    MUDA execution (Chapter 3):
-      x0, x1, x2, ...  where  xi+1 = δ(xi)
-
-<div class="paragraph"> </div>
-
-    LTL trace (Chapter 4):
-      σ = (v0, v1, v2, ...)
-      where each vi assigns truth values to atomic propositions.
+    Thesis notation:
+      x0, x1, x2, ...   where xi+1 = δ(xi)
+      σ                 the induced infinite trace
+      <span class="inlinecode">[<span class="id" title="var">x</span>]</span>              the valuation at state x
 
 <div class="paragraph"> </div>
 
     In this development:
 <ul class="doclist">
-<li> `mu_trace x0` is the infinite trace σ induced by repeatedly applying
-        `step` (deterministic transition), with terminal stuttering at P7.
+<li> mu_trace x0 is σ
 
 </li>
-<li> `trace_at (mu_trace x0) i` is the valuation vi.
+<li> trace_at (mu_trace x0) i is the valuation at time i
 
 </li>
-<li> `interp_atom x` is the valuation <span class="inlinecode">[<span class="id" title="var">x</span>]</span> : PROP -&gt; Prop.
-
-</li>
-</ul>
-
-<div class="paragraph"> </div>
-
-    Chapter 4 state-level atomic predicates are available (math notation):
-<ul class="doclist">
-<li> matched(b, s, q, x)   (match record membership)
-
-</li>
-<li> residualB(b, x) = r   (buyer residual)
-
-</li>
-<li> residualS(s, x) = r   (seller residual)
-
-</li>
-<li> price(x) = c          (clearing price)
-
-</li>
-<li> feasible(b, s, x)     (price bound + positive residuals)
-
-</li>
-</ul>
-    These are defined in MUDA/State.v as:
-<ul class="doclist">
-<li> `matched`    (match record membership)
-
-</li>
-<li> `residualB`  (buyer residual)
-
-</li>
-<li> `residualS`  (seller residual)
-
-</li>
-<li> `price_at`   (clearing price equality)
-
-</li>
-<li> `feasible`   (feasibility predicate)
+<li> interp_atom x is <span class="inlinecode">[<span class="id" title="var">x</span>]</span>
 
 </li>
 </ul>
 
 <div class="paragraph"> </div>
 
-    Fairness proofs in this repo evaluate a fixed set of *named* predicates
-    (indexed as naturals) via `interp_atom`:
-      p_allocOK      : quantity accounting predicate (Chapter 4 φ<i>qty)
-      p_prioB_step   : buyer-side priority step predicate (part of Chapter 4 φ<i>prio)
-      p_prioS_step   : seller-side priority step predicate (part of Chapter 4 φ<i>prio)
-      p_has_cprice   : clearing price exists
-      p_bounds_cstar : clearing price bounded by marginal pair
-      p_price_rule   : clearing price follows protocol rule
+    The fairness layer evaluates named state predicates through interp_atom:
+      p_allocOK
+      p_prioB_step
+      p_prioS_step
+      p_has_cprice
+      p_bounds_cstar
+      p_price_rule
 
 </div>
 <div class="code">
@@ -173,47 +124,8 @@ Chapter 4 (MUDA Protocol Layer) — Section 4.1.3 / 4.2 (Traces + Atomic Predica
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_4</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 4) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P4</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_5</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 5) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P5</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_6</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 6) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P6</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">interp_atom_phase_7</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>, <span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span> (<span class="id" title="var">p_phase</span> 7) &lt;-&gt; <span class="id" title="var">phase</span> <span class="id" title="var">s</span> = <span class="id" title="var">P7</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">s</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>, <span class="id" title="var">p_phase</span>, <span class="id" title="var">nth_phase</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">tauto</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
 <span class="id" title="keyword">CoFixpoint</span> <span class="id" title="var">mu_trace</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">trace</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">Trace</span> (<span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">match</span> <span class="id" title="var">phase</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">P7</span> =&gt; <span class="id" title="var">mu_trace</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)   <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span>  =&gt; <span class="id" title="var">mu_trace</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_trace_at_execute</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">n</span>,<br/>
-&nbsp;&nbsp;<span class="id" title="var">trace_at</span> (<span class="id" title="var">mu_trace</span> <span class="id" title="var">s</span>) <span class="id" title="var">n</span> = <span class="id" title="var">interp_atom</span> (<span class="id" title="var">execute</span> <span class="id" title="var">n</span> <span class="id" title="var">s</span>).<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">n</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="var">s</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">n</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">s</span>; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">reflexivity</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> <span class="id" title="var">s</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">apply</span> <span class="id" title="var">IH</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Trace</span> (<span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span>) (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)).<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_trace_atom_at_execute</span> :<br/>
@@ -225,12 +137,12 @@ Chapter 4 (MUDA Protocol Layer) — Section 4.1.3 / 4.2 (Traces + Atomic Predica
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">satisfies</span>; <span class="id" title="var">revert</span> <span class="id" title="var">s</span> <span class="id" title="var">p</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">i</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">i</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">p</span>; <span class="id" title="tactic">simpl</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> <span class="id" title="var">s</span>); <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">auto</span>.<br/>
 &nbsp;&nbsp;- <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">satisfies</span>; <span class="id" title="var">revert</span> <span class="id" title="var">s</span> <span class="id" title="var">p</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">i</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">i</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">p</span>; <span class="id" title="tactic">simpl</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">H</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> <span class="id" title="var">s</span>); <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">auto</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 </div>
 </div>

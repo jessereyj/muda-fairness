@@ -75,17 +75,14 @@ Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
 <div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span> <span class="id" title="var">Lia</span>.<br/>
 <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>      <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LTL</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span>     <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">MUDA</span> <span class="id" title="var">Atoms</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>      <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span>     <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Matching</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span>. 
 <br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">quantityOK</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_allocOK</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">phi_qty</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">quantityOK</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Theorem</span> <span class="id" title="var">quantity_fairness_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>

@@ -1,6 +1,6 @@
 (** Chapter 3 (Methodology) — Section 3.5.3 (Phase P4: Clearing Price)
 
-  - Definition-8 (marginal pair) and Definition-9 (uniform clearing price)
+  - Definition-10 (clearing price: marginal pair + uniform price rule)
   - Proposition-6 (clearing price boundedness)
 
   Uses the final match record (the match list once matching terminates).
@@ -35,35 +35,9 @@ Proof.
   intros bs as_list m Hin. inversion Hin.
 Qed.
 
-Lemma wf_state_match_step_preservation :
-  forall s s',
-    wf_state s ->
-    match_step s = Some s' ->
-    wf_state s'.
-Proof.
-  intros s s' Hwf Hms.
-  unfold match_step in Hms.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
-  inversion Hms; subst s'; clear Hms.
-  unfold wf_state in *. intros m Hin.
-  set (ms := matches s) in *.
-  set (m0 := create_match b a (matches s)) in *.
-  change (In m (ms ++ [m0])) in Hin.
-  rewrite in_app_iff in Hin.
-  destruct Hin as [Hin|Hin].
-  - (* inherited *) apply Hwf, Hin.
-  - simpl in Hin. destruct Hin as [Hin|Hin]; [|contradiction].
-    subst m. (* newly created match *)
-    apply find_feasible_spec in Hf.
-    unfold is_feasible in Hf.
-    repeat rewrite Bool.andb_true_iff in Hf.
-    destruct Hf as [[Hp _] _].
-    apply Nat.leb_le in Hp. simpl. exact Hp.
-Qed.
-
 (* Chapter 3 Definition numbering notes are recorded as Coqdoc comments below. *)
 
-(** Definition-8 (Last Marginal Pair).
+(** Definition-10 (Clearing Price): Last marginal pair.
 
     The marginal pair is the last trade in the final match record.
 *)
@@ -91,7 +65,7 @@ Proof.
   exact Hwf.
 Qed.
 
-(** Definition-9 (Uniform Clearing Price).
+(** Definition-10 (Clearing Price): Uniform clearing price.
 
   Chapter 5 scenarios use the convention:
   - if the marginal seller is exhausted, use the marginal bid price

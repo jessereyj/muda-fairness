@@ -1,50 +1,30 @@
-(** Chapter 4 (MUDA Protocol Layer) — Section 4.1.3 / 4.2 (Traces + Atomic Predicates)
+(** Chapter 4 (MUDA trace interpretation layer)
 
-    This file bridges MUDA executions (Chapter 3, deterministic `step`) to LTL
-    trace semantics (Chapter 4):
+    This file connects the deterministic MUDA execution from Chapter 3
+    with the LTL trace semantics from Chapter 4.
 
-    - Defines a fixed numbering of MUDA-specific atomic propositions `p_*`.
-    - Defines `interp_atom : State -> predicate -> Prop`.
-    - Defines the infinite trace `mu_trace` by iterating `step` and relying on
-      terminal stuttering (P7 is a fixed point of `step`).
+    - It fixes the numbering of MUDA-specific atomic predicates p_*.
+    - It defines interp_atom : State -> predicate -> Prop, the valuation [[x]].
+    - It defines the infinite trace mu_trace by iterating step.
+    - Terminal stuttering is obtained because step s = s when phase s = P7.
 
-    Chapter 4 symbols and notation (bridge to code)
-    ------------------------------------------------
-
-    MUDA execution (Chapter 3):
-      x0, x1, x2, ...  where  xi+1 = δ(xi)
-
-    LTL trace (Chapter 4):
-      σ = (v0, v1, v2, ...)
-      where each vi assigns truth values to atomic propositions.
+    Thesis notation:
+      x0, x1, x2, ...   where xi+1 = δ(xi)
+      σ                 the induced infinite trace
+      [[x]]              the valuation at state x
 
     In this development:
-      - `mu_trace x0` is the infinite trace σ induced by repeatedly applying
-        `step` (deterministic transition), with terminal stuttering at P7.
-      - `trace_at (mu_trace x0) i` is the valuation vi.
-      - `interp_atom x` is the valuation [[x]] : PROP -> Prop.
+      - mu_trace x0 is σ
+      - trace_at (mu_trace x0) i is the valuation at time i
+      - interp_atom x is [[x]]
 
-    Chapter 4 state-level atomic predicates are available (math notation):
-      - matched(b, s, q, x)   (match record membership)
-      - residualB(b, x) = r   (buyer residual)
-      - residualS(s, x) = r   (seller residual)
-      - price(x) = c          (clearing price)
-      - feasible(b, s, x)     (price bound + positive residuals)
-    These are defined in MUDA/State.v as:
-      - `matched`    (match record membership)
-      - `residualB`  (buyer residual)
-      - `residualS`  (seller residual)
-      - `price_at`   (clearing price equality)
-      - `feasible`   (feasibility predicate)
-
-    Fairness proofs in this repo evaluate a fixed set of *named* predicates
-    (indexed as naturals) via `interp_atom`:
-      p_allocOK      : quantity accounting predicate (Chapter 4 φ_qty)
-      p_prioB_step   : buyer-side priority step predicate (part of Chapter 4 φ_prio)
-      p_prioS_step   : seller-side priority step predicate (part of Chapter 4 φ_prio)
-      p_has_cprice   : clearing price exists
-      p_bounds_cstar : clearing price bounded by marginal pair
-      p_price_rule   : clearing price follows protocol rule
+    The fairness layer evaluates named state predicates through interp_atom:
+      p_allocOK
+      p_prioB_step
+      p_prioS_step
+      p_has_cprice
+      p_bounds_cstar
+      p_price_rule
 *)
 From Stdlib Require Import List Bool PeanoNat.
 From LTL  Require Import Syntax Semantics.
@@ -84,42 +64,8 @@ Definition interp_atom (s : State) : predicate -> Prop :=
         else False
     end.
 
-Lemma interp_atom_phase_4 : forall s, interp_atom s (p_phase 4) <-> phase s = P4.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_5 : forall s, interp_atom s (p_phase 5) <-> phase s = P5.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_6 : forall s, interp_atom s (p_phase 6) <-> phase s = P6.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_7 : forall s, interp_atom s (p_phase 7) <-> phase s = P7.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
 CoFixpoint mu_trace (s : State) : trace :=
-  Trace (interp_atom s)
-        (match phase s with
-         | P7 => mu_trace (step s)   (* still advance execute; avoid self-loop for lemma *)
-         | _  => mu_trace (step s)
-         end).
-
-Lemma mu_trace_at_execute : forall s n,
-  trace_at (mu_trace s) n = interp_atom (execute n s).
-Proof.
-  intros s n.
-  revert s.
-  induction n as [|n IH]; intros s; simpl.
-  - reflexivity.
-  - destruct (phase s) eqn:Hp; simpl; apply IH.
-Qed.
+  Trace (interp_atom s) (mu_trace (step s)).
 
 Lemma mu_trace_atom_at_execute :
   forall s i p,
@@ -130,10 +76,10 @@ Proof.
     unfold satisfies; revert s p.
     induction i as [|i IH]; intros s p; simpl.
     + intros H; exact H.
-    + destruct (phase s); simpl; auto.
+    + auto.
   - (* ← *)
     unfold satisfies; revert s p.
     induction i as [|i IH]; intros s p; simpl.
     + intros H; exact H.
-    + destruct (phase s); simpl; auto.
+    + auto.
 Qed.

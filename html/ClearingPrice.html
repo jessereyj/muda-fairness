@@ -27,7 +27,7 @@ Chapter 3 (Methodology) — Section 3.5.3 (Phase P4: Clearing Price)
 <div class="paragraph"> </div>
 
 <ul class="doclist">
-<li> Definition-8 (marginal pair) and Definition-9 (uniform clearing price)
+<li> Definition-10 (clearing price: marginal pair + uniform price rule)
 
 </li>
 <li> Proposition-6 (clearing price boundedness)
@@ -76,38 +76,12 @@ Chapter 3 (Methodology) — Section 3.5.3 (Phase P4: Clearing Price)
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">wf_state_match_step_preservation</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wf_state</span> <span class="id" title="var">s</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">match_step</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">s'</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wf_state</span> <span class="id" title="var">s'</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">s'</span> <span class="id" title="var">Hwf</span> <span class="id" title="var">Hms</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">match_step</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hms</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">find_feasible</span> (<span class="id" title="var">bids</span> <span class="id" title="var">s</span>) (<span class="id" title="var">asks</span> <span class="id" title="var">s</span>) (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hf</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hms</span>; <span class="id" title="tactic">subst</span> <span class="id" title="var">s'</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">Hms</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">wf_state</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">intros</span> <span class="id" title="var">m</span> <span class="id" title="var">Hin</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">ms</span> := <span class="id" title="var">matches</span> <span class="id" title="var">s</span>) <span class="id" title="tactic">in</span> *.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">m0</span> := <span class="id" title="var">create_match</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)) <span class="id" title="tactic">in</span> *.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">change</span> (<span class="id" title="var">In</span> <span class="id" title="var">m</span> (<span class="id" title="var">ms</span> ++ [<span class="id" title="var">m0</span>])) <span class="id" title="tactic">in</span> <span class="id" title="var">Hin</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">in_app_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hin</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hin</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hin</span>|<span class="id" title="var">Hin</span>].<br/>
-&nbsp;&nbsp;-  <span class="id" title="tactic">apply</span> <span class="id" title="var">Hwf</span>, <span class="id" title="var">Hin</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hin</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">Hin</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hin</span>|<span class="id" title="var">Hin</span>]; [|<span class="id" title="var">contradiction</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">m</span>. &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">find_feasible_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_feasible</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hf</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hf</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">Hp</span> <span class="id" title="var">_</span>] <span class="id" title="var">_</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hp</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hp</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-Definition-8 (Last Marginal Pair).
+Definition-10 (Clearing Price): Last marginal pair.
 
 <div class="paragraph"> </div>
 
@@ -143,7 +117,7 @@ Definition-8 (Last Marginal Pair).
 </div>
 
 <div class="doc">
-Definition-9 (Uniform Clearing Price).
+Definition-10 (Clearing Price): Uniform clearing price.
 
 <div class="paragraph"> </div>
 

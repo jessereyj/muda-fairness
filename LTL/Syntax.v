@@ -29,9 +29,6 @@ Inductive LTL_formula : Type :=
    specifications, we also include ∨ and → as derived connectives with their
    standard semantics (not as axioms). *)
 
-Definition top : LTL_formula := Or (Atom 0) (Not (Atom 0)).
-
-
 Notation "¬ φ"     := (Not φ)                   (at level 75, right associativity) : LTL_scope.
 Notation "φ ∧ ψ"   := (And φ ψ)                 (at level 80, right associativity) : LTL_scope.
 Notation "φ ∨ ψ"   := (Or φ ψ)                  (at level 85, right associativity) : LTL_scope.

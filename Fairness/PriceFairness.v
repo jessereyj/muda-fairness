@@ -23,8 +23,8 @@
     state is the unique price used for all matched trades.
 *)
 From Stdlib Require Import Arith List.
-From LTL  Require Import LTL.
-From MUDA Require Import MUDA Atoms.
+From LTL  Require Import Syntax Semantics.
+From MUDA Require Import Types State Matching ClearingPrice Transitions Atoms.
 From Fairness Require Import Interpretation.
 
 Local Open Scope LTL_scope.
@@ -34,9 +34,6 @@ Definition priceOK : LTL_formula :=
      state-derived atomic propositions for clearing-price existence, boundedness,
      and the clearing-price rule. *)
   G (Atom p_has_cprice → (Atom p_bounds_cstar ∧ Atom p_price_rule)).
-
-(* Chapter 4 notation alias. *)
-Definition phi_price : LTL_formula := priceOK.
 
 Lemma bounds_cstar_from_wf : forall s,
   wf_state s -> bounds_cstar_prop s.

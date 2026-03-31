@@ -32,8 +32,8 @@
 From Stdlib Require Import List Bool Arith Lia.
 Import ListNotations.
 
-From LTL      Require Import LTL.
-From MUDA     Require Import MUDA Types State Sorting Matching Atoms.
+From LTL      Require Import Syntax Semantics.
+From MUDA     Require Import Types State Sorting Matching Transitions Atoms.
 From Fairness Require Import Interpretation.
 
 Local Open Scope LTL_scope.
@@ -41,9 +41,6 @@ Local Open Scope bool_scope.
 
 Definition priorityOK : LTL_formula :=
   (G (Atom p_prioB_step)) ∧ (G (Atom p_prioS_step)).
-
-(* Chapter 4 notation alias. *)
-Definition phi_prio : LTL_formula := priorityOK.
 
 (* ------------------------------------------------------------------------- *)
 (* Relating thesis priority (prioB/prioS) to the deterministic refinement. *)

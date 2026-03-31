@@ -61,7 +61,6 @@ cat > _CoqProject <<'EOF'
 # ===== LTL Foundation (Layer 1) =====
 LTL/Syntax.v
 LTL/Semantics.v
-LTL/LTL.v
 
 # ===== MUDA Protocol (Layer 2) =====
 MUDA/Eqb.v
@@ -72,17 +71,16 @@ MUDA/Matching.v
 MUDA/ClearingPrice.v
 MUDA/Transitions.v
 MUDA/Atoms.v
-MUDA/MUDA.v
 
 # ===== Fairness Verification (Layer 3) =====
 Fairness/Interpretation.v
 Fairness/PriorityFairness.v
 Fairness/QuantityFairness.v
 Fairness/PriceFairness.v
-Fairness/All.v
 
 # ===== Simulation (Layer 4) =====
 Example/Scenario1.v
+
 
 
 EOF

@@ -138,8 +138,5 @@ Definition residualB (b : Bid) (x : State) : nat :=
 Definition residualS (a : Ask) (x : State) : nat :=
   residual_ask a (matches x).
 
-Definition price_at (x : State) (c : nat) : Prop :=
-  clearing_price x = Some c.
-
 Definition feasible (b : Bid) (a : Ask) (x : State) : Prop :=
   feasible_pair b a (matches x).

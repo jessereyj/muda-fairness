@@ -8,7 +8,6 @@ Temporal verification of fairness in the Multi-Unit Double Auction (MUDA) using 
 LTL/       - Linear Temporal Logic foundation
 MUDA/      - MUDA protocol model (state, sorting, matching, price)
 Fairness/  - Fairness property formulas and proofs
-Example/   - Chapter 5 Scenario 1 (executable trace checks)
 ```
 
 ## Quick Start
@@ -89,6 +88,28 @@ Proven for traces starting from initial states.
 See the Chapter 4 predicate notation mapping in [NOTATION.md](NOTATION.md) and
 the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 
+## Thesis questions answered (where in the code)
+
+1) **How can MUDA execution be formalized as a deterministic STS?**
+- State space: `State` in [MUDA/State.v](MUDA/State.v)
+- Deterministic transition function: `step : State -> State` in [MUDA/Transitions.v](MUDA/Transitions.v)
+- Finite execution: `execute n s` (iterate `step`) in [MUDA/Transitions.v](MUDA/Transitions.v)
+- Infinite trace for LTL: `mu_trace` (coinductively iterating `step`) in [Fairness/Interpretation.v](Fairness/Interpretation.v)
+
+2) **Which temporal operators are sufficient to express fairness properties over MUDA traces?**
+- The development uses the Chapter 4 core temporal operators `X`, `F`, `G` (see [LTL/Syntax.v](LTL/Syntax.v) and [LTL/Semantics.v](LTL/Semantics.v)).
+- The three fairness properties in this repo are expressed as invariants, so `G` (plus propositional connectives) is sufficient for them:
+	- Priority: `G(p_prioB_step) ∧ G(p_prioS_step)` in [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
+	- Quantity: `G(p_allocOK)` in [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
+	- Price: `G(p_has_cprice → (p_bounds_cstar ∧ p_price_rule))` in [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
+
+3) **Can all three fairness properties be verified using Rocq?**
+- Yes. Each property is proven for MUDA traces from initial states:
+	- Priority: `priority_fairness_LTL_initial` in [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
+	- Quantity: `quantity_fairness_LTL_initial` in [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
+	- Price: `uniform_price_fairness_LTL_initial` in [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
+- The build/check scripts enforce that no proofs are left unfinished (see `./check.sh`).
+
 ## Verification Status
 
 ### Proof Completeness
@@ -97,13 +118,13 @@ the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 - Admitted lemmas: **0**, enforced by `check.sh`
 All fairness theorems are proven using `Qed`. No fairness proof uses `Admitted`.
 
-This refactored version introduces no unproven postulates in the `.v` sources under `LTL/`, `MUDA/`, `Fairness/`, and `Example/`.
+This refactored version introduces no unproven postulates in the `.v` sources under `LTL/`, `MUDA/`, and `Fairness/`.
 
 ### Verification Commands
 
 ```bash
 # Check for admitted lemmas
-grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Example/
+grep -rn "Admitted\." LTL/ MUDA/ Fairness/
 
 # Show proof and definition statistics
 ./stats.sh
@@ -125,6 +146,7 @@ The thesis presents a mathematical model focused on economically relevant compon
 - **Code:** `State = (bids, asks, matches, clearing_price, phase)`
 
 Residuals are computed dynamically using `residual_bid` and `residual_ask`.
+Example/   - Chapter 5 Scenario 1 (executable trace checks)
 
 ### Bids and Asks
 
@@ -136,7 +158,7 @@ Residuals are computed dynamically using `residual_bid` and `residual_ask`.
 - **Thesis:** Uses `(b, s, q)` triples
 - **Code:** Stores full bid and ask records with quantities
 
-### Allocation
+grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Example/
 
 - **Thesis:** Presents abstract allocation functions
 - **Code:** Uses recursive functions with decidable equality
@@ -152,11 +174,7 @@ This abstraction pattern is standard in formal verification. The mathematical mo
 
 ### Price Fairness
 
-Defined in `Fairness/PriceFairness.v` as `priceOK`. The Chapter 5 executable trace checks are in `Example/Scenario1.v`.
-
-### Fairness Export
-
-`Fairness/All.v` re-exports all fairness properties for convenience.
+Defined in `Fairness/PriceFairness.v` as `priceOK`.
 
 ## Future Work
 

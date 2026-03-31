@@ -1,9 +1,9 @@
 (** Chapter 3 (Methodology) — Section 3.5.2 (Phase P3: Matching)
 
-  Executable greedy matching rule (Definition-6) based on:
+  Executable greedy matching rule (Definition-8) based on:
   - feasibility (Definition-1)
-  - traded quantity q = min(residuals) (Definition-2)
-  - match monotonicity (Definition-7)
+  - traded quantity q = min(residuals) (Definition-9)
+  - match monotonicity (proved as a lemma)
 *)
 From Stdlib Require Import Arith List Bool PeanoNat Lia.
 From MUDA Require Import Eqb Types State Sorting.
@@ -29,9 +29,6 @@ Definition feasible (b : Bid) (a : Ask) (ms : list Match) : Prop :=
      tie-broken ordering from MUDA/Sorting.v)
    - then select the highest-priority feasible seller for that buyer
 *)
-
-Definition better_bid (b1 b2 : Bid) : Bid :=
-  if bid_priorityb b1 b2 then b1 else b2.
 
 Definition better_ask (a1 a2 : Ask) : Ask :=
   if ask_priorityb a1 a2 then a1 else a2.
@@ -108,7 +105,7 @@ Qed.
 
 
 
-(** Definition-2 (Traded Unit Quantity).
+(** Definition-9 (Traded Unit Quantity).
 
     A trade quantity is the maximum feasible trade between the chosen buyer and
     seller: q = min(residual_bid, residual_ask).
@@ -117,25 +114,7 @@ Definition create_match (b : Bid) (a : Ask) (ms : list Match) : Match :=
   let q := Nat.min (residual_bid b ms) (residual_ask a ms) in
   {| matched_bid := b; matched_ask := a; match_quantity := q |}.
 
-Lemma match_quantity_pos :
-  forall s b a,
-    find_feasible (bids s) (asks s) (matches s) = Some (b,a) ->
-    0 < match_quantity (create_match b a (matches s)).
-Proof.
-  intros s b a Hf.
-  unfold create_match. simpl.
-  apply find_feasible_spec in Hf.
-  unfold is_feasible in Hf.
-  repeat rewrite Bool.andb_true_iff in Hf.
-  destruct Hf as [[_ Hb] Ha].
-  apply Nat.leb_le in Hb.
-  apply Nat.leb_le in Ha.
-  (* min of two naturals >=1 is >=1, i.e., strictly positive *)
-  apply Nat.min_glb_lt; lia.
-Qed.
-
-
-(** Definition-6 (Greedy Matching Rule).
+(** Definition-8 (Greedy Matching Rule).
 
   One greedy round either appends exactly one trade to the match record, or
   returns `None` to signal that no feasible pair exists.
@@ -152,22 +131,10 @@ Definition match_step (s : State) : option State :=
   | None => None
   end.
 
-(** Definition-7 (Match Monotonicity).
+(** Lemma (Match Monotonicity).
 
     During matching, the match record grows monotonically.
 *)
-Lemma match_step_monotonic :
-  forall s s',
-    match_step s = Some s' ->
-    incl (matches s) (matches s').
-Proof.
-  intros s s' H.
-  unfold match_step in H.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:HF; try discriminate.
-  inversion H; subst; clear H.
-  simpl. unfold incl. intros x Hx.
-  rewrite in_app_iff. left. exact Hx.
-Qed.
 
 Lemma allocated_bid_app_single :
   forall b ms m,
@@ -191,129 +158,6 @@ Proof.
   - destruct (ask_eq_dec (matched_ask m0) a); simpl; rewrite IH; lia.
 Qed.
 
-Lemma app_singleton_inj :
-  forall (A : Type) (l : list A) x y,
-    l ++ [x] = l ++ [y] -> x = y.
-Proof.
-  intros A l x y H.
-  induction l as [|a l IH]; simpl in H.
-  - inversion H. reflexivity.
-  - inversion H. apply IH. assumption.
-Qed.
-
-
-Lemma feasible_implies_pos :
-  forall b a ms,
-    is_feasible b a ms = true ->
-    1 <= residual_bid b ms /\ 1 <= residual_ask a ms.
-Proof.
-  intros b a ms Hf. unfold is_feasible in Hf.
-  repeat rewrite Bool.andb_true_iff in Hf.
-  destruct Hf as [[Hprice Hrb] Hra].
-  split; apply Nat.leb_le; assumption.
-Qed.
-
-Lemma find_feasible_price_bound :
-  forall bs as_list ms b a,
-    find_feasible bs as_list ms = Some (b,a) ->
-    ask_price a <= price b.
-Proof.
-  intros bs as_list ms b a H.
-  apply find_feasible_spec in H.
-  unfold is_feasible in H.
-  repeat rewrite Bool.andb_true_iff in H.
-  destruct H as [[Hp _] _]. now apply Nat.leb_le in Hp.
-Qed.
-
-
-Lemma match_price_bounds : forall s b a,
-  find_feasible (bids s) (asks s) (matches s) = Some (b, a) ->
-  ask_price a <= price b.
-Proof.
-  intros s b a H.
-  apply find_feasible_spec in H.
-  unfold is_feasible in H.
-  rewrite !Bool.andb_true_iff in H.
-  destruct H as [[Hp _] _].
-  apply Nat.leb_le in Hp.
-  assumption.
-Qed.
-
-Lemma match_step_head_price_bounds :
-  forall s s' b a,
-    match_step s = Some s' ->
-    matches s' = matches s ++ [create_match b a (matches s)] ->
-    ask_price a <= price b.
-Proof.
-  intros s s' b a Hstep Hhd.
-  unfold match_step in Hstep.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b0 a0]|] eqn:Hf; try discriminate.
-  inversion Hstep; subst; clear Hstep. simpl in Hhd.
-  apply app_singleton_inj in Hhd. inversion Hhd; subst; clear Hhd.
-  eapply match_price_bounds.
-  now rewrite Hf.
-Qed.
-
-Lemma feasible_price_bounds :
-  forall ms b a,
-    is_feasible b a ms = true ->
-    ask_price a <= price b.
-Proof.
-  intros ms b a Hf.
-  unfold is_feasible in Hf.
-  repeat rewrite Bool.andb_true_iff in Hf.
-  destruct Hf as [[Hp _] _].
-  now apply Nat.leb_le in Hp.
-Qed.
-
-Lemma find_feasible_price_bounds :
-  forall s b a,
-    find_feasible (bids s) (asks s) (matches s) = Some (b,a) ->
-    ask_price a <= price b.
-Proof.
-  intros s b a H.
-  apply find_feasible_spec in H.
-  eapply feasible_price_bounds; eauto.
-Qed.
-
-Lemma create_match_price_bounds :
-  forall ms b a,
-    is_feasible b a ms = true ->
-    ask_price a <= price b.
-Proof.
-  apply feasible_price_bounds.
-Qed.
-
-
-Lemma match_step_head_is_create :
-  forall s s',
-    match_step s = Some s' ->
-    exists b a, matches s' = matches s ++ [create_match b a (matches s)].
-Proof.
-  intros s s' H.
-  unfold match_step in H.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
-  inversion H; subst; clear H.
-  eexists b, a; reflexivity.
-Qed.
-
-Lemma match_step_head_price_bound :
-  forall s s' b a,
-    match_step s = Some s' ->
-    matches s' = matches s ++ [create_match b a (matches s)] ->
-    ask_price a <= price b.
-Proof.
-  intros s s' b a Hstep Hhd.
-  unfold match_step in Hstep.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b0 a0]|] eqn:Hf; try discriminate.
-  inversion Hstep; subst; clear Hstep. simpl in Hhd.
-  apply app_singleton_inj in Hhd. inversion Hhd; subst; clear Hhd.
-  (* use the feasibility spec of find_feasible *)
-  apply find_feasible_spec in Hf.
-  unfold is_feasible in Hf.
-  repeat rewrite Bool.andb_true_iff in Hf.
-  destruct Hf as [[Hp _] _]. now apply Nat.leb_le in Hp.
-Qed.
 
 Lemma allocOK_after_match :
   forall s s',

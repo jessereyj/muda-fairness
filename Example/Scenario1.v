@@ -12,13 +12,18 @@
     (b1,s1,q=3), (b1,s2,q=2), (b2,s2,q=2)
   Expected clearing price:
     p* = 8 (marginal seller exhausted => use marginal bid price).
+
+  This file serves two purposes:
+  - Correctness of the concrete execution (expected matches + clearing price).
+  - Fairness of the induced trace, using the Chapter 4 fairness modules:
+      PriorityFairness, QuantityFairness, PriceFairness.
 *)
 From Stdlib Require Import List.
 Import ListNotations.
 
-From LTL      Require Import LTL.
+From LTL      Require Import Syntax Semantics.
 From MUDA     Require Import Types State Matching Transitions.
-From Fairness Require Import All.
+From Fairness Require Import Interpretation PriorityFairness QuantityFairness PriceFairness.
 
 Local Open Scope LTL_scope.
 
@@ -46,6 +51,12 @@ Definition as_s1 : list Ask := [s1; s2].
 Definition st0 : State := initial_state bs_s1 as_s1.
 Definition run_s1 : trace := mu_trace st0.
 
+(* ------------------------------------------------------------------------- *)
+(* Fairness: Scenario 1 satisfies all three fairness properties on run_s1. *)
+
+Definition scenario1_fairness : LTL_formula :=
+  priorityOK ∧ (quantityOK ∧ priceOK).
+
 Example Scenario1_Priority : satisfies run_s1 0 priorityOK.
 Proof.
   unfold run_s1, st0.
@@ -62,6 +73,16 @@ Example Scenario1_UniformPrice : satisfies run_s1 0 priceOK.
 Proof.
   unfold run_s1, st0.
   apply uniform_price_fairness_LTL_initial.
+Qed.
+
+Example Scenario1_AllFairness : satisfies run_s1 0 scenario1_fairness.
+Proof.
+  unfold scenario1_fairness.
+  split.
+  - apply Scenario1_Priority.
+  - split.
+    + apply Scenario1_Quantity.
+    + apply Scenario1_UniformPrice.
 Qed.
 
 (* Concrete execution checks: matches and clearing price. *)
@@ -93,3 +114,7 @@ Proof. cbv. reflexivity. Qed.
 Example Scenario1_ClearingPrice_Is_8 :
   clearing_price (execute 7 st0) = Some 8.
 Proof. cbv. reflexivity. Qed.
+
+Example Scenario1_Final_Phase_And_Price :
+  phase (execute 7 st0) = P5 /\ clearing_price (execute 7 st0) = Some 8.
+Proof. cbv. auto. Qed.

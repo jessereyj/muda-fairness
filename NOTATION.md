@@ -91,7 +91,7 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
 - Infinite traces and satisfaction: [LTL/Semantics.v](LTL/Semantics.v) (`trace`, `trace_at`, `satisfies`, `models`, `valid`).
 - Lemma 1 (Semantics of F and G): [LTL/Semantics.v](LTL/Semantics.v) (`satisfies_eventually_unfold`, `satisfies_always_unfold`).
 
-**Note:** This repository version keeps the Chapter 4 *semantic* satisfaction layer only (syntax + semantics + derived operators in [LTL/LTL.v](LTL/LTL.v)). It intentionally does not include a Hilbert-style proof system, soundness, or completeness development.
+**Note:** This repository version keeps the Chapter 4 *semantic* satisfaction layer only (syntax + semantics in [LTL/Syntax.v](LTL/Syntax.v) and [LTL/Semantics.v](LTL/Semantics.v)). It intentionally does not include a Hilbert-style proof system, soundness, or completeness development.
 
 ### 4.2 MUDA Protocol Layer (Traces + Atomic Propositions)
 
@@ -348,7 +348,7 @@ Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
 
 ## Clearing Price
 
-**Thesis (Chapter 3, Definition 9):**
+**Thesis (Chapter 3, Definition 10):**
 - Marginal pair `(b*, s*)` is the last match in `M`
 - Clearing price `p*` determined by residuals of marginal pair
 
@@ -379,7 +379,7 @@ Definition determine_clearing_price (s : State) : option nat :=
 
 ## Rejection
 
-**Thesis (Chapter 3, Definition 10):**
+**Thesis (Chapter 3, Definition 11):**
 - An agent is rejected at termination iff it does not appear in the final match record.
 
 **Code:** `MUDA/Atoms.v`
@@ -406,7 +406,7 @@ Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
 ## Temporal Semantics
 
 **Thesis (Chapter 4, Section 4.3):**
-- Omega-run: `ω = x₀x₁x₂...`
+- Infinite run: `omega = x0 x1 x2 ...`
 - Stuttering after terminal state
 
 **Code:** `Fairness/Interpretation.v`
@@ -420,8 +420,8 @@ CoFixpoint mu_trace (s : State) : trace :=
 ```
 
 **Mapping:**
-- Thesis `ω` ↔ Code `mu_trace s` (coinductive trace)
-- Thesis stuttering (implicit in `x₇ = x₈ = ...`) ↔ Code `step` becomes identity at `P7`
+- Thesis `omega` ↔ Code `mu_trace s` (coinductive trace)
+- Thesis stuttering (implicit in `x7 = x8 = ...`) ↔ Code `step` becomes identity at `P7`
 
 **Note:** `mu_trace` always advances by `step`; terminal stuttering is ensured because `step s = s` when `phase s = P7`.
 
@@ -461,6 +461,103 @@ Definition interp_atom (s : State) (p : predicate) : Prop :=
 ```
 
 **Mapping:** Thesis uses informal predicates; code defines them as computable `Prop` values and maps them to LTL predicates via a numbered encoding. This repo version includes only the atoms needed for priority/quantity/price fairness.
+
+---
+
+## Chapter 5 (Scenario 1): Execution Index and Predicate Evaluation
+
+This section rewrites the Chapter 5 "predicate evaluation" in terms of the *actual* state sequence used by the mechanization.
+
+### Time index convention
+
+In [Example/Scenario1.v](Example/Scenario1.v), the trace is defined as:
+
+- `st0 := initial_state bs_s1 as_s1`
+- `run_s1 := mu_trace st0`
+
+The LTL semantics are aligned with the deterministic STS iteration:
+
+- Time `t = 0` corresponds to state `st0`.
+- Time `t = n` corresponds to `execute n st0`.
+
+### Concrete execution checkpoints (Scenario 1)
+
+The file [Example/Scenario1.v](Example/Scenario1.v) contains concrete checks that pin down when matches and the clearing price appear:
+
+- `matches (execute 3 st0) = [m1]`
+- `matches (execute 4 st0) = [m1; m2]`
+- `matches (execute 5 st0) = [m1; m2; m3]`
+- `phase (execute 6 st0) = P4`
+- `phase (execute 7 st0) = P5` and `clearing_price (execute 7 st0) = Some 8`
+
+For Chapter 5 prose, the key alignment point is:
+
+- the clearing price is *computed* by the P4 pricing transition, but the state *that carries* `clearing_price = Some 8` is the next state (phase `P5`).
+
+### Predicate evaluation (atoms)
+
+The relevant atomic predicates are defined in [MUDA/Atoms.v](MUDA/Atoms.v) and mapped into LTL atoms by `interp_atom` in [Fairness/Interpretation.v](Fairness/Interpretation.v).
+
+Below is the intended interpretation for Scenario 1 along the states `execute t st0` (time `t` in the LTL trace).
+
+##### Time-index table (t = 0..7)
+
+This table is written to match the concrete checks in [Example/Scenario1.v](Example/Scenario1.v). It uses:
+
+- `|matches|` = length of the match record `matches (execute t st0)`
+- `cprice_field` = the state field `clearing_price (execute t st0)`
+- `has_cprice` = `has_clearing_price_prop (execute t st0)` (defined via `determine_clearing_price`, not the field)
+
+| t | phase | |matches| | cprice_field | has_cprice |
+|--:|:------|--------:|:------------|:----------|
+| 0 | P1 | 0 | None | False |
+| 1 | P2 | 0 | None | False |
+| 2 | P3 | 0 | None | False |
+| 3 | P3 | 1 | None | True |
+| 4 | P3 | 2 | None | True |
+| 5 | P3 | 3 | None | True |
+| 6 | P4 | 3 | None | True |
+| 7 | P5 | 3 | Some 8 | True |
+
+Notes:
+
+- The `t = 3,4,5` match record sizes are exactly those proven by `Scenario1_Matches_After_Round{1,2,3}`.
+- The `t = 6` and `t = 7` phases are exactly those proven by `Scenario1_Enters_P4` and `Scenario1_Final_Phase_And_Price`.
+- `has_cprice` becomes true at `t = 3` because from that point the match record is non-empty, so `marginal_pair` exists and `determine_clearing_price` is defined.
+
+#### Phase atoms
+
+The phase atoms are encoded as `p_phase(i) = 10 + i` for `i in {1..7}`.
+
+At any time `t`, exactly one of these phase atoms is true, namely the one corresponding to `phase (execute t st0)`.
+
+#### Named fairness atoms (indices 0..5)
+
+These are the atoms used by the three fairness formulas (`priorityOK`, `quantityOK`, `priceOK`):
+
+| Atom index | Name (informal) | Coq predicate (in MUDA/Atoms.v) | How it is used |
+|-----------:|------------------|---------------------------------|----------------|
+| 0 | allocOK | `allocOK_prop` | Quantity fairness: `G allocOK` |
+| 1 | has_cprice | `has_clearing_price_prop` | Price fairness guard: `G(has_cprice -> ...)` |
+| 2 | bounds_cstar | `bounds_cstar_prop` | Price fairness: marginal bounds when defined |
+| 3 | price_rule | `price_rule_prop` | Price fairness: clearing price rule when applicable |
+| 4 | prioB_step_ok | `priorityB_step_ok_prop` | Priority fairness: `G prioB_step_ok` |
+| 5 | prioS_step_ok | `priorityS_step_ok_prop` | Priority fairness: `G prioS_step_ok` |
+
+#### Scenario 1 truth summary (aligned to the mechanization)
+
+- `allocOK_prop` holds at all times on `run_s1` (this is exactly `Scenario1_Quantity : satisfies run_s1 0 quantityOK`).
+- `priorityB_step_ok_prop` and `priorityS_step_ok_prop` hold at all times on `run_s1` (this is exactly `Scenario1_Priority : satisfies run_s1 0 priorityOK`).
+- `has_clearing_price_prop` becomes true once there is at least one match in the record, because it is defined using `determine_clearing_price` (which depends on `marginal_pair`, i.e. the last match). In Scenario 1, this is from time `t = 3` onward, because `matches (execute 3 st0) = [m1]`.
+- `bounds_cstar_prop` and `price_rule_prop` are the conjuncts enforced by the price fairness theorem whenever `has_clearing_price_prop` is true (this is exactly `Scenario1_UniformPrice : satisfies run_s1 0 priceOK`).
+
+#### Important alignment note (priority atoms)
+
+Although priority is conceptually "step-based", the mechanization exposes it as *state predicates* that inspect what the deterministic greedy selector would choose in that state. Concretely, both priority atoms are of the form:
+
+- `phase s = P3 -> ...`
+
+So outside phase `P3` these atoms hold trivially (because the antecedent is false). This is why a global invariant `G(prio*_step_ok)` is the correct LTL encoding for the intended per-round constraint.
 
 ---
 

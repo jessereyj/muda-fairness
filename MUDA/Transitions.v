@@ -83,51 +83,6 @@ Fixpoint execute (fuel : nat) (s : State) : State :=
   end.
 
 
-Lemma step_preserves_bids_asks : forall s,
-  phase s <> P2 ->
-  bids (step s) = bids s /\ asks (step s) = asks s.
-Proof.
-  intros s Hneq.
-  unfold step.
-  destruct (phase s) eqn:Hph.
-  - (* P1 *)
-    simpl; split; reflexivity.
-  - (* P2: excluded by hypothesis *)
-    exfalso. apply Hneq. reflexivity.
-  - (* P3 *)
-    destruct (match_step s) as [s'|] eqn:Hm; simpl.
-    + (* match_step Some s' preserves bids/asks by definition *)
-      unfold match_step in Hm.
-      destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
-      inversion Hm; subst; clear Hm; simpl; split; reflexivity.
-    + (* None -> finish_matching preserves bids/asks *)
-      simpl; split; reflexivity.
-  - (* P4 *)
-    unfold do_clearing_price; simpl; split; reflexivity.
-  - (* P5 *) simpl; split; reflexivity.
-  - (* P6 *) simpl; split; reflexivity.
-  - (* P7 *) simpl; split; reflexivity.
-Qed.
-
-Lemma step_monotone_matches : forall s,
-  length (matches s) <= length (matches (step s)).
-Proof.
-  intros s.
-  unfold step.
-  destruct (phase s) eqn:Hph; simpl; try lia.
-  - (* P3 *)
-    destruct (match_step s) as [s'|] eqn:Hm; simpl.
-    + (* Some s' -> one new head match *)
-      unfold match_step in Hm.
-      destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:?; try discriminate.
-      inversion Hm; subst; clear Hm.
-      simpl.
-      rewrite length_app. simpl. lia.
-    + (* None -> finish_matching, no change *)
-      lia.
-Qed.
-
-
 Lemma wf_state_step_preservation : forall s,
   wf_state s -> wf_state (step s).
 Proof.

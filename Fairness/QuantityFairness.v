@@ -23,16 +23,13 @@
 *)
 From Stdlib Require Import Arith List Lia.
 Import ListNotations.
-From LTL      Require Import LTL.
-From MUDA     Require Import MUDA Atoms.
+From LTL      Require Import Syntax Semantics.
+From MUDA     Require Import Types State Matching Transitions Atoms.
 From Fairness Require Import Interpretation.  (* for p_allocOK and mu_trace *)
 
 Local Open Scope LTL_scope.
 
 Definition quantityOK : LTL_formula := G (Atom p_allocOK).
-
-(* Chapter 4 notation alias. *)
-Definition phi_qty : LTL_formula := quantityOK.
 
 Theorem quantity_fairness_initial : forall bs as_list,
   allocOK (initial_state bs as_list).
