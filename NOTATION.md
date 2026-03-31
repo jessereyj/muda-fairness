@@ -24,7 +24,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Definit
 
 1. **Feasibility**
   - [MUDA/State.v](MUDA/State.v) (`feasible_pair`), and boolean form [MUDA/Matching.v](MUDA/Matching.v) (`is_feasible`).
-  - **Scenario 1 convention (Chapter 5):** the executable matcher enforces **single-match per order** by requiring the bid and ask have not appeared in the match record yet (implemented as `allocated_bid b ms = 0` and `allocated_ask a ms = 0` inside `is_feasible`).
+  - Executable feasibility in `is_feasible` checks: (i) `ask_price(a) <= price(b)` and (ii) both residual quantities are at least 1. The model allows an order to participate in multiple matches until its residual reaches 0 (Scenario 1 includes a bid matched in more than one round).
 
 2. **Traded Unit Quantity**
   - [MUDA/Matching.v](MUDA/Matching.v) (`create_match` uses `Nat.min`).
@@ -42,7 +42,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Definit
   - [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `match_step`).
 
 7. **Match Monotonicity**
-  - [MUDA/Matching.v](MUDA/Matching.v) (`match_step_monotonic`).
+  - The match record grows by appending at most one new match per successful matching round: [MUDA/Matching.v](MUDA/Matching.v) (`match_step` uses `matches s ++ [m]`).
 
 8. **Last Marginal Pair**
   - [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`marginal_pair`).
@@ -51,7 +51,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Definit
   - [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`determine_clearing_price`).
 
 10. **Rejection at Termination**
-  - [MUDA/Atoms.v](MUDA/Atoms.v) (`occurs_bid`, `occurs_ask`, `rejected_bid_prop`, `rejected_ask_prop`).
+  - Not mechanized in this repository snapshot (no rejection predicates/atoms are used by the Chapter 3–5 fairness verification layer).
 
 ### Propositions (Chapter 3, Section 3.6)
 
@@ -62,7 +62,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Definit
   - Residuals are defined from allocation: [MUDA/State.v](MUDA/State.v) (`residual_* = initial - allocated_*`).
 
 3. **Halting Condition of Phase P3**
-  - Matching stops when no feasible pair is found: [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `find_feasible_None_forall`).
+  - Matching stops when no feasible pair is found: [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `match_step`).
 
 4. **Transition from P3 to P4**
   - Implemented in [MUDA/Transitions.v](MUDA/Transitions.v) (`step` uses `finish_matching` when `match_step` returns `None`).
@@ -85,11 +85,11 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
 
 4.1.1 **Syntax**
 - Atomic proposition index set PROP = N: [LTL/Syntax.v](LTL/Syntax.v) (`predicate := nat`, `LTL_formula`, `X`, `F`, `G`).
-- Chapter 4 primitives are `¬`, `∧`, `X`, `F`, `G`. The code also provides `∨` and `→` as *derived connectives with standard semantics* (implemented as extra constructors) so fairness specs can be written in the same style as the thesis, without relying on classical axioms.
+- Chapter 4 primitives are `¬`, `∧`, `X`, `F`, `G`. The code also provides `∨` and `→` as *derived connectives with standard semantics* (implemented as extra constructors) so fairness specs can be written in the same style as the thesis, without relying on classical logic.
 
 4.1.2 **Semantics**
 - Infinite traces and satisfaction: [LTL/Semantics.v](LTL/Semantics.v) (`trace`, `trace_at`, `satisfies`, `models`, `valid`).
-- Lemma 1 (Semantics of F and G): [LTL/Semantics.v](LTL/Semantics.v) (`satisfies_eventually_unfold`, `satisfies_always_unfold`).
+- Lemma (Semantics of G / Always): [LTL/Semantics.v](LTL/Semantics.v) (`satisfies_always_unfold`).
 
 **Note:** This repository version keeps the Chapter 4 *semantic* satisfaction layer only (syntax + semantics in [LTL/Syntax.v](LTL/Syntax.v) and [LTL/Semantics.v](LTL/Semantics.v)). It intentionally does not include a Hilbert-style proof system, soundness, or completeness development.
 
@@ -98,11 +98,11 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
 - Determinism (unique trace from an initial state): Chapter 3 `step : State -> State` used coinductively (by construction) in [MUDA/Transitions.v](MUDA/Transitions.v) (`step`).
 - Stuttering after termination (P7 fixed point): [MUDA/Transitions.v](MUDA/Transitions.v) (`step`, `P7 => s`).
 - MUDA execution as infinite valuation trace: [Fairness/Interpretation.v](Fairness/Interpretation.v) (`interp_atom`, `mu_trace`).
-- Trace identification lemma (link to i-fold execution): [Fairness/Interpretation.v](Fairness/Interpretation.v) (`mu_trace_at_execute`, `mu_trace_atom_at_execute`).
+- Trace identification lemma (link to i-fold execution for atoms): [Fairness/Interpretation.v](Fairness/Interpretation.v) (`mu_trace_atom_at_execute`).
 
 ### 4.3 Fairness Verification Layer (Atoms + LTL Theorems)
 
-- MUDA predicates as atoms (allocOK, no_feasible, has_cprice, bounds, etc.): [MUDA/Atoms.v](MUDA/Atoms.v) (state-level predicates) + [Fairness/Interpretation.v](Fairness/Interpretation.v) (atom numbering and interpretation).
+- MUDA predicates as atoms (allocOK, has_cprice, bounds_cstar, price_rule, prioB_step_ok, prioS_step_ok): [MUDA/Atoms.v](MUDA/Atoms.v) (state-level predicates) + [Fairness/Interpretation.v](Fairness/Interpretation.v) (atom numbering and interpretation).
 - Fairness LTL formulas and mechanically-checked proofs:
   - [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
   - [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
@@ -121,7 +121,8 @@ state components (orders, residuals, match record, clearing price).
 - `residualS(s) = r` — true iff seller order `s` has residual `r`:
   [MUDA/State.v](MUDA/State.v) (`residualS`) defined via `residual_ask`.
 - `price(x) = c` — true iff the clearing price stored in state `x` is `c`:
-  [MUDA/State.v](MUDA/State.v) (`price_at`) over `clearing_price`.
+- `price(x) = c` — true iff the clearing price stored in state `x` is `Some c`:
+  [MUDA/State.v](MUDA/State.v) (`clearing_price` field of `State`).
 - `feasible(b, s)` — true iff `p(b) ≥ a(s)` and both residuals are positive:
   [MUDA/State.v](MUDA/State.v) (`feasible`) / `feasible_pair`.
 
@@ -377,29 +378,13 @@ Definition determine_clearing_price (s : State) : option nat :=
 
 ---
 
-## Rejection
+## Rejection (not mechanized in this repository snapshot)
 
 **Thesis (Chapter 3, Definition 11):**
 - An agent is rejected at termination iff it does not appear in the final match record.
 
-**Code:** `MUDA/Atoms.v`
-```coq
-Definition occurs_bid (b : Bid) (ms : list Match) : Prop :=
-  exists m, In m ms /\ matched_bid m = b.
-
-Definition occurs_ask (a : Ask) (ms : list Match) : Prop :=
-  exists m, In m ms /\ matched_ask m = a.
-
-Definition rejected_bid_prop (b : Bid) (s : State) : Prop :=
-  In b (bids s) /\ ~ occurs_bid b (matches s).
-
-Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
-  In a (asks s) /\ ~ occurs_ask a (matches s).
-```
-
-**Mapping:**
-- Thesis “appears in final match record” ↔ Code `occurs_bid` / `occurs_ask` over `matches`
-- Thesis “rejected” ↔ Code `rejected_bid_prop` / `rejected_ask_prop`
+**Repository scope note:**
+This repository snapshot focuses on the Chapter 3–5 fairness layer (priority, quantity, uniform price). It does not include rejection predicates/atoms in `MUDA/Atoms.v`, and no mechanized fairness result in this repo depends on rejection.
 
 ---
 
@@ -412,11 +397,7 @@ Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
 **Code:** `Fairness/Interpretation.v`
 ```coq
 CoFixpoint mu_trace (s : State) : trace :=
-  Trace (interp_atom s)
-        (match phase s with
-         | P7 => mu_trace (step s)
-         | _  => mu_trace (step s)
-         end).
+  Trace (interp_atom s) (mu_trace (step s)).
 ```
 
 **Mapping:**
@@ -571,6 +552,6 @@ So outside phase `P3` these atoms hold trivially (because the antecedent is fals
 | Allocation sum | Set notation | Recursive function | Decidable, constructive |
 | Trace construction | Conceptual ω-run | `CoFixpoint` | Mechanized coinduction |
 | Match list | Abstract set `M` | `list Match` with append | Executable, provable monotonicity |
-| Rejection | Non-occurrence in `M_fin` | `occurs_*` over `matches` | Matches Chapter 3 definition |
+| Rejection | Mentioned in Chapter 3 | Not included in this repo snapshot | Out of scope for current fairness proofs |
 
 These choices are **standard practice in formal verification**: the thesis emphasizes mathematical clarity and essential logic, while the code provides a mechanically checkable implementation with necessary bookkeeping. The correctness of the formalization depends on faithful implementation of the thesis's core definitions (matching, feasibility, clearing price), which has been achieved.

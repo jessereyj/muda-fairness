@@ -8,6 +8,8 @@ Temporal verification of fairness in the Multi-Unit Double Auction (MUDA) using 
 LTL/       - Linear Temporal Logic foundation
 MUDA/      - MUDA protocol model (state, sorting, matching, price)
 Fairness/  - Fairness property formulas and proofs
+Example/   - Concrete scenario(s) and end-to-end checks (Scenario 1)
+html/      - Generated browsing documentation (coqdoc output)
 ```
 
 ## Quick Start
@@ -81,7 +83,8 @@ the priority orderings).
 ### Uniform Price Fairness
 
 Uniform price fairness states that trades recorded in the match record are
-priced consistently with the clearing price `price(x) = c` determined by MUDA.
+priced consistently with the clearing price carried by the state (i.e.,
+`clearing_price(x) = Some c`) as determined by MUDA.
 
 Proven for traces starting from initial states.
 
@@ -118,13 +121,13 @@ the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 - Admitted lemmas: **0**, enforced by `check.sh`
 All fairness theorems are proven using `Qed`. No fairness proof uses `Admitted`.
 
-This refactored version introduces no unproven postulates in the `.v` sources under `LTL/`, `MUDA/`, and `Fairness/`.
+This refactored version contains no admitted proofs in the `.v` sources under `LTL/`, `MUDA/`, `Fairness/`, and `Example/`.
 
 ### Verification Commands
 
 ```bash
 # Check for admitted lemmas
-grep -rn "Admitted\." LTL/ MUDA/ Fairness/
+grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Example/
 
 # Show proof and definition statistics
 ./stats.sh
@@ -146,7 +149,7 @@ The thesis presents a mathematical model focused on economically relevant compon
 - **Code:** `State = (bids, asks, matches, clearing_price, phase)`
 
 Residuals are computed dynamically using `residual_bid` and `residual_ask`.
-Example/   - Chapter 5 Scenario 1 (executable trace checks)
+Concrete example executions and checks are in `Example/`.
 
 ### Bids and Asks
 
@@ -157,8 +160,6 @@ Example/   - Chapter 5 Scenario 1 (executable trace checks)
 
 - **Thesis:** Uses `(b, s, q)` triples
 - **Code:** Stores full bid and ask records with quantities
-
-grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Example/
 
 - **Thesis:** Presents abstract allocation functions
 - **Code:** Uses recursive functions with decidable equality
