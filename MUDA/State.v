@@ -16,8 +16,9 @@ From MUDA Require Import Types.
 *)
 
 (* Phase: protocol phases P1..P7 (Chapter 3).
-   P1 (submission) → P2 (sorting) → P3 (matching) →
-   P4 (clearing price) → P5 (finalization) → P6 (bookkeeping) → P7 (rejection/terminal) *)
+  P1 (submission) → P2 (sorting) → P3 (matching) →
+  P4 (clearing price) → P5 (finalization) → P6 (bookkeeping) → P7 (rejection/terminal) *)
+(* Phase: phase enumeration used by step. *)
 Inductive Phase : Type :=
   | P1  (* Order submission *)
   | P2  (* Sorting *)
@@ -38,6 +39,7 @@ Inductive Phase : Type :=
    Note: "residuals" from thesis are computed via residual_bid/residual_ask,
          not stored as a separate field.
 *)
+(* State: record of bids/asks/matches/clearing_price/phase. *)
 Record State := {
   bids : list Bid;
   asks : list Ask;

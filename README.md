@@ -104,7 +104,7 @@ the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 - The three fairness properties in this repo are expressed as invariants, so `G` (plus propositional connectives) is sufficient for them:
 	- Priority: `G(p_prioB_step) ∧ G(p_prioS_step)` in [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
 	- Quantity: `G(p_allocOK)` in [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
-	- Price: `G(p_has_cprice → (p_bounds_cstar ∧ p_price_rule))` in [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
+		- Price: `G(p_has_cprice → (p_bounds_pstar ∧ p_price_rule))` in [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
 
 3) **Can all three fairness properties be verified using Rocq?**
 - Yes. Each property is proven for MUDA traces from initial states:

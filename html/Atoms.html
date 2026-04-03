@@ -35,7 +35,7 @@ Panel index (thesis ↔ code)
 <li> allocOK_prop: quantity accounting atom (initial = allocated + residual)
 
 </li>
-<li> has_clearing_price_prop, bounds_cstar_prop, price_rule_prop: price fairness atoms
+<li> has_clearing_price_prop, bounds_pstar_prop, price_rule_prop: price fairness atoms
 
 </li>
 <li> priorityB_step_ok_prop, priorityS_step_ok_prop: priority-step correctness atoms
@@ -56,7 +56,7 @@ Panel index (thesis ↔ code)
 &nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">c</span>, <span class="id" title="var">determine_clearing_price</span> <span class="id" title="var">s</span> = <span class="id" title="var">Some</span> <span class="id" title="var">c</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">bounds_cstar_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">bounds_pstar_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">marginal_pair</span> <span class="id" title="var">s</span>, <span class="id" title="var">determine_clearing_price</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>), <span class="id" title="var">Some</span> <span class="id" title="var">c</span> =&gt; <span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">c</span> /\ <span class="id" title="var">c</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span><br/>
 &nbsp;&nbsp;| <span class="id" title="var">_</span>, <span class="id" title="var">_</span> =&gt; <span class="id" title="var">True</span><br/>

@@ -57,7 +57,7 @@ Panel index (thesis ↔ code)
 <br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">p_allocOK</span>      : <span class="id" title="var">predicate</span> := 0.<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">p_has_cprice</span>   : <span class="id" title="var">predicate</span> := 1.<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_bounds_cstar</span> : <span class="id" title="var">predicate</span> := 2.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">p_bounds_pstar</span> : <span class="id" title="var">predicate</span> := 2.<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">p_price_rule</span>   : <span class="id" title="var">predicate</span> := 3.<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">p_prioB_step</span>   : <span class="id" title="var">predicate</span> := 4.<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">p_prioS_step</span>   : <span class="id" title="var">predicate</span> := 5.<br/>
@@ -78,7 +78,7 @@ Panel index (thesis ↔ code)
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">p</span> <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| 0 =&gt; <span class="id" title="var">allocOK_prop</span> <span class="id" title="var">s</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| 1 =&gt; <span class="id" title="var">has_clearing_price_prop</span> <span class="id" title="var">s</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;| 2 =&gt; <span class="id" title="var">bounds_cstar_prop</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 2 =&gt; <span class="id" title="var">bounds_pstar_prop</span> <span class="id" title="var">s</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| 3 =&gt; <span class="id" title="var">price_rule_prop</span> <span class="id" title="var">s</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| 4 =&gt; <span class="id" title="var">priorityB_step_ok_prop</span> <span class="id" title="var">s</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| 5 =&gt; <span class="id" title="var">priorityS_step_ok_prop</span> <span class="id" title="var">s</span><br/>
@@ -94,12 +94,6 @@ Panel index (thesis ↔ code)
 &nbsp;&nbsp;<span class="id" title="var">Trace</span> (<span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span>) (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">δ</span> <span class="id" title="var">s</span>)).<br/>
 
 <br/>
-</div>
-
-<div class="doc">
-Thesis-level alias: μ(x0) denotes the induced infinite trace. 
-</div>
-<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">μ</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">trace</span> := <span class="id" title="var">mu_trace</span> <span class="id" title="var">s</span>.<br/>
 
 <br/>

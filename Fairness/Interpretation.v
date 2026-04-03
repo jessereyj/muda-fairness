@@ -14,12 +14,17 @@ From MUDA Require Import State Transitions Atoms.
 Local Open Scope LTL_scope.
 Local Open Scope bool_scope.  
 
-(* Predicate indices for fairness-related atoms (Chapter 4). *)
+(* p_allocOK: predicate index for allocOK_prop (quantity accounting). *)
 Definition p_allocOK      : predicate := 0.
+(* p_has_cprice: predicate index for “clearing price exists”. *)
 Definition p_has_cprice   : predicate := 1.
-Definition p_bounds_cstar : predicate := 2.
+(* p_bounds_pstar: predicate index for marginal-pair bounds on the clearing price p_star. *)
+Definition p_bounds_pstar : predicate := 2.
+(* p_price_rule: predicate index for the deterministic clearing-price rule. *)
 Definition p_price_rule   : predicate := 3.
+(* p_prioB_step: predicate index for the buyer-side priority-step atom. *)
 Definition p_prioB_step   : predicate := 4.
+(* p_prioS_step: predicate index for the seller-side priority-step atom. *)
 Definition p_prioS_step   : predicate := 5.
 
 (* p_phase: encoding of phase atoms p_phase(i) = 10+i. *)
@@ -38,7 +43,7 @@ Definition interp_atom (s : State) : predicate -> Prop :=
     match p with
     | 0 => allocOK_prop s
     | 1 => has_clearing_price_prop s
-    | 2 => bounds_cstar_prop s
+    | 2 => bounds_pstar_prop s
     | 3 => price_rule_prop s
     | 4 => priorityB_step_ok_prop s
     | 5 => priorityS_step_ok_prop s
@@ -53,12 +58,13 @@ Definition interp_atom (s : State) : predicate -> Prop :=
 CoFixpoint mu_trace (s : State) : trace :=
   Trace (interp_atom s) (mu_trace (δ s)).
 
-(** Thesis-level alias: μ(x0) denotes the induced infinite trace. *)
+(* μ: thesis-level alias for the induced infinite trace μ(x0) (Chapter 4). *)
 Definition μ (s : State) : trace := mu_trace s.
 
 (* Bridge lemma (Chapter 4 “lift step”): evaluating Atom p at time i on μ(s)
    coincides with evaluating p on the state reached by executing i steps. *)
 
+(* mu_trace_atom_at_execute: bridge lemma (time i on μ(s) equals execute i on states). *)
 Lemma mu_trace_atom_at_execute :
   forall s i p,
     satisfies (mu_trace s) i (Atom p) <-> interp_atom (execute i s) p.

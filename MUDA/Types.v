@@ -15,8 +15,8 @@ From Stdlib Require Export Arith List Bool PeanoNat.
 (* AgentType: buyer/seller role used for ownership bookkeeping. *)
 Inductive AgentType := Buyer | Seller.
 
-(* Agent: ownership bookkeeping record (not explicit in the thesis notation).
-   Not explicitly modeled in thesis—agents are implicit in order ownership. *)
+(* Agent: ownership bookkeeping record (not explicit in the thesis notation). *)
+(* Agent: record of agent_id and agent_type. *)
 Record Agent := { agent_id : nat; agent_type : AgentType }.
 
 (* Bid: order record (price, quantity, timestamp) with identifiers/ownership bookkeeping.
@@ -29,6 +29,7 @@ Record Agent := { agent_id : nat; agent_type : AgentType }.
      - bid_id: unique identifier for decidable equality
      - buyer: agent ownership (implementation bookkeeping)
 *)
+(* Bid: record type for bids. *)
 Record Bid := {
   bid_id : nat;
   buyer : Agent;
@@ -47,6 +48,7 @@ Record Bid := {
      - ask_id: unique identifier for decidable equality
      - seller: agent ownership (implementation bookkeeping)
 *)
+(* Ask: record type for asks. *)
 Record Ask := {
   ask_id : nat;
   seller : Agent;
@@ -60,6 +62,7 @@ Record Ask := {
    Direct correspondence: matched_bid = b, matched_ask = s, match_quantity = q.
    Note: b and s are full Bid and Ask records, not just identifiers.
 *)
+(* Match: record type for matched trades. *)
 Record Match := {
   matched_bid : Bid;
   matched_ask : Ask;
@@ -72,6 +75,7 @@ Proof. decide equality. Defined.
 
 (* Use a computational nat equality decider (instead of Stdlib's Nat.eq_dec,
    which may be opaque under vm_compute), so executions can be evaluated. *)
+(* nat_eq_dec: decidable equality for nat that stays computable under vm_compute. *)
 Definition nat_eq_dec (x y : nat) : {x = y} + {x <> y}.
 Proof. decide equality. Defined.
 
@@ -81,6 +85,7 @@ Proof. decide equality. - apply agent_type_eq_dec. - apply nat_eq_dec. Defined.
 
 #[export] Hint Resolve agent_type_eq_dec agent_eq_dec : core.
 
+(* bid_eq_dec_spec: decidable equality for Bid (used by allocated_bid scans). *)
 Lemma bid_eq_dec_spec : forall b1 b2 : Bid, {b1 = b2} + {b1 <> b2}.
 Proof.
   intros [bid_id1 buyer1 price1 quantity1] [bid_id2 buyer2 price2 quantity2].
@@ -90,6 +95,7 @@ Defined.
 (* bid_eq_dec: exported bid equality decider (wrapper around bid_eq_dec_spec). *)
 Definition bid_eq_dec := bid_eq_dec_spec.
 
+(* ask_eq_dec_spec: decidable equality for Ask (used by allocated_ask scans). *)
 Lemma ask_eq_dec_spec : forall a1 a2 : Ask, {a1 = a2} + {a1 <> a2}.
 Proof.
   intros [ask_id1 seller1 price1 quantity1] [ask_id2 seller2 price2 quantity2].

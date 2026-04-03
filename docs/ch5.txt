@@ -31,6 +31,7 @@ b1 >_B b2, because 10 > 8
 Seller priority:
 
 s1 >_S s2, because 6 < 7
+
 5.1.2 Initial State
 
 The initial state x0 satisfies the following conditions.
@@ -41,24 +42,27 @@ residB(b2, x0) = 4
 residS(s1, x0) = 3
 residS(s2, x0) = 4
 M(x0) = empty
-pstar is not yet determined
+p_star is not yet determined
+
 5.1.3 Execution Trace
 
 The execution trace proceeds through the seven protocol phases.
 
 Note that the Phase P2 sorting transition produces a Phase P3 state before any match is executed.
 
-State	Phase	Residual Quantities	Match Record	Clearing Price
-x0	P1	b1=5, b2=4, s1=3, s2=4	empty	undefined
-x1	P2	b1=5, b2=4, s1=3, s2=4	empty	undefined
-x2	P3	b1=5, b2=4, s1=3, s2=4	empty	undefined
-x3	P3	b1=2, b2=4, s1=0, s2=4	[(b1, s1, 3)]	undefined
-x4	P3	b1=0, b2=4, s1=0, s2=2	[(b1, s1, 3), (b1, s2, 2)]	undefined
-x5	P3	b1=0, b2=2, s1=0, s2=0	[(b1, s1, 3), (b1, s2, 2), (b2, s2, 2)]	undefined
-x6	P4	b1=0, b2=2, s1=0, s2=0	same as x5	undefined
-x7	P5	b1=0, b2=2, s1=0, s2=0	same as x5	8
-x8	P6	b1=0, b2=2, s1=0, s2=0	same as x5	8
-x9	P7	b1=0, b2=2, s1=0, s2=0	same as x5	8
+Each row corresponds to xi = δ^i(x0).
+
+State | Phase | Residual Quantities | Match Record | Clearing Price
+x0 | P1 | b1=5, b2=4, s1=3, s2=4 | empty | undefined
+x1 | P2 | b1=5, b2=4, s1=3, s2=4 | empty | undefined
+x2 | P3 | b1=5, b2=4, s1=3, s2=4 | empty | undefined
+x3 | P3 | b1=2, b2=4, s1=0, s2=4 | [(b1, s1, 3)] | undefined
+x4 | P3 | b1=0, b2=4, s1=0, s2=2 | [(b1, s1, 3), (b1, s2, 2)] | undefined
+x5 | P3 | b1=0, b2=2, s1=0, s2=0 | [(b1, s1, 3), (b1, s2, 2), (b2, s2, 2)] | undefined
+x6 | P4 | b1=0, b2=2, s1=0, s2=0 | same as x5 | undefined
+x7 | P5 | b1=0, b2=2, s1=0, s2=0 | same as x5 | 8
+x8 | P6 | b1=0, b2=2, s1=0, s2=0 | same as x5 | 8
+x9 | P7 | b1=0, b2=2, s1=0, s2=0 | same as x5 | 8
 
 After x9, the execution trace continues by repeating x9.
 
@@ -76,7 +80,7 @@ After this trade:
 residB(b1) = 2
 residS(s1) = 0
 
-The next feasible pair is (b1, s2).
+The next selected feasible pair is (b1, s2).
 
 b1 still has higher priority than b2.
 s2 is now the highest priority feasible seller.
@@ -88,7 +92,7 @@ After this trade:
 residB(b1) = 0
 residS(s2) = 2
 
-The next feasible pair is (b2, s2).
+The next selected feasible pair is (b2, s2).
 
 b1 has no residual quantity, so it is no longer feasible.
 b2 and s2 are feasible because 8 >= 7.
@@ -107,26 +111,26 @@ The last matched pair is (b2, s2, 2).
 
 The final seller is fully matched, since residS(s2, x6) = 0. Therefore, the clearing price is determined from the buyer side. Hence,
 
-pstar = p(b2) = 8
+p_star = p(b2) = 8
 
-In the mechanization, this computation is performed by the Phase P4 pricing transition, and the resulting post-pricing state (where the clearing price field is set) is in Phase P5.
+In the mechanization, this computation is performed by the Phase P4 pricing transition, and the resulting post-pricing state, where the clearing price field is set, is in Phase P5.
 
 This price is applied uniformly to all matched trades.
 
 5.1.6 Priority Fairness (Illustration)
 
-Priority fairness is specified in Chapter 4 as an invariance property over the induced trace (an LTL G-formula). The general statement σ, 0 ⊨ priorityOK is established for all inputs by the Chapter 4 theorem, and Chapter 5 does not add validation beyond that.
+Priority fairness is specified in Chapter 4 as an invariance property over the induced trace, an LTL G-formula. The general statement σ, 0 ⊨ priorityOK is established for all inputs by the Chapter 4 theorem, and Chapter 5 does not add validation beyond that.
 
 Here we illustrate what the priority atoms mean on this concrete run:
 
-- Buyer side: while b1 remains feasible, the greedy selector chooses b1 ahead of b2.
-- Seller side: while s1 remains feasible for the chosen buyer, the selector chooses s1 ahead of s2.
+Buyer side: while b1 remains feasible, the greedy selector chooses b1 ahead of b2.
+Seller side: while s1 remains feasible for the chosen buyer, the selector chooses s1 ahead of s2.
 
-These observations are exactly the step-by-step content of the two priority step predicates evaluated along the Phase P3 portion of the trace.
+These observations correspond to the step predicates evaluated along the Phase P3 portion of the trace.
 
 5.1.7 Quantity Fairness (Illustration)
 
-Quantity fairness is specified in Chapter 4 as an invariance property: at every time index, each agent’s initial quantity equals allocated quantity plus residual quantity. The general LTL statement is proved in Chapter 4; here we simply show what the accounting looks like for the specific agents in Scenario 1.
+Quantity fairness is specified in Chapter 4 as an invariance property. At every time index, each agent’s initial quantity equals allocated quantity plus residual quantity. The general LTL statement is proved in Chapter 4. Here we illustrate the accounting for Scenario 1.
 
 For b1:
 
@@ -134,9 +138,8 @@ initial quantity = 5
 traded quantity = 3 + 2 = 5
 residual quantity = 0
 
-So:
+Thus:
 
-initial = allocated + residual
 5 = 5 + 0
 
 For b2:
@@ -145,7 +148,7 @@ initial quantity = 4
 traded quantity = 2
 residual quantity = 2
 
-So:
+Thus:
 
 4 = 2 + 2
 
@@ -155,7 +158,7 @@ initial quantity = 3
 traded quantity = 3
 residual quantity = 0
 
-So:
+Thus:
 
 3 = 3 + 0
 
@@ -165,30 +168,18 @@ initial quantity = 4
 traded quantity = 2 + 2 = 4
 residual quantity = 0
 
-So:
+Thus:
 
 4 = 4 + 0
 
-In other words, the allocation record M and the residual quantities exactly account for each agent’s initial quantity in this concrete run.
+The match record M and the residual quantities fully account for each agent’s initial quantity in this execution.
 
-5.1.8 Uniform Price Fairness (Illustration)
+5.1.8 Price Fairness (Uniform Pricing Illustration)
 
-Uniform price fairness is specified in Chapter 4 as an invariance property relating the existence of a clearing price to (i) boundedness by the marginal pair and (ii) correctness of the deterministic pricing rule. The general LTL statement is proved in Chapter 4; here we show the concrete clearing price computation in Scenario 1.
+Price fairness is specified in Chapter 4 as an invariance property relating the existence of a clearing price to boundedness by the marginal pair and correctness of the deterministic pricing rule. The general LTL statement is proved in Chapter 4. Here we illustrate the concrete pricing outcome in Scenario 1.
 
 In this execution:
 
-clearing price = 8
+p_star = 8
 
-All matched trades are executed at the clearing price p*. 
-This illustrates how the marginal pair and residual condition determine the uniform clearing price in the operational execution.
-
-5.1.9 Summary
-
-Scenario 1 serves as an execution-level illustration:
-
-- how the deterministic transition system generates a concrete state sequence,
-- where matching terminates and the trace enters the terminal stuttering phase,
-- how the residual quantities and match record account for quantities, and
-- how the marginal pair determines the uniform clearing price.
-
-The formal correctness claims (the LTL satisfaction statements for the fairness formulas) are established in Chapter 4 for all initial states; Chapter 5’s role is to make those semantics concrete on a readable example.
+All matched trades are executed at the clearing price p_star. This illustrates how the marginal pair and residual condition determine the uniform clearing price in the operational execution.

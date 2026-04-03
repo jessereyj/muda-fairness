@@ -6,7 +6,7 @@ From Fairness Require Import Interpretation.
 (** Panel index (thesis ↔ code)
 
   Chapter 4 (Uniform price fairness)
-  - priceOK: LTL formula G(p_has_cprice → (p_bounds_cstar ∧ p_price_rule))
+  - priceOK: LTL formula G(p_has_cprice → (p_bounds_pstar ∧ p_price_rule))
   - uniform_price_fairness_LTL_initial: main theorem (holds for all initial states)
 *)
 
@@ -14,7 +14,7 @@ Local Open Scope LTL_scope.
 
 (* priceOK: LTL formula for uniform price fairness (bounds + deterministic price rule). *)
 Definition priceOK : LTL_formula :=
-  G (Atom p_has_cprice → (Atom p_bounds_cstar ∧ Atom p_price_rule)).
+  G (Atom p_has_cprice → (Atom p_bounds_pstar ∧ Atom p_price_rule)).
 
 (* uniform_price_fairness_LTL_initial: LTL lift — priceOK holds on μ(initial_state). *)
 Theorem uniform_price_fairness_LTL_initial : forall bs as_list,
@@ -28,15 +28,15 @@ Proof.
   simpl.
   right.
   split.
-  - (* bounds_cstar *)
-    change (satisfies (mu_trace (initial_state bs as_list)) j (Atom p_bounds_cstar)).
-    apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) j p_bounds_cstar)).
+  - (* bounds_pstar *)
+    change (satisfies (mu_trace (initial_state bs as_list)) j (Atom p_bounds_pstar)).
+    apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) j p_bounds_pstar)).
     unfold interp_atom.
-    change (bounds_cstar_prop (execute j (initial_state bs as_list))).
+    change (bounds_pstar_prop (execute j (initial_state bs as_list))).
     pose proof
       (wf_state_execute_n j (initial_state bs as_list) (wf_state_initial bs as_list))
       as Hwf.
-    unfold bounds_cstar_prop.
+    unfold bounds_pstar_prop.
     destruct (marginal_pair (execute j (initial_state bs as_list))) as [[b a]|] eqn:Hmp;
       destruct (determine_clearing_price (execute j (initial_state bs as_list))) as [c|] eqn:Hdc;
       simpl; try exact I.

@@ -20,11 +20,13 @@ Local Open Scope bool_scope.
 
     This is the executable feasibility test used by the greedy matcher.
 *)
+(* is_feasible: executable feasibility test (ask_price <= bid_price and positive residuals). *)
 Definition is_feasible (b : Bid) (a : Ask) (ms : list Match) : bool :=
   Nat.leb (ask_price a) (price b)
   && Nat.leb 1 (residual_bid b ms)
   && Nat.leb 1 (residual_ask a ms).
 
+(* feasible: Prop-level wrapper for is_feasible = true. *)
 Definition feasible (b : Bid) (a : Ask) (ms : list Match) : Prop :=
   is_feasible b a ms = true.
 
@@ -118,6 +120,7 @@ Qed.
     A trade quantity is the maximum feasible trade between the chosen buyer and
     seller: q = min(residual_bid, residual_ask).
 *)
+(* create_match: construct a Match with q = min(residual_bid, residual_ask). *)
 Definition create_match (b : Bid) (a : Ask) (ms : list Match) : Match :=
   let q := Nat.min (residual_bid b ms) (residual_ask a ms) in
   {| matched_bid := b; matched_ask := a; match_quantity := q |}.
@@ -127,6 +130,7 @@ Definition create_match (b : Bid) (a : Ask) (ms : list Match) : Match :=
   One greedy round either appends exactly one trade to the match record, or
   returns `None` to signal that no feasible pair exists.
 *)
+(* match_step: one greedy round (append one match if feasible, else return None). *)
 Definition match_step (s : State) : option State :=
   match find_feasible (bids s) (asks s) (matches s) with
   | Some (b,a) =>

@@ -5,7 +5,7 @@ From MUDA Require Import Types State Sorting Matching ClearingPrice Transitions.
 
   Chapter 4 (Atomic propositions over MUDA states)
   - allocOK_prop: quantity accounting atom (initial = allocated + residual)
-  - has_clearing_price_prop, bounds_cstar_prop, price_rule_prop: price fairness atoms
+  - has_clearing_price_prop, bounds_pstar_prop, price_rule_prop: price fairness atoms
   - priorityB_step_ok_prop, priorityS_step_ok_prop: priority-step correctness atoms
 *)
 
@@ -25,12 +25,14 @@ Definition allocOK_prop (s : State) : Prop :=
 Definition has_clearing_price_prop (s : State) : Prop :=
   exists c, determine_clearing_price s = Some c.
 
-(* bounds_cstar_prop: atom asserting clearing price bounds w.r.t. the marginal pair (when defined). *)
-Definition bounds_cstar_prop (s : State) : Prop :=
+(* bounds_pstar_prop: atom asserting clearing price bounds w.r.t. the marginal pair (when defined). *)
+Definition bounds_pstar_prop (s : State) : Prop :=
   match marginal_pair s, determine_clearing_price s with
   | Some (b,a), Some c => ask_price a <= c /\ c <= price b
   | _, _ => True
   end.
+
+
 
 (* Price rule atom: must match determine_clearing_price. *)
 (* price_rule_prop: atom asserting the deterministic price-selection rule after P3. *)

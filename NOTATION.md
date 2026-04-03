@@ -102,7 +102,7 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
 
 ### 4.3 Fairness Verification Layer (Atoms + LTL Theorems)
 
-- MUDA predicates as atoms (allocOK, has_cprice, bounds_cstar, price_rule, prioB_step_ok, prioS_step_ok): [MUDA/Atoms.v](MUDA/Atoms.v) (state-level predicates) + [Fairness/Interpretation.v](Fairness/Interpretation.v) (atom numbering and interpretation).
+- MUDA predicates as atoms (allocOK, has_cprice, bounds_pstar, price_rule, prioB_step_ok, prioS_step_ok): [MUDA/Atoms.v](MUDA/Atoms.v) (state-level predicates) + [Fairness/Interpretation.v](Fairness/Interpretation.v) (atom numbering and interpretation).
 - Fairness LTL formulas and mechanically-checked proofs:
   - [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
   - [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
@@ -428,7 +428,7 @@ Definition interp_atom (s : State) (p : predicate) : Prop :=
   match p with
   | 0 => allocOK_prop s
   | 1 => has_clearing_price_prop s
-  | 2 => bounds_cstar_prop s
+  | 2 => bounds_pstar_prop s
   | 3 => price_rule_prop s
   | 4 => priorityB_step_ok_prop s
   | 5 => priorityS_step_ok_prop s
@@ -524,7 +524,7 @@ These are the atoms used by the three fairness formulas (`priorityOK`, `quantity
 |-----------:|------------------|---------------------------------|----------------|
 | 0 | allocOK | `allocOK_prop` | Quantity fairness: `G allocOK` |
 | 1 | has_cprice | `has_clearing_price_prop` | Price fairness guard: `G(has_cprice -> ...)` |
-| 2 | bounds_cstar | `bounds_cstar_prop` | Price fairness: marginal bounds when defined |
+| 2 | bounds_pstar | `bounds_pstar_prop` | Price fairness: marginal bounds when defined |
 | 3 | price_rule | `price_rule_prop` | Price fairness: clearing price rule when applicable |
 | 4 | prioB_step_ok | `priorityB_step_ok_prop` | Priority fairness: `G prioB_step_ok` |
 | 5 | prioS_step_ok | `priorityS_step_ok_prop` | Priority fairness: `G prioS_step_ok` |
@@ -534,7 +534,7 @@ These are the atoms used by the three fairness formulas (`priorityOK`, `quantity
 - `allocOK_prop` holds at all times on `run_s1` (this is exactly `Scenario1_Quantity : run_s1 ⊨ quantityOK`).
 - `priorityB_step_ok_prop` and `priorityS_step_ok_prop` hold at all times on `run_s1` (this is exactly `Scenario1_Priority : run_s1 ⊨ priorityOK`).
 - `has_clearing_price_prop` becomes true once there is at least one match in the record, because it is defined using `determine_clearing_price` (which depends on `marginal_pair`, i.e. the last match). In Scenario 1, this is from time `t = 3` onward, because `matches (execute 3 st0) = [m1]`.
-- `bounds_cstar_prop` and `price_rule_prop` are the conjuncts enforced by the price fairness theorem whenever `has_clearing_price_prop` is true (this is exactly `Scenario1_UniformPrice : run_s1 ⊨ priceOK`).
+- `bounds_pstar_prop` and `price_rule_prop` are the conjuncts enforced by the price fairness theorem whenever `has_clearing_price_prop` is true (this is exactly `Scenario1_UniformPrice : run_s1 ⊨ priceOK`).
 
 #### Important alignment note (priority atoms)
 
