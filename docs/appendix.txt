@@ -1,0 +1,256 @@
+APPENDIX A — Supplementary MUDA Diagrams (Chapter 3 support)
+
+Purpose
+This appendix contains supplementary diagrams that help explain the MUDA protocol description from Chapter 3. The figures are explanatory only: the Rocq development does not depend on them, but they help the reader understand the operational components and phase structure used by the deterministic state-transition model.
+
+A.1 MUDA mechanism and feasibility condition
+- Figure file: Fig1_1_MUDA_Mechanism.png
+- What it illustrates: the matching mechanism between bids and asks and the feasibility conditions used during matching.
+- Feasibility conditions (informal):
+  1) Price compatibility: bid price is greater than or equal to ask price.
+  2) Quantity feasibility: there is remaining quantity on both sides so a trade quantity can be executed.
+
+A.2 Positioning of MUDA among auction protocols
+- Figure file: Fig1_2_MUDA_Comparison.png
+- What it illustrates: MUDA as a multi-unit double auction executed in batch mode.
+
+A.3 MUDA phase structure
+- Figure file: Fig1_3_MUDA_Phases.png
+- What it illustrates: the high-level phase progression used in the deterministic execution model (pre-matching, matching/settlement, post-matching/finalization).
+
+
+APPENDIX B — Rocq formalization and verification artifacts (Where are the Rocq codes?)
+
+Purpose
+This appendix explains where the Rocq source code is located, what it contains, and how it connects to the thesis claims.
+
+B.1 Where the Rocq source code is located
+The Rocq code is included with the project repository. The mechanized development consists of the Rocq source files (the files ending in .v) in these folders:
+
+- MUDA/        MUDA operational model (types, state, sorting, matching, clearing price, transitions, atomic predicates)
+- LTL/         Linear Temporal Logic syntax and semantic interpretation over infinite traces
+- Fairness/    Interpretation of atoms over MUDA states, fairness formulas, and mechanized proofs
+- Example/     Concrete executable scenario(s) and instantiation proofs (Scenario 1)
+
+In addition, the root of the repository contains build and checking scripts (e.g., build.sh and check.sh) and the project configuration (_CoqProject).
+
+Note on generated documentation
+The html/ folder contains generated browsing documentation (coqdoc output). These HTML files are not the primary source; the primary source is the .v files listed above.
+
+Suggested reading order (quick navigation)
+If the goal is to see "where the code is" and "what is proved" quickly, the fastest path through the development is:
+
+1) Start from the concrete example and the end-to-end claims
+- Example/Scenario1.v (defines an initial market instance, runs execute-based checks, and proves the fairness formulas for that scenario)
+
+2) Then open the three fairness theorems (what is proved, in general)
+- Fairness/PriorityFairness.v
+- Fairness/QuantityFairness.v
+- Fairness/PriceFairness.v
+
+3) Then open the bridge layer (how MUDA states become an LTL trace)
+- Fairness/Interpretation.v (mu_trace and atom interpretation)
+
+4) Finally, drill down into the operational model and the state predicates
+- MUDA/Transitions.v (step and execute)
+- MUDA/State.v (state structure and derived quantities such as residuals)
+- MUDA/Atoms.v (the atomic state predicates used by the fairness formulas)
+- LTL/Syntax.v and LTL/Semantics.v (formula language and satisfaction relation satisfies, written σ, i ⊨ φ)
+
+B.2 What is mechanized in this repository (scope)
+Based on the current project contents, the mechanized results in this repository cover:
+
+1) A deterministic MUDA state-transition model
+- A concrete State record and derived quantities (residuals computed from the match record)
+- A deterministic step function and finite execution by iteration
+- A coinductive infinite trace obtained by repeatedly applying step; the final phase stutters (the transition function becomes id), so the trace is infinite
+
+2) LTL syntax and semantics needed for fairness verification
+- The syntax of formulas and their semantic evaluation over infinite traces
+
+3) Three fairness properties and their proofs
+- Priority fairness
+- Quantity fairness
+- Uniform price fairness
+
+Note on LTL meta-theory (soundness/completeness)
+This repository mechanizes the LTL *syntax* and *trace semantics* needed to evaluate fairness formulas over MUDA traces. It does not mechanize a standalone LTL proof system (no derivability judgment or inference rules), and therefore it does not include mechanized soundness/completeness proofs. Where the thesis discusses such meta-theory, it is cited from the literature rather than re-proved in this development.
+
+B.3 Project structure (by folder and file)
+
+MUDA operational model (folder: MUDA/)
+- Types.v          Core types for bids, asks, identifiers, quantities, prices, and phases
+- State.v          MUDA state and derived computations (matches, residuals, allocations)
+- Sorting.v        Deterministic sorting/priority orderings used by the protocol
+- Matching.v       Deterministic matching mechanism (greedy matching) producing match records
+- ClearingPrice.v  Deterministic clearing price computation and price rule checks
+- Transitions.v    Deterministic transition function (step), phase progression, and execute (iteration)
+- Atoms.v          Atomic state predicates used by the LTL layer (e.g., allocation consistency, priority-step correctness, clearing-price conditions)
+
+LTL foundation (folder: LTL/)
+- Syntax.v         LTL formula syntax (including X, F, G)
+- Semantics.v      Satisfaction relation for formulas over infinite traces
+
+Fairness properties and proofs (folder: Fairness/)
+- Interpretation.v     Bridges MUDA states to LTL: atom interpretation and the infinite trace construction (mu_trace)
+- PriorityFairness.v   Priority fairness formula and proof for traces from initial states
+- QuantityFairness.v   Quantity fairness formula and proof for traces from initial states
+- PriceFairness.v      Uniform price fairness formula and proof for traces from initial states
+
+Executable scenario(s) (folder: Example/)
+- Scenario1.v          Concrete initial market instance, execute-based trace checks, and scenario-level proofs of the fairness formulas
+
+B.4 Key entry points per file (main definitions and results)
+This section lists the main entry points per file. Each file lists (1) the core definitions/results to read first and (2) other notable helpers that support the proofs.
+
+MUDA/Types.v (core market objects)
+Core entry points
+- AgentType, Agent: buyer/seller tagging and agent identity
+- Bid, Ask: orders with price, quantity, and time information
+- Match: recorded trades produced by matching
+Other notable helpers
+- bid_eq_dec, ask_eq_dec, match_eq_dec: decidable equality helpers used by executable computations
+
+MUDA/Eqb.v (executable equality interface)
+Core entry points
+- Eqb: typeclass for boolean equality
+- Notation x =? y: boolean equality operator
+Other notable helpers
+- EqbSpec: specification linking eqb to propositional equality
+- nat_eqb and nat_eqb_spec: instance and correctness proof for nat equality
+
+MUDA/State.v (states and derived quantities)
+Core entry points
+- Phase: protocol phases (the discrete control state)
+- State: the MUDA state record (bids, asks, matches, clearing price, phase)
+- initial_state: constructs the initial state from bid/ask lists
+- allocated_bid, allocated_ask: total matched quantity for a given bid/ask in a match list
+- residual_bid, residual_ask: remaining quantity after accounting for matches
+- allocOK: allocation consistency predicate used by quantity fairness
+Other notable helpers
+- feasible_pair / feasible / matched: feasibility and match-record predicates
+- residualB / residualS: residual quantities lifted to a State
+
+MUDA/Sorting.v (priority order and sorting)
+Core entry points
+- prioB, prioS: primitive buyer/seller priority relations
+- sort_bids, sort_asks: deterministic sorting procedures
+- do_sorting: state-level sorting step used by the transition system
+Other notable helpers
+- bid_priority, ask_priority: derived priority relations used in proofs
+- bid_priorityb, ask_priorityb: executable priority comparisons
+
+MUDA/Matching.v (greedy matching)
+Core entry points
+- is_feasible, feasible: feasibility check (boolean and Prop forms)
+- best_feasible_ask: selects the best feasible ask for a given bid
+- find_feasible: finds the next feasible bid/ask pair under the priority order
+- create_match: constructs a Match record for a selected feasible pair
+- match_step: performs one matching step at the state level
+Other notable helpers
+- allocOK_after_match: preservation lemma supporting quantity fairness
+- best_feasible_ask_spec and find_feasible_spec: correctness statements for the matching selectors
+
+MUDA/ClearingPrice.v (clearing price computation)
+Core entry points
+- determine_clearing_price: computes the clearing price as an option
+- do_clearing_price: updates the state with the computed clearing price
+- clearing_price_bounds: main lemma relating the computed price to bounds conditions
+Other notable helpers
+- marginal_pair: selects a boundary pair used for price-bounds reasoning
+
+MUDA/Transitions.v (deterministic STS)
+Core entry points
+- step: deterministic one-step transition of the protocol
+- execute: finite execution by iterating step for a given fuel
+Other notable helpers
+- finish_matching: helper used at the end of the matching phase
+- wf_state_step_preservation and wf_state_execute_n: key preservation lemmas across steps
+
+MUDA/Atoms.v (atomic state predicates used by LTL)
+Core entry points
+- allocOK_prop: LTL atom for allocation consistency
+- has_clearing_price_prop: LTL atom indicating a clearing price can be determined
+- bounds_cstar_prop: LTL atom for clearing-price bounds
+- price_rule_prop: LTL atom for the uniform pricing rule
+- priorityB_step_ok_prop, priorityS_step_ok_prop: LTL atoms capturing priority correctness during matching
+
+LTL/Syntax.v (formula language)
+Core entry points
+- predicate: the type of atomic proposition identifiers
+- LTL_formula: inductive definition of LTL formulas (including X, F, G)
+
+LTL/Semantics.v (formula interpretation)
+Core entry points
+- trace: coinductive type of infinite traces of states
+- trace_at: state at time i on a trace
+- satisfies: satisfaction relation (trace, time, formula)
+Other notable helpers
+- models and valid: convenience wrappers (satisfaction at time 0, validity over all traces)
+
+Fairness/Interpretation.v (bridge: MUDA -> LTL)
+Core entry points
+- interp_atom: interpretation of each predicate as a state property
+- mu_trace: infinite trace generated by repeatedly applying step to a MUDA state
+- mu_trace_atom_at_execute: connects trace evaluation at time i with execute i
+Other notable helpers
+- p_allocOK, p_has_cprice, p_bounds_cstar, p_price_rule, p_prioB_step, p_prioS_step: predicate identifiers for the main atoms
+- p_phase and nth_phase: phase predicates and indexing
+
+Fairness/PriorityFairness.v (priority fairness)
+Core entry points
+- priorityOK: LTL fairness formula for priority correctness
+- priority_fairness_LTL_initial: main theorem (priority fairness holds from all initial states)
+Other notable helpers
+- priorityB_step_ok_global and priorityS_step_ok_global: key invariants over step
+- mu_trace_satisfies_prioB_initial and mu_trace_satisfies_prioS_initial: initial-state satisfaction lemmas
+
+Fairness/QuantityFairness.v (quantity fairness)
+Core entry points
+- quantityOK: LTL fairness formula (allocation consistency invariant)
+- quantity_fairness_LTL_initial: main theorem (quantity fairness holds from all initial states)
+Other notable helpers
+- allocOK_preserved_n: preservation of allocOK over execute n
+- mu_trace_satisfies_allocOK_initial: initial-state satisfaction lemma
+
+Fairness/PriceFairness.v (uniform price fairness)
+Core entry points
+- priceOK: LTL fairness formula relating clearing-price existence to bounds and price rule
+- uniform_price_fairness_LTL_initial: main theorem (uniform price fairness holds from all initial states)
+Other notable helpers
+- bounds_cstar_from_wf and bounds_cstar_preserved_n: bounds lemmas used in the proof
+- price_rule_fairness_LTL_initial: supporting lemma used to establish priceOK
+
+Example/Scenario1.v (concrete scenario and end-to-end checks)
+Core entry points
+- st0: concrete initial state for Scenario 1
+- run_s1: the scenario trace σ = mu_trace st0
+- Scenario1_AllFairness: scenario-level end-to-end satisfaction of the combined fairness formula
+Other notable helpers
+- scenario1_fairness: combined fairness formula (priorityOK and quantityOK and priceOK)
+- Scenario1_Priority / Scenario1_Quantity / Scenario1_UniformPrice: individual fairness proofs
+- Scenario1_Matches_After_Round1/2/3: concrete checks about the match list after execute
+- Scenario1_ClearingPrice_Is_8 and Scenario1_Final_Phase_And_Price: concrete checks about clearing price and final phase
+
+B.5 Mapping from thesis sections to Rocq artifacts (reader-friendly)
+
+Chapter 3 (Deterministic STS for MUDA)
+- MUDA/Types.v, MUDA/State.v, MUDA/Sorting.v, MUDA/Matching.v, MUDA/ClearingPrice.v, MUDA/Transitions.v
+
+Chapter 4 (LTL: formulas interpreted over traces)
+- LTL/Syntax.v, LTL/Semantics.v
+- Fairness/Interpretation.v (connects MUDA traces to LTL satisfaction)
+
+Chapter 4/5 (Fairness specifications and mechanized proofs)
+- Fairness/PriorityFairness.v
+- Fairness/QuantityFairness.v
+- Fairness/PriceFairness.v
+- Example/Scenario1.v (concrete instantiation)
+
+B.6 Verification and reproducibility checks
+The project provides scripts to compile and to enforce that proofs are fully closed (no unfinished proofs). Typical commands used for validation are:
+
+- ./build.sh    build all modules
+- ./check.sh    check that there are no admitted lemmas in the development
+
+These scripts compile the .v sources and provide the reproducibility basis for the mechanized fairness results described in Chapters 3–5.

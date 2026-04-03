@@ -1,0 +1,205 @@
+CHAPTER 3
+
+METHODOLOGY
+
+This chapter specifies the operational semantics of the MUDA protocol as a deterministic state transition system (STS) [22], [26], as per the description in [10], [20]. Unlike the single-unit auction, in the MUDA protocol, the agents can trade multiple units at a time. This means we need to account for the number of units left after each trade. Also, the matching is done in batches, and the single uniform clearing price is calculated after the termination of the matching. Further, the priority rules are followed while choosing the pair of buyers and sellers when there are multiple options available. All definitions and notation used in the rest of the chapters are introduced in this chapter.
+
+3.1 Object and State Representation
+
+This section introduces orders, the match record, derived quantities such as allocation and residuals, and the matching rule.
+
+3.1.1 Order Components
+
+Definition 1 (Order).
+An order is a submission by an agent to trade units of a good. Each order consists of a unit price, an initial unit quantity, and a submission time.
+
+Definition 2 (Agent).
+An agent can be either a buyer or a seller. Buyers submit bid orders and sellers submit ask orders. A bid order is represented as
+b_i = (p_i, q_i^0, t_i)
+and an ask order is represented as
+s_j = (a_j, q_j^0, t_j),
+where p_i is the bid unit price, a_j is the ask unit price, q_i^0 and q_j^0 are initial unit quantities, and t_i and t_j are submission times.
+
+Notation.
+We use function-style projections p(b), q0(b), t(b) to denote the bid price, initial quantity, and time to submit the bid, and function-style projections a(s), q0(s), t(s) to denote the ask price, initial quantity, and time to submit the ask.
+
+Remark (Implementation bookkeeping).
+For the mechanized model, "agent" information, i.e., whether it is a buyer or a seller, is stored separately from orders, and this information is included for each bid and ask. This does not affect the meaning of the above representations for orders.
+
+Definition 3 (Order Immutability).
+The components of the order will not be altered after the submission of the order. The transition function will not change the price, the initial quantity of the order, or the time at which the order was submitted.
+
+3.1.2 Matching Components
+
+Definition 4 (Match Record).
+The match record is denoted by the function M(x), which is a finite sequence of executed trades. Each element in the sequence is of the form (b, s, q), where b is the buyer, s is the seller, and q is the quantity of the executed trade.
+For tracking purposes, we can use the match record to determine the amount of each order that remains by defining allocation and residual quantities.
+
+Definition 5 (Residual Unit Quantity).
+Given the set B of submitted bids and the set S of submitted asks, we define the allocated quantity for an agent as the total quantity allocated in the trades in M(x):
+allocB: B x (finite sequence over B x S x N) → N, and
+allocS: S x (finite sequence over B x S x N) → N.
+
+allocB(b, M(x)) = Σ{ q | (b', s, q) ∈ M(x) and b = b'}, and
+allocS(s, M(x)) = Σ{ q | (b, s', q) ∈ M(x) and s = s'}.
+
+Finally, we define the residual unit quantity as:
+residB(b, x) = q0(b) - allocB(b, M(x)), and
+residS(s, x) = q0(s) - allocS(s, M(x)).
+
+In the mechanized development, the transition rules ensure that bids allocation allocB(b, M(x)) <= q0(b) and asks allocation allocS(s, M(x)) <= q0(s). As a result, all residual quantities remain non-negative.
+
+Remark (State vs. derived quantities).
+In the mechanized development presented in this thesis, the residual quantities are not state components. They are derived from the initial quantities and the match record M(x), by computing the allocated quantities from the match record and subtracting the allocated quantities from the initial quantities.
+
+Link to implementation.
+The Rocq development provides executable definitions of the allocation functions over the match record and the computation of the residuals as the initial quantities minus the allocated quantities. The allocated quantities allocB(b, M(x)) and allocS(s, M(x)) in the Rocq development correspond to the definitions `allocated_bid b (matches x)` and `allocated_ask s (matches x)`, respectively. The computation of the residual quantities in the Rocq development is done as `residual_bid b (matches x)` and `residual_ask s (matches x)`, respectively.
+
+Definition 6 (Feasibility).
+A buyer b_i and a seller s_j are said to be feasible in a state x if the following conditions are satisfied:
+Agents Priority p(b_i) >= a(s_j),
+Residual Unit Quantity of Buyer residB(b_i, x) > 0, and
+Residual Unit Quantity of Seller residS(s_j, x) > 0.
+
+
+Definition 7 (Priority Ordering).
+An agent is said to be ordered by priority as follows. 
+For retrieving the list of buyers b_i and b_k,
+the selected buyers will return b_i >_B b_k if one condition is met p(b_i) > p(b_k),
+or if two conditions are met p(b_i) = p(b_k) and t(b_i) < t(b_k).
+For retrieving the list of sellers s_j and s_l,
+the selected sellers will return s_j >_S s_l if one condition is met a(s_j) < a(s_l),
+or if two conditions are met a(s_j) = a(s_l) and t(s_j) < t(s_l).
+
+Remark (Deterministic tie-breaking).
+In the mechanized model, the tie-breaking is done based on a unique order identifier. This refinement maintains the economic priority and makes the order a total and deterministic order.
+The matching step follows a greedy rules in Definition 8 by choosing the highest priority feasible buyer-seller pair.
+
+Definition 8 (Greedy Matching Rule).
+Given state x in Phase P3. If at least one feasible pair exists, then the following steps are taken.
+Choose the buyer b_star from all the buyers who can be paired with a seller such that the pair is feasible. Then choose the seller s_star from all the sellers such that the pair formed by b_star and s_star is feasible. Define q = min{residB(b_star, x), residS(s_star, x)}.
+Next state x_next is determined by adding the new trade to the match record. The submitted orders remain the same.
+Next, the residual quantities in x_next are determined from the new match record M(x_next) by Definition 5. Specifically,
+residB(b_star, x_next) = residB(b_star, x) - q, and
+residS(s_star, x_next) = residS(s_star, x) - q.
+If no feasible pair exists, then the matching stops.
+
+Definition 9 (Traded Unit Quantity).
+The unit quantity of the trade is the minimum of the residual unit quantities of the buyer and the seller in state x. That is, q = min(residB(b_i, x), residS(s_j, x)).
+
+3.1.3 Settlement Components
+
+Definition 10 (Marginal Matched Pair).
+Let M_final be the match record when matching terminates. If M_final is non-empty, then the marginal matched pair is simply the last element in M_final. That is, if
+M_final = <(b_1, s_1, q_1), ..., (b_k, s_k, q_k)>,
+then the marginal matched pair is (b_k, s_k).
+If M_final is empty, then the marginal matched pair is undefined.
+In the operational semantics, M_final is defined as M(x_P4), where x_P4 is the state after matching terminates.
+
+Definition 11 (Clearing Price).
+After termination of the matching, let x_P4 denote the state immediately after termination of the matching. Then, the clearing price p_star, if it exists, is obtained from the matching record M(x_P4) by applying the deterministic MUDA pricing rule in Definition 10. Let (b_star,s_star) denote the marginal pair of the matching record.
+The clearing price p_star is defined as:
+ResidS(s_star,x_P4) = 0 => p_star = p(b_star).
+ResidS(s_star,x_P4) != 0 => p_star = a(s_star).
+The price applies globally for all trade.
+
+Remark (No-trade case).
+When the matching record is empty, i.e., no trades were made, the marginal pair is undefined and the clearing price is not computed.
+
+Link to Chapter 4 predicates.
+The Chapter 4 atomic predicates are defined in terms of the Chapter 3 state components and transition behavior. In particular, we have the following items:
+The predicate matched(b, s, q, x) is true if and only if (b, s, q) is an entry in the match record M(x).
+The predicate feasible(b, s, x) is defined by Definition 6.
+The selection behavior in Phase P3 is the deterministic choice in the matching step (Definition 8).
+The selection behavior is exposed in the mechanized development through temporal logic predicates on the matching choice in terms of the state. These predicates assert that no higher-priority feasible buyer or seller is skipped in the matching step.
+
+3.2 Execution and Deterministic State Transition Function
+
+The MUDA protocol is modeled as a deterministic state transition system. Each state contains information regarding the currently placed orders, match record, and phase.
+
+The state transition function defines the way in which the system progresses from one state to another according to the rule of the phase in which it is currently in.
+
+The state transition function step maps each state into its image in the next state. Let's denote the state by x. Then step(x) will depend on the phase in which it currently is and the rule of its phase. For each state x, there is a unique state y for which step(x) = y.
+
+An execution is defined as a sequence of states starting from the initial state x0 and obtained by applying the state transition function step repeatedly:
+x₀ = x0,
+for all i >= 0, xᵢ₊₁ = step(xᵢ).
+
+The execution is uniquely defined for a deterministic state transition system.
+
+A state is called terminal if phase(x) = P7. For each terminal state x, step(x) = x. This way, an infinite execution can always be constructed.
+
+When the state is in phase P3 and there is no feasible pair, the state transition function step advances the state into phase P4, keeping the submitted orders and match record unchanged.
+
+3.3 MUDA Protocol
+
+The protocol has seven phases from P1 through P7. The phase is used in determining the particular transition rule. Deterministic transition function step with respect to states is used for the execution.
+
+3.3.1 Pre-Match Phase
+
+P1 (Submission).
+Order positions are fixed. Residual amounts are the same as initial amounts, that is, residB(b, x) = q(b) for each b ∈ B and residS(s, x) = q(s) for each s ∈ S. Also, the match record is empty, that is, M(x) = empty. The system transitions to the next phase, which is Phase P2, that is, phase(step(x)) = P2.
+
+P2 (Sorting).
+Orders are sorted on the basis of the deterministic refinement of priorities in Definition 7. Order residual amounts and the match record are the same as before. No trade takes place. Transition to Phase P3 occurs, that is, phase(step(x)) = P3.
+
+P3 (Matching).
+The state satisifes phase(x) = P3. There is an existence of a feasible pair (b, s) where buyer b is selected from set B and seller s belongs to set S. In this situation, a trade is executed on a greedy matching rule, according to the definition presented in Definition 8. The match record is modified to find new residual quantities as per Definition 5.
+
+If no feasible pair (buyer, seller) exists, then there will be no match and thus matching process will stop leading us to Phase P4. That is, phase(step(x)) = P4.
+
+
+3.3.2 Settlement Phase
+
+P4 (Clearing Price).
+In the event of matching being completed, the protocol proceeds to Phase P4. If the clearing price p* can be calculated from the match record using Definition 9, then no transaction takes place, while the match record stays unchanged. Phase P4 shifts the protocol into Phase P5, i.e., phase(step(x))=P5.
+
+
+3.3.3 Post-Match Phase
+
+P5 (Finalization).
+The final match is characterized by M_final = M(x). There are no changes to any other state component. This transition results in the system moving to Phase P6, which is stated by phase(step(x)) = P6.
+
+P6 (Bookkeeping).
+Additional values are derived from the M_final for reporting and/or settlement purposes. The state components B, S, O, M, residuals, and p* are left unchanged. The transition leads to the system being in Phase P7, i.e., phase(step(x)) = P7.
+
+P7 (Terminal/Rejection).
+The state satisfies phase(x) = P7. Agents not contained in the match are left unmatched. There are no changes to any state component. The transition satisfies step(x) = x. The execution trace is an infinitely repeating sequence of states.
+
+3.4 Fairness Mechanism
+
+In this section, we discuss how the operational semantics ensure the fairness conditions that are formulated in temporal logic. The LTL formulas for the fairness conditions of MUDA traces are specified in Chapter 4, while the operational semantics for MUDA and its predicates are given in Chapter 3.
+
+Priority Fairness
+Priority fairness demands that no higher priority feasible agent be bypassed when matches occur.
+
+From Definitions 7 and 8, it follows that each transition made in Phase P3 chooses a highest-priority feasible buyer, then a highest-priority feasible seller who matches the chosen buyer, and notes the match in M(x). Such an implementation precisely conforms to the definition of priority fairness given in Chapter 4.
+
+
+Quantity Fairness
+In order to ensure quantity fairness, it must be the case that the total quantity for all agents does not change during execution.
+
+At each stage of Phase P3, the following happens:
+
+The quantity exchanged q is the minimum of the buyer and seller residuals.
+The quantity residual is decreased by exactly q.
+A trade is made to the match set.
+
+No other changes will be made to these variables.
+
+From Definition 5, we have that for any bid b and any state x
+q0(b) = allocB(b, M(x)) + residB(b, x)
+and similarly, for any ask s and any state x
+q0(s) = allocS(s, M(x)) + residS(s, x)
+
+These are the state invariants that we need to define quantity fairness temporally in Chapter 4.
+
+
+Price Fairness
+Price fairness entails that all trades take place using the same clearing price.
+
+In Phase P3, no trades are executed as part of the allocation of the price. Following the execution of the match, the protocol moves to Phase P4 and allocates the one clearing price using the pricing transition function as per Definition 11 (when the clearing price is set). The post-pricing state will be found in Phase P5 in which the clearing price is already allocated and maintained through future phases.
+
+As such, since there will be no further trading and the clearing price does not change after pricing in any phase, the price fairness property in Chapter 4 can be expressed as an invariant for all trades in relation to the single cleared price.
+
+

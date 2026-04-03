@@ -1,0 +1,66 @@
+CHAPTER 6
+
+DISCUSSION
+
+6.1 Analysis
+
+This chapter analyzes the Scenario 1 execution from Chapter 5 and relates it to the fairness properties defined in Chapter 4. No new execution scenarios are introduced. The discussion interprets the execution using the deterministic operational semantics (Chapter 3) and the LTL semantics (Chapter 4).
+
+Let x0 be the initial state for Scenario 1 (Coq identifier: st0). Let σ = μ(x0) denote the induced infinite execution trace. In the mechanization, this trace is defined as mu_trace st0 (also named run_s1 in Scenario1.v).
+
+This is an infinite trace built by repeatedly applying the deterministic transition function δ (Coq: step). The trace stutters after reaching the terminal phase because δ(x) = x once phase(x) = P7 (Coq: step s = s when phase s = P7), so the suffix is constant once P7 is reached.
+
+LTL satisfaction is evaluated using the Chapter 4 relation σ, i ⊨ φ (Coq: satisfies sigma i phi). At each time i, the valuation of atomic propositions is obtained by interpreting the current MUDA state (Coq: atoms from Atoms.v mapped by interp_atom in Interpretation.v). Note that in the mechanization, residual quantities are not stored as separate state components; they are computed from the match record (Coq: allocated_bid/allocated_ask and residual_bid/residual_ask), so the atom evaluations for quantity and price fairness are defined directly from the match list and the deterministic pricing function.
+
+Crucially, the fairness conclusions in Chapter 5 are not only "observed" from a table: Scenario1.v contains mechanized proofs that the trace σ satisfies the three fairness formulas at time 0:
+- σ ⊨ priorityOK (Coq lemma: Scenario1_Priority : satisfies sigma 0 priorityOK)
+- σ ⊨ quantityOK (Coq lemma: Scenario1_Quantity : satisfies sigma 0 quantityOK)
+- σ ⊨ priceOK (Coq lemma: Scenario1_UniformPrice : satisfies sigma 0 priceOK)
+
+6.2 Priority Fairness
+
+Priority fairness in this project is expressed as an LTL invariant over two state predicates (buyer-side and seller-side priority). Intuitively, during matching (Phase P3), the greedy selector must not skip a higher-priority feasible agent in favor of a lower-priority feasible one.
+
+In the mechanization, the priority atoms are defined as state predicates guarded by Phase P3 (schematically in Coq: phase s = P3 -> ...). This matches the intended meaning: priority constraints matter exactly when matching decisions are made; outside P3 the predicates hold trivially because the antecedent is false.
+
+Therefore, priority fairness holds on the entire trace because the mechanized model proves σ ⊨ priorityOK (Coq: satisfies sigma 0 priorityOK).
+
+Moreover, priorityOK is an "always" property (it is built from G(...) over the priority atoms), so it enforces the priority constraint at every time index along σ.
+
+6.3 Quantity Fairness
+
+Quantity fairness requires conservation of quantity for each order: the initial quantity equals (allocated quantity in matches) plus (residual quantity).
+
+In the mechanization, this is captured by the atom allocOK_prop, which states for every bid and ask that:
+
+initial_quantity = allocated + residual
+
+where allocated_bid and allocated_ask are computed from the match record and residual_bid and residual_ask are defined as the remaining quantities implied by that allocation. Since residuals are computed from matches (not separately mutated), this property is naturally stable across the execution.
+
+The mechanized model proves σ ⊨ quantityOK (Coq: satisfies sigma 0 quantityOK).
+
+Moreover, quantityOK is an invariant (G allocOK_prop), so the conservation equation holds at every state along the trace.
+
+6.4 Price Fairness
+
+Price fairness (uniform price) is encoded so that price obligations are required only when a clearing price is defined. In this project, "has a clearing price" is not the same as "the state field clearing_price is set": the atom `has_clearing_price_prop` is defined using the pricing function `determine_clearing_price`, which depends on the existence of a marginal pair (i.e., a non-empty match record).
+
+As a result:
+- Before any match exists, the price condition is not required (the guard is false).
+- Once the match record is non-empty, the guard becomes true and the formula enforces:
+  (1) the clearing price is within the marginal ask/bid bounds, and
+  (2) the clearing price follows the deterministic rule used by the mechanized model.
+
+Separately, the state field `clearing_price` is set by the P4 pricing transition and appears in the subsequent Phase P5 state in Scenario 1 (as validated in Chapter 5). After that, later phases preserve the field unchanged.
+
+The mechanized model proves σ ⊨ priceOK (Coq: satisfies sigma 0 priceOK).
+
+Moreover, priceOK is an invariant of the form G(has_cprice -> (bounds_cstar AND price_rule)), so the price constraints hold at every time index where the guard applies.
+
+6.5 Integration with LTL Semantics
+
+The trace σ = μ(x0) provides the structure for evaluating LTL formulas: each time index i corresponds to the MUDA state reached after i deterministic steps from x0, and atomic predicates are evaluated from that state via the fixed interpretation function.
+
+Thus, Chapter 5 establishes fairness in the formal sense: for each fairness property used in this project (priorityOK, quantityOK, priceOK), Scenario1.v contains a proof that σ, 0 ⊨ priorityOK, σ, 0 ⊨ quantityOK, and σ, 0 ⊨ priceOK on the infinite trace induced by the deterministic STS. Because each property is formulated as an invariant (using G internally), these proofs entail that the corresponding condition holds throughout the execution trace, not just at a few sampled states.
+
+Since each property is formulated as an invariant using G, satisfaction at time 0 implies that the property holds at every state along the execution trace.

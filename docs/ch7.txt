@@ -1,0 +1,20 @@
+CHAPTER 7
+CONCLUSION
+
+This thesis mechanizes the MUDA protocol as a deterministic state-transition system (STS) with seven phases and verifies fairness properties using Linear Temporal Logic (LTL) over the induced infinite executions. The STS transition is a total function δ : State → State (implemented in the mechanization as step : State -> State), the finite execution is given by iteration x_n = δ^n(x0) (implemented as execute n st0), and the infinite trace used for LTL is the induced trace σ = μ(x0) (implemented as mu_trace st0) (see Transitions.v and Interpretation.v). Terminal stuttering is obtained internally because δ(x) = x once the terminal phase is reached (Phase P7).
+
+The verification is carried out at the execution level: fairness is stated and proven as temporal properties over the entire state sequence produced by iterating step, rather than as isolated claims about a single matching decision. In this mechanization, the match record is the primary evolving artifact; residual quantities are not stored as mutable state but are computed from the match record (via `allocated_bid`/`allocated_ask` and `residual_bid`/`residual_ask`). This design ensures that accounting-style properties (quantity fairness) are stated as constructive, mechanically checkable state predicates.
+
+Scenario 1 (see Scenario1.v) validates that the executable protocol behavior matches the intended example outcomes: the expected match sequence is obtained, matching terminates after the expected number of rounds, and the clearing price computed by the pricing rule appears in the post-pricing state. Beyond these concrete checks, the core result is the mechanized verification of the following three fairness properties for MUDA traces generated from initial states:
+
+Priority Fairness: during the matching phase (P3), the deterministic greedy selector does not skip higher-priority feasible participants (see PriorityFairness.v).
+Quantity Fairness: for every order, initial quantity equals allocated quantity plus residual quantity at every point in the execution (see QuantityFairness.v).
+Uniform Price Fairness: whenever a clearing price is defined, it follows the protocol’s deterministic rule and satisfies the marginal-pair bounds (see PriceFairness.v).
+
+These properties are expressed using the LTL operators provided by the development (notably G/Always, together with propositional connectives and implication). In this repo version, the three fairness specifications are invariants, so G is sufficient for their formulation. All theorems in the verified core are mechanically checked in Rocq, and the project checks enforce that no proofs are left unfinished (no admitted lemmas).
+
+Future work
+
+This repository version focuses on Chapters 3–5 and on priority, quantity, and uniform price fairness. Additional economically relevant properties such as maximality, match finality, and justified rejection should be presented as future work (not as verified results here), since they are not mechanized as corresponding theorems in the current fairness layer. A natural extension is to add state predicates and LTL specifications for these properties and prove them for traces generated from initial states, reusing the existing STS and trace interpretation infrastructure.
+
+Future work may also extend the verification to temporal properties of protocol execution. These include termination, phase progression, and step-wise transition correctness. Such properties can be expressed using temporal operators such as F (eventually) and X (next), which are already provided by the LTL syntax in this development, and potentially operators such as U (until), which are not mechanized in this repository version. For example, termination can be specified as F(phase = P7), phase progression can be stated using an until-style property between phases, and step-wise correctness can be stated using X to relate consecutive states.
