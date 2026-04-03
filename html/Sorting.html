@@ -19,33 +19,6 @@
 <h1 class="libtitle">Library Sorting</h1>
 
 <div class="code">
-</div>
-
-<div class="doc">
-Chapter 3 (Methodology) — Priority Ordering + Phase P2 Sorting
-
-<div class="paragraph"> </div>
-
-  This file provides:
-<ul class="doclist">
-<li> thesis-level priority relations `prioB` / `prioS`
-
-</li>
-<li> deterministic tie-broken priority relations (`bid_priority` / `ask_priority`)
-
-</li>
-<li> an executable, deterministic sorting function used in Phase P2
-
-</li>
-</ul>
-
-<div class="paragraph"> </div>
-
-  Note: Fairness proofs do not rely on sorting correctness; the matching
-  step selects the highest-priority feasible buyer/seller directly.
-
-</div>
-<div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Arith</span> <span class="id" title="var">Bool</span>.<br/>
 <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span>.<br/>

@@ -19,62 +19,7 @@
 <h1 class="libtitle">Library QuantityFairness</h1>
 
 <div class="code">
-</div>
-
-<div class="doc">
-Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
-
-<div class="paragraph"> </div>
-
-  Quantity fairness: allocation is consistent with residual quantities.
-  Proved as a global invariant over MUDA traces.
-
-<div class="paragraph"> </div>
-
-  Chapter 4 math notation view:
-<ul class="doclist">
-<li> `matched(b, s, q)` ranges over the match record
-
-</li>
-<li> `residualB(b)` / `residualS(s)` are the remaining quantities
-
-</li>
-</ul>
-
-<div class="paragraph"> </div>
-
-  Chapter 4 quantity fairness formula (thesis notation):
-
-<div class="paragraph"> </div>
-
-    sum_matches(b, x) = Σ{ q | matched(b, s, q, x) }
-
-<div class="paragraph"> </div>
-
-    φ<i>qty = G(
-      initial(b) = sum_matches(b, x) + residualB(b, x)
-    )
-
-<div class="paragraph"> </div>
-
-  Mechanization note:
-<ul class="doclist">
-<li> `sum_matches` is `allocated_bid`.
-
-</li>
-<li> `residualB` is `residual_bid` (computed as `initial - allocated`).
-
-</li>
-<li> The trace-level atom `p_allocOK` is interpreted as this equality for all
-    bids/asks, and `φ<i>qty := G(Atom p_allocOK)`.
-
-</li>
-</ul>
-
-</div>
-<div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span> <span class="id" title="var">Lia</span>.<br/>
-<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>      <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span>     <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Matching</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span>. 

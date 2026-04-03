@@ -1,13 +1,3 @@
-(** Chapter 3 (Methodology) — Priority Ordering + Phase P2 Sorting
-
-  This file provides:
-  - thesis-level priority relations `prioB` / `prioS`
-  - deterministic tie-broken priority relations (`bid_priority` / `ask_priority`)
-  - an executable, deterministic sorting function used in Phase P2
-
-  Note: Fairness proofs do not rely on sorting correctness; the matching
-  step selects the highest-priority feasible buyer/seller directly.
-*)
 From Stdlib Require Import List Arith Bool.
 Import ListNotations.
 From MUDA Require Import Types State.

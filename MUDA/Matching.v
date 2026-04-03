@@ -1,10 +1,3 @@
-(** Chapter 3 (Methodology) — Section 3.5.2 (Phase P3: Matching)
-
-  Executable greedy matching rule (Definition-8) based on:
-  - feasibility (Definition-1)
-  - traded quantity q = min(residuals) (Definition-9)
-  - match monotonicity (proved as a lemma)
-*)
 From Stdlib Require Import Arith List Bool PeanoNat Lia.
 From MUDA Require Import Eqb Types State Sorting.
 Import ListNotations.

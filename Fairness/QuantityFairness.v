@@ -1,28 +1,4 @@
-(** Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
-
-  Quantity fairness: allocation is consistent with residual quantities.
-  Proved as a global invariant over MUDA traces.
-
-  Chapter 4 math notation view:
-  - `matched(b, s, q)` ranges over the match record
-  - `residualB(b)` / `residualS(s)` are the remaining quantities
-
-  Chapter 4 quantity fairness formula (thesis notation):
-
-    sum_matches(b, x) = Σ{ q | matched(b, s, q, x) }
-
-    φ_qty = G(
-      initial(b) = sum_matches(b, x) + residualB(b, x)
-    )
-
-  Mechanization note:
-  - `sum_matches` is `allocated_bid`.
-  - `residualB` is `residual_bid` (computed as `initial - allocated`).
-  - The trace-level atom `p_allocOK` is interpreted as this equality for all
-    bids/asks, and `φ_qty := G(Atom p_allocOK)`.
-*)
 From Stdlib Require Import Arith List Lia.
-Import ListNotations.
 From LTL      Require Import Syntax Semantics.
 From MUDA     Require Import Types State Matching Transitions Atoms.
 From Fairness Require Import Interpretation.  (* for p_allocOK and mu_trace *)

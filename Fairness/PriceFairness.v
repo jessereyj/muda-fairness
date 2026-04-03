@@ -1,27 +1,3 @@
-(** Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
-
-  Price fairness: the clearing price (when defined) follows the rule and is
-  bounded by the marginal pair.
-
-  Chapter 4 math notation view:
-  whenever `matched(b, s, q)` holds in a state, trades are evaluated against the
-  clearing price `price(x) = c` produced by MUDA.
-
-  Chapter 4 price fairness formula (thesis notation):
-
-    φ_price = G(
-      matched(b, s, q, x) -> price(x) = p⋆(x)
-    )
-
-  Mechanization note:
-  - The development exposes a MUDA-level price fairness package via atoms:
-      `p_has_cprice`   : a clearing price exists
-      `p_bounds_cstar` : the clearing price is bounded by the marginal pair
-      `p_price_rule`   : the clearing price follows the protocol rule
-    and sets `φ_price := G(p_has_cprice -> (p_bounds_cstar ∧ p_price_rule))`.
-  - This matches the Chapter 4 intent that the observable clearing price in the
-    state is the unique price used for all matched trades.
-*)
 From Stdlib Require Import Arith List.
 From LTL  Require Import Syntax Semantics.
 From MUDA Require Import Types State Matching ClearingPrice Transitions Atoms.

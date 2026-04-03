@@ -108,28 +108,28 @@ Chapter 5 — Scenario 1 (from the thesis excerpt)
 &nbsp;&nbsp;<span class="id" title="var">priorityOK</span> ∧ (<span class="id" title="var">quantityOK</span> ∧ <span class="id" title="var">priceOK</span>).<br/>
 
 <br/>
-<span class="id" title="keyword">Example</span> <span class="id" title="var">Scenario1_Priority</span> : <span class="id" title="var">satisfies</span> <span class="id" title="var">run_s1</span> 0 <span class="id" title="var">priorityOK</span>.<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">Scenario1_Priority</span> : <span class="id" title="var">run_s1</span> ⊨ <span class="id" title="var">priorityOK</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run_s1</span>, <span class="id" title="var">st0</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">priority_fairness_LTL_initial</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Example</span> <span class="id" title="var">Scenario1_Quantity</span> : <span class="id" title="var">satisfies</span> <span class="id" title="var">run_s1</span> 0 <span class="id" title="var">quantityOK</span>.<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">Scenario1_Quantity</span> : <span class="id" title="var">run_s1</span> ⊨ <span class="id" title="var">quantityOK</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run_s1</span>, <span class="id" title="var">st0</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">quantity_fairness_LTL_initial</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Example</span> <span class="id" title="var">Scenario1_UniformPrice</span> : <span class="id" title="var">satisfies</span> <span class="id" title="var">run_s1</span> 0 <span class="id" title="var">priceOK</span>.<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">Scenario1_UniformPrice</span> : <span class="id" title="var">run_s1</span> ⊨ <span class="id" title="var">priceOK</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run_s1</span>, <span class="id" title="var">st0</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">uniform_price_fairness_LTL_initial</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Example</span> <span class="id" title="var">Scenario1_AllFairness</span> : <span class="id" title="var">satisfies</span> <span class="id" title="var">run_s1</span> 0 <span class="id" title="var">scenario1_fairness</span>.<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">Scenario1_AllFairness</span> : <span class="id" title="var">run_s1</span> ⊨ <span class="id" title="var">scenario1_fairness</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">scenario1_fairness</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>

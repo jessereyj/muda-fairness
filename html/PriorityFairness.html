@@ -19,68 +19,6 @@
 <h1 class="libtitle">Library PriorityFairness</h1>
 
 <div class="code">
-</div>
-
-<div class="doc">
-Chapter 4 (Fairness Verification Layer)
-
-<div class="paragraph"> </div>
-
-  Priority fairness (Chapter 3 Def. 7 / Chapter 4 verification):
-<ul class="doclist">
-<li> In every matching step (Phase P3), the matcher selects the highest-priority
-    feasible buyer; then for that buyer, the highest-priority feasible seller.
-
-</li>
-</ul>
-
-<div class="paragraph"> </div>
-
-  In Chapter 4 notation, feasibility is `feasible(b, s)` (price bound + positive
-  residuals) and the selected pair is the one appended to the match record.
-
-<div class="paragraph"> </div>
-
-  This file proves the LTL property:
-    G(p_prioB_step) ∧ G(p_prioS_step)
-  constructively from the executable greedy selector in MUDA/Matching.v.
-
-<div class="paragraph"> </div>
-
-  Chapter 4 notation (as in the thesis text):
-
-<div class="paragraph"> </div>
-
-    φ<i>prio = G(
-      selected(b, s, x) -&gt;
-      ¬ ∃ b', higher_priority(b', b) ∧ feasible(b', s, x)
-    )
-
-<div class="paragraph"> </div>
-
-  Mechanization note:
-<ul class="doclist">
-<li> `selected(b,s,x)` is represented via the deterministic greedy selection
-    computed in Phase P3 (see `find_feasible` / `best_feasible_ask`).
-
-</li>
-<li> `higher_priority` and `feasible` use the Chapter 3 orders and residuals.
-
-</li>
-<li> We expose this as two step-level atomic propositions:
-      `p_prioB_step` (no higher-priority feasible buyer skipped)
-      `p_prioS_step` (no higher-priority feasible seller skipped)
-    and set `φ<i>prio := G(p_prioB_step) ∧ G(p_prioS_step)`.
-
-</li>
-</ul>
-
-<div class="paragraph"> </div>
-
-  No unproven postulates and no admitted proofs.
-
-</div>
-<div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">Arith</span> <span class="id" title="var">Lia</span>.<br/>
 <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
 

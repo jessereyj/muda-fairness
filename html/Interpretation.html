@@ -19,68 +19,7 @@
 <h1 class="libtitle">Library Interpretation</h1>
 
 <div class="code">
-</div>
-
-<div class="doc">
-Chapter 4 (MUDA trace interpretation layer)
-
-<div class="paragraph"> </div>
-
-    This file connects the deterministic MUDA execution from Chapter 3
-    with the LTL trace semantics from Chapter 4.
-
-<div class="paragraph"> </div>
-
-<ul class="doclist">
-<li> It fixes the numbering of MUDA-specific atomic predicates p*.
-
-</li>
-<li> It defines interp_atom : State -&gt; predicate -&gt; Prop, the valuation <span class="inlinecode">[<span class="id" title="var">x</span>]</span>.
-
-</li>
-<li> It defines the infinite trace mu_trace by iterating step.
-
-</li>
-<li> Terminal stuttering is obtained because step s = s when phase s = P7.
-
-</li>
-</ul>
-
-<div class="paragraph"> </div>
-
-    Thesis notation:
-      x0, x1, x2, ...   where xi+1 = δ(xi)
-      σ                 the induced infinite trace
-      <span class="inlinecode">[<span class="id" title="var">x</span>]</span>              the valuation at state x
-
-<div class="paragraph"> </div>
-
-    In this development:
-<ul class="doclist">
-<li> mu_trace x0 is σ
-
-</li>
-<li> trace_at (mu_trace x0) i is the valuation at time i
-
-</li>
-<li> interp_atom x is <span class="inlinecode">[<span class="id" title="var">x</span>]</span>
-
-</li>
-</ul>
-
-<div class="paragraph"> </div>
-
-    The fairness layer evaluates named state predicates through interp_atom:
-      p_allocOK
-      p_prioB_step
-      p_prioS_step
-      p_has_cprice
-      p_bounds_cstar
-      p_price_rule
-
-</div>
-<div class="code">
-<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">PeanoNat</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Bool</span> <span class="id" title="var">PeanoNat</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">State</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
 
@@ -125,7 +64,16 @@ Chapter 4 (MUDA trace interpretation layer)
 
 <br/>
 <span class="id" title="keyword">CoFixpoint</span> <span class="id" title="var">mu_trace</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">trace</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">Trace</span> (<span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span>) (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">step</span> <span class="id" title="var">s</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="var">Trace</span> (<span class="id" title="var">interp_atom</span> <span class="id" title="var">s</span>) (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">δ</span> <span class="id" title="var">s</span>)).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Thesis-level alias: μ(x0) denotes the induced infinite trace. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">μ</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">trace</span> := <span class="id" title="var">mu_trace</span> <span class="id" title="var">s</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_trace_atom_at_execute</span> :<br/>

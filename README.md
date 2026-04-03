@@ -95,9 +95,9 @@ the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 
 1) **How can MUDA execution be formalized as a deterministic STS?**
 - State space: `State` in [MUDA/State.v](MUDA/State.v)
-- Deterministic transition function: `step : State -> State` in [MUDA/Transitions.v](MUDA/Transitions.v)
-- Finite execution: `execute n s` (iterate `step`) in [MUDA/Transitions.v](MUDA/Transitions.v)
-- Infinite trace for LTL: `mu_trace` (coinductively iterating `step`) in [Fairness/Interpretation.v](Fairness/Interpretation.v)
+- Deterministic transition function: `δ : State -> State` in [MUDA/Transitions.v](MUDA/Transitions.v)
+- Finite execution: `execute n s` (iterate `δ`) in [MUDA/Transitions.v](MUDA/Transitions.v)
+- Infinite trace for LTL: `mu_trace` (coinductively iterating `δ`) in [Fairness/Interpretation.v](Fairness/Interpretation.v)
 
 2) **Which temporal operators are sufficient to express fairness properties over MUDA traces?**
 - The development uses the Chapter 4 core temporal operators `X`, `F`, `G` (see [LTL/Syntax.v](LTL/Syntax.v) and [LTL/Semantics.v](LTL/Semantics.v)).

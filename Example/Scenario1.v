@@ -57,25 +57,25 @@ Definition run_s1 : trace := mu_trace st0.
 Definition scenario1_fairness : LTL_formula :=
   priorityOK ∧ (quantityOK ∧ priceOK).
 
-Example Scenario1_Priority : satisfies run_s1 0 priorityOK.
+Example Scenario1_Priority : run_s1 ⊨ priorityOK.
 Proof.
   unfold run_s1, st0.
   apply priority_fairness_LTL_initial.
 Qed.
 
-Example Scenario1_Quantity : satisfies run_s1 0 quantityOK.
+Example Scenario1_Quantity : run_s1 ⊨ quantityOK.
 Proof.
   unfold run_s1, st0.
   apply quantity_fairness_LTL_initial.
 Qed.
 
-Example Scenario1_UniformPrice : satisfies run_s1 0 priceOK.
+Example Scenario1_UniformPrice : run_s1 ⊨ priceOK.
 Proof.
   unfold run_s1, st0.
   apply uniform_price_fairness_LTL_initial.
 Qed.
 
-Example Scenario1_AllFairness : satisfies run_s1 0 scenario1_fairness.
+Example Scenario1_AllFairness : run_s1 ⊨ scenario1_fairness.
 Proof.
   unfold scenario1_fairness.
   split.

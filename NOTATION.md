@@ -13,12 +13,12 @@ This section provides a stable cross-reference from Chapter 3 numbering (Definit
   - See [MUDA/Sorting.v](MUDA/Sorting.v) (`sort_bids`, `sort_asks`, `do_sorting`) and [MUDA/Matching.v](MUDA/Matching.v) (`match_step`).
 
 2. **Determinism (one successor)**
-  - `delta` is modeled as a function `step : State -> State`.
-  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`step`).
+  - The deterministic transition function δ is modeled as a total function `δ : State -> State` (an alias of `step`).
+  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`δ`, underlying `step`).
 
 3. **Terminal state preservation**
-  - If `phase = P7` then `step s = s`.
-  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`step`, `P7` branch).
+  - If `phase = P7` then `δ s = s`.
+  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`δ`, underlying `step`, `P7` branch).
 
 ### Definitions (Chapter 3)
 
@@ -65,11 +65,11 @@ This section provides a stable cross-reference from Chapter 3 numbering (Definit
   - Matching stops when no feasible pair is found: [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `match_step`).
 
 4. **Transition from P3 to P4**
-  - Implemented in [MUDA/Transitions.v](MUDA/Transitions.v) (`step` uses `finish_matching` when `match_step` returns `None`).
+  - Implemented in [MUDA/Transitions.v](MUDA/Transitions.v) (`δ` / `step` uses `finish_matching` when `match_step` returns `None`).
 
 5. **Clearing Price Stability After Matching**
-  - Computed in P4 and preserved in later phases by `step`:
-    [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`do_clearing_price`), [MUDA/Transitions.v](MUDA/Transitions.v) (`step` cases for P5–P7).
+  - Computed in P4 and preserved in later phases by δ:
+    [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`do_clearing_price`), [MUDA/Transitions.v](MUDA/Transitions.v) (`δ` / `step` cases for P5–P7).
 
 6. **Clearing Price Boundedness**
   - Proved as [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`clearing_price_bounds`).
@@ -95,9 +95,9 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
 
 ### 4.2 MUDA Protocol Layer (Traces + Atomic Propositions)
 
-- Determinism (unique trace from an initial state): Chapter 3 `step : State -> State` used coinductively (by construction) in [MUDA/Transitions.v](MUDA/Transitions.v) (`step`).
-- Stuttering after termination (P7 fixed point): [MUDA/Transitions.v](MUDA/Transitions.v) (`step`, `P7 => s`).
-- MUDA execution as infinite valuation trace: [Fairness/Interpretation.v](Fairness/Interpretation.v) (`interp_atom`, `mu_trace`).
+- Determinism (unique trace from an initial state): Chapter 3 transition function `δ : State -> State` (alias of `step`) in [MUDA/Transitions.v](MUDA/Transitions.v) (`δ`, `step`).
+- Stuttering after termination (P7 fixed point): [MUDA/Transitions.v](MUDA/Transitions.v) (`δ` / `step`, `P7 => s`).
+- MUDA execution as infinite valuation trace: [Fairness/Interpretation.v](Fairness/Interpretation.v) (`interp_atom`, `μ` / `mu_trace`).
 - Trace identification lemma (link to i-fold execution for atoms): [Fairness/Interpretation.v](Fairness/Interpretation.v) (`mu_trace_atom_at_execute`).
 
 ### 4.3 Fairness Verification Layer (Atoms + LTL Theorems)
@@ -129,7 +129,7 @@ state components (orders, residuals, match record, clearing price).
 The LTL layer then assigns truth values to a fixed set of *named* predicates
 (e.g., priority step correctness, quantity allocation bounds, clearing price
 bounds/rule) using [Fairness/Interpretation.v](Fairness/Interpretation.v)
-(`interp_atom`, `mu_trace`).
+(`interp_atom`, `μ` / `mu_trace`).
 
 ## Core Data Types
 
@@ -160,7 +160,7 @@ Record Agent := { agent_id : nat; agent_type : AgentType }.
 **Code:** Transitions never mutate the contents of `Bid`/`Ask` records; the only Phase that changes order presentation is P2 sorting, which reorders the lists.
 
 - Sorting step: [MUDA/Sorting.v](MUDA/Sorting.v) (`do_sorting`)
-- Deterministic transition: [MUDA/Transitions.v](MUDA/Transitions.v) (`step`) preserves `bids`/`asks` outside of Phase P2
+- Deterministic transition: [MUDA/Transitions.v](MUDA/Transitions.v) (`δ` / `step`) preserves `bids`/`asks` outside of Phase P2
 
 ---
 
@@ -397,14 +397,14 @@ This repository snapshot focuses on the Chapter 3–5 fairness layer (priority, 
 **Code:** `Fairness/Interpretation.v`
 ```coq
 CoFixpoint mu_trace (s : State) : trace :=
-  Trace (interp_atom s) (mu_trace (step s)).
+  Trace (interp_atom s) (mu_trace (δ s)).
 ```
 
 **Mapping:**
-- Thesis `omega` ↔ Code `mu_trace s` (coinductive trace)
-- Thesis stuttering (implicit in `x7 = x8 = ...`) ↔ Code `step` becomes identity at `P7`
+- Thesis `omega` ↔ Code `μ s` (alias of `mu_trace s`, a coinductive trace)
+- Thesis stuttering (implicit in `x7 = x8 = ...`) ↔ Code δ becomes identity at `P7`
 
-**Note:** `mu_trace` always advances by `step`; terminal stuttering is ensured because `step s = s` when `phase s = P7`.
+**Note:** `μ` / `mu_trace` always advances by δ; terminal stuttering is ensured because `δ s = s` when `phase s = P7`.
 
 **Note:** Coq's `CoFixpoint` mechanizes infinite traces. The thesis describes this conceptually without implementation syntax.
 
@@ -454,7 +454,7 @@ This section rewrites the Chapter 5 "predicate evaluation" in terms of the *actu
 In [Example/Scenario1.v](Example/Scenario1.v), the trace is defined as:
 
 - `st0 := initial_state bs_s1 as_s1`
-- `run_s1 := mu_trace st0`
+- `run_s1 := mu_trace st0` (equivalently, `run_s1 := μ st0`)
 
 The LTL semantics are aligned with the deterministic STS iteration:
 
@@ -527,10 +527,10 @@ These are the atoms used by the three fairness formulas (`priorityOK`, `quantity
 
 #### Scenario 1 truth summary (aligned to the mechanization)
 
-- `allocOK_prop` holds at all times on `run_s1` (this is exactly `Scenario1_Quantity : satisfies run_s1 0 quantityOK`).
-- `priorityB_step_ok_prop` and `priorityS_step_ok_prop` hold at all times on `run_s1` (this is exactly `Scenario1_Priority : satisfies run_s1 0 priorityOK`).
+- `allocOK_prop` holds at all times on `run_s1` (this is exactly `Scenario1_Quantity : run_s1 ⊨ quantityOK`).
+- `priorityB_step_ok_prop` and `priorityS_step_ok_prop` hold at all times on `run_s1` (this is exactly `Scenario1_Priority : run_s1 ⊨ priorityOK`).
 - `has_clearing_price_prop` becomes true once there is at least one match in the record, because it is defined using `determine_clearing_price` (which depends on `marginal_pair`, i.e. the last match). In Scenario 1, this is from time `t = 3` onward, because `matches (execute 3 st0) = [m1]`.
-- `bounds_cstar_prop` and `price_rule_prop` are the conjuncts enforced by the price fairness theorem whenever `has_clearing_price_prop` is true (this is exactly `Scenario1_UniformPrice : satisfies run_s1 0 priceOK`).
+- `bounds_cstar_prop` and `price_rule_prop` are the conjuncts enforced by the price fairness theorem whenever `has_clearing_price_prop` is true (this is exactly `Scenario1_UniformPrice : run_s1 ⊨ priceOK`).
 
 #### Important alignment note (priority atoms)
 

@@ -1,23 +1,6 @@
-(** Chapter 3 (Methodology) — Section 3.2 / 3.5 (Deterministic STS + Phases)
-
-  The deterministic transition function δ from the thesis is `step`.
-  Executing MUDA for n steps is `execute n`.
-
-  Phase evolution matches the Chapter 3 phase diagram and stutters at P7.
-*)
-From Stdlib Require Import List Lia Sorting Permutation.
-Import ListNotations.
+From Stdlib Require Import List.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
-(** Proposition-4 (Transition from P3 to P4).
-
-    When matching terminates because no feasible buyer–seller pair exists,
-    the protocol transitions from Phase P3 to Phase P4 without changing the
-    submitted orders or the match record.
-
-    Chapter 3 also specifies that the clearing price is determined in Phase P4;
-    therefore the P3 -> P4 transition preserves `clearing_price`.
-*)
 Definition finish_matching (s : State) : State :=
   {| bids := bids s;
      asks := asks s;
@@ -29,10 +12,10 @@ Definition finish_matching (s : State) : State :=
 
 (** Chapter 3 properties: determinism and terminal preservation.
 
-    The deterministic STS transition function `delta` from Chapter 3 is modeled
-    as `step : State -> State`. Determinism is by construction.
+    The deterministic STS transition function `δ` from Chapter 3 is modeled
+    as `δ : State -> State`. Determinism is by construction.
 
-    For Phase P7 (terminal), Chapter 3 requires `delta(x) = x`; this is the
+    For Phase P7 (terminal), Chapter 3 requires `δ(x) = x`; this is the
     `P7 => s` branch below.
 *)
 Definition step (s : State) : State :=
@@ -63,6 +46,9 @@ Definition step (s : State) : State :=
   | P7 => s (* Terminal state *)
   end.
 
+(** Thesis-level alias: δ is the deterministic transition function. *)
+Definition δ : State -> State := step.
+
 
 Lemma allocOK_after_sorting :
   forall s,
@@ -79,7 +65,7 @@ Qed.
 Fixpoint execute (fuel : nat) (s : State) : State :=
   match fuel with
   | 0 => s
-  | S fuel' => execute fuel' (step s)
+  | S fuel' => execute fuel' (δ s)
   end.
 
 

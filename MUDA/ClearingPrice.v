@@ -1,10 +1,3 @@
-(** Chapter 3 (Methodology) — Section 3.5.3 (Phase P4: Clearing Price)
-
-  - Definition-10 (clearing price: marginal pair + uniform price rule)
-  - Proposition-6 (clearing price boundedness)
-
-  Uses the final match record (the match list once matching terminates).
-*)
 From Stdlib Require Import Arith List.
 Import ListNotations.
 From LTL  Require Import Syntax Semantics.

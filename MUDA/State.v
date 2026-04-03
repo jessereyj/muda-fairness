@@ -1,10 +1,3 @@
-(** Chapter 3 (Methodology)
-
-  - Section 3.1: MUDA state representation (`State`, `Phase`).
-  - Section 3.4: feasibility, allocation, and residual definitions.
-
-  See NOTATION.md for complete thesis-to-code mapping.
-*)
 From Stdlib Require Import List Arith.
 Import ListNotations.
 From MUDA Require Import Types.

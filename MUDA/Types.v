@@ -1,17 +1,6 @@
-(** Chapter 3 (Methodology) — Section 3.1 (Object and State Representation)
-
-  Core objects of MUDA:
-  - Agents (implementation bookkeeping), bids, asks, and matches.
-
-  Thesis notation uses 3-tuples for bids/asks; the code refines with IDs and
-  ownership fields to support decidable equality and traceability.
-
-  See NOTATION.md for thesis-to-code mapping.
-*)
 From Stdlib Require Export Arith List Bool PeanoNat.
 From MUDA Require Export Eqb.
-Import ListNotations.
-Local Open Scope bool_scope.
+
 
 (* Agent type: implementation detail not shown in thesis notation *)
 Inductive AgentType := Buyer | Seller.

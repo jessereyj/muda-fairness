@@ -1,14 +1,4 @@
-(** Chapter 4 (Foundation Layer) — Section 4.1.1 (Syntax)
-
-  This file defines the LTL language used throughout the development.
-
-  Thesis: PROP = N, and formulas are built from atomic propositions using
-  ¬, ∧, X, F, and G.
-
-  Code: atomic propositions are indexed by `predicate := nat`.
-*)
-From Stdlib Require Import List Bool.
-Import List.ListNotations.
+(* No Stdlib imports needed here; this file defines the LTL AST and notations. *)
 
 Declare Scope LTL_scope.
 Delimit Scope LTL_scope with LTL.
@@ -26,8 +16,8 @@ Inductive LTL_formula : Type :=
   | Eventually : LTL_formula -> LTL_formula.
 
 (* Chapter 4 core grammar uses ¬, ∧, X, F, G. For convenience in proofs and
-   specifications, we also include ∨ and → as derived connectives with their
-   standard semantics (not as axioms). *)
+  specifications, we also include ∨ and → as additional connectives with their
+  standard semantics (not as axioms). *)
 
 Notation "¬ φ"     := (Not φ)                   (at level 75, right associativity) : LTL_scope.
 Notation "φ ∧ ψ"   := (And φ ψ)                 (at level 80, right associativity) : LTL_scope.

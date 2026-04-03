@@ -1,17 +1,4 @@
-(** MUDA/Atoms.v — Chapter 4 (MUDA Protocol Layer): Atomic Predicates
-
-  This project focuses on Chapters 3–5 only:
-  - Chapter 3: operational semantics (phases + deterministic transitions)
-  - Chapter 4: LTL semantics over MUDA traces
-  - Chapter 5: concrete executions + fairness validation
-
-  Atomic predicates are therefore restricted to those needed for:
-  - Priority fairness
-  - Quantity fairness
-  - Uniform price fairness
-*)
 From Stdlib Require Import List Arith Bool.
-Import ListNotations.
 From MUDA Require Import Types State Sorting Matching ClearingPrice Transitions.
 
 (* Chapter 4 quantity fairness notation:

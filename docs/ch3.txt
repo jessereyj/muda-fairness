@@ -97,7 +97,7 @@ If M_final is empty, then the marginal matched pair is undefined.
 In the operational semantics, M_final is defined as M(x_P4), where x_P4 is the state after matching terminates.
 
 Definition 11 (Clearing Price).
-After termination of the matching, let x_P4 denote the state immediately after termination of the matching. Then, the clearing price p_star, if it exists, is obtained from the matching record M(x_P4) by applying the deterministic MUDA pricing rule in Definition 10. Let (b_star,s_star) denote the marginal pair of the matching record.
+After termination of the matching, let x_P4 denote the state immediately after termination of the matching. Then, the clearing price p_star, if it exists, is obtained from the matching record M(x_P4) using the deterministic MUDA pricing rule defined below, based on the marginal matched pair from Definition 10. Let (b_star,s_star) denote the marginal pair of the matching record.
 The clearing price p_star is defined as:
 ResidS(s_star,x_P4) = 0 => p_star = p(b_star).
 ResidS(s_star,x_P4) != 0 => p_star = a(s_star).
@@ -119,52 +119,52 @@ The MUDA protocol is modeled as a deterministic state transition system. Each st
 
 The state transition function defines the way in which the system progresses from one state to another according to the rule of the phase in which it is currently in.
 
-The state transition function step maps each state into its image in the next state. Let's denote the state by x. Then step(x) will depend on the phase in which it currently is and the rule of its phase. For each state x, there is a unique state y for which step(x) = y.
+The state transition function δ maps each state into its image in the next state. Let's denote the state by x. Then δ(x) depends on the phase in which it currently is and the rule of that phase. For each state x, there is a unique state y for which δ(x) = y.
 
-An execution is defined as a sequence of states starting from the initial state x0 and obtained by applying the state transition function step repeatedly:
+An execution is defined as a sequence of states starting from the initial state x0 and obtained by applying the state transition function δ repeatedly:
 x₀ = x0,
-for all i >= 0, xᵢ₊₁ = step(xᵢ).
+for all i >= 0, xᵢ₊₁ = δ(xᵢ).
 
 The execution is uniquely defined for a deterministic state transition system.
 
-A state is called terminal if phase(x) = P7. For each terminal state x, step(x) = x. This way, an infinite execution can always be constructed.
+A state is called terminal if phase(x) = P7. For each terminal state x, δ(x) = x. This way, an infinite execution can always be constructed.
 
-When the state is in phase P3 and there is no feasible pair, the state transition function step advances the state into phase P4, keeping the submitted orders and match record unchanged.
+When the state is in phase P3 and there is no feasible pair, the state transition function δ advances the state into phase P4, keeping the submitted orders and match record unchanged.
 
 3.3 MUDA Protocol
 
-The protocol has seven phases from P1 through P7. The phase is used in determining the particular transition rule. Deterministic transition function step with respect to states is used for the execution.
+The protocol has seven phases from P1 through P7. The phase is used in determining the particular transition rule. The deterministic transition function δ is used for the execution.
 
 3.3.1 Pre-Match Phase
 
 P1 (Submission).
-Order positions are fixed. Residual amounts are the same as initial amounts, that is, residB(b, x) = q(b) for each b ∈ B and residS(s, x) = q(s) for each s ∈ S. Also, the match record is empty, that is, M(x) = empty. The system transitions to the next phase, which is Phase P2, that is, phase(step(x)) = P2.
+Order positions are fixed. Residual amounts are the same as initial amounts, that is, residB(b, x) = q(b) for each b ∈ B and residS(s, x) = q(s) for each s ∈ S. Also, the match record is empty, that is, M(x) = empty. The system transitions to the next phase, which is Phase P2, that is, phase(δ(x)) = P2.
 
 P2 (Sorting).
-Orders are sorted on the basis of the deterministic refinement of priorities in Definition 7. Order residual amounts and the match record are the same as before. No trade takes place. Transition to Phase P3 occurs, that is, phase(step(x)) = P3.
+Orders are sorted on the basis of the deterministic refinement of priorities in Definition 7. Order residual amounts and the match record are the same as before. No trade takes place. Transition to Phase P3 occurs, that is, phase(δ(x)) = P3.
 
 P3 (Matching).
-The state satisifes phase(x) = P3. There is an existence of a feasible pair (b, s) where buyer b is selected from set B and seller s belongs to set S. In this situation, a trade is executed on a greedy matching rule, according to the definition presented in Definition 8. The match record is modified to find new residual quantities as per Definition 5.
+The state satisfies phase(x) = P3. There is an existence of a feasible pair (b, s) where buyer b is selected from set B and seller s belongs to set S. In this situation, a trade is executed on a greedy matching rule, according to the definition presented in Definition 8. The match record is modified to find new residual quantities as per Definition 5.
 
-If no feasible pair (buyer, seller) exists, then there will be no match and thus matching process will stop leading us to Phase P4. That is, phase(step(x)) = P4.
+If no feasible pair (buyer, seller) exists, then there will be no match and thus matching process will stop leading us to Phase P4. That is, phase(δ(x)) = P4.
 
 
 3.3.2 Settlement Phase
 
 P4 (Clearing Price).
-In the event of matching being completed, the protocol proceeds to Phase P4. If the clearing price p* can be calculated from the match record using Definition 9, then no transaction takes place, while the match record stays unchanged. Phase P4 shifts the protocol into Phase P5, i.e., phase(step(x))=P5.
+In the event of matching being completed, the protocol proceeds to Phase P4. If the clearing price p* can be calculated from the match record using Definition 11, then no transaction takes place, while the match record stays unchanged. Phase P4 shifts the protocol into Phase P5, i.e., phase(δ(x))=P5.
 
 
 3.3.3 Post-Match Phase
 
 P5 (Finalization).
-The final match is characterized by M_final = M(x). There are no changes to any other state component. This transition results in the system moving to Phase P6, which is stated by phase(step(x)) = P6.
+The final match is characterized by M_final = M(x). There are no changes to any other state component. This transition results in the system moving to Phase P6, which is stated by phase(δ(x)) = P6.
 
 P6 (Bookkeeping).
-Additional values are derived from the M_final for reporting and/or settlement purposes. The state components B, S, O, M, residuals, and p* are left unchanged. The transition leads to the system being in Phase P7, i.e., phase(step(x)) = P7.
+Additional values are derived from the M_final for reporting and/or settlement purposes. The state components B, S, O, M, residuals, and p* are left unchanged. The transition leads to the system being in Phase P7, i.e., phase(δ(x)) = P7.
 
 P7 (Terminal/Rejection).
-The state satisfies phase(x) = P7. Agents not contained in the match are left unmatched. There are no changes to any state component. The transition satisfies step(x) = x. The execution trace is an infinitely repeating sequence of states.
+The state satisfies phase(x) = P7. Agents not contained in the match are left unmatched. There are no changes to any state component. The transition satisfies δ(x) = x. The execution trace is an infinitely repeating sequence of states.
 
 3.4 Fairness Mechanism
 

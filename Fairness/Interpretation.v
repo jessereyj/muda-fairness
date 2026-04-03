@@ -1,32 +1,4 @@
-(** Chapter 4 (MUDA trace interpretation layer)
-
-    This file connects the deterministic MUDA execution from Chapter 3
-    with the LTL trace semantics from Chapter 4.
-
-    - It fixes the numbering of MUDA-specific atomic predicates p_*.
-    - It defines interp_atom : State -> predicate -> Prop, the valuation [[x]].
-    - It defines the infinite trace mu_trace by iterating step.
-    - Terminal stuttering is obtained because step s = s when phase s = P7.
-
-    Thesis notation:
-      x0, x1, x2, ...   where xi+1 = δ(xi)
-      σ                 the induced infinite trace
-      [[x]]              the valuation at state x
-
-    In this development:
-      - mu_trace x0 is σ
-      - trace_at (mu_trace x0) i is the valuation at time i
-      - interp_atom x is [[x]]
-
-    The fairness layer evaluates named state predicates through interp_atom:
-      p_allocOK
-      p_prioB_step
-      p_prioS_step
-      p_has_cprice
-      p_bounds_cstar
-      p_price_rule
-*)
-From Stdlib Require Import List Bool PeanoNat.
+From Stdlib Require Import Bool PeanoNat.
 From LTL  Require Import Syntax Semantics.
 From MUDA Require Import State Transitions Atoms.
 
@@ -65,7 +37,10 @@ Definition interp_atom (s : State) : predicate -> Prop :=
     end.
 
 CoFixpoint mu_trace (s : State) : trace :=
-  Trace (interp_atom s) (mu_trace (step s)).
+  Trace (interp_atom s) (mu_trace (δ s)).
+
+(** Thesis-level alias: μ(x0) denotes the induced infinite trace. *)
+Definition μ (s : State) : trace := mu_trace s.
 
 Lemma mu_trace_atom_at_execute :
   forall s i p,

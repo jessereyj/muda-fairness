@@ -19,35 +19,8 @@
 <h1 class="libtitle">Library Types</h1>
 
 <div class="code">
-</div>
-
-<div class="doc">
-Chapter 3 (Methodology) — Section 3.1 (Object and State Representation)
-
-<div class="paragraph"> </div>
-
-  Core objects of MUDA:
-<ul class="doclist">
-<li> Agents (implementation bookkeeping), bids, asks, and matches.
-
-</li>
-</ul>
-
-<div class="paragraph"> </div>
-
-  Thesis notation uses 3-tuples for bids/asks; the code refines with IDs and
-  ownership fields to support decidable equality and traceability.
-
-<div class="paragraph"> </div>
-
-  See NOTATION.md for thesis-to-code mapping.
-
-</div>
-<div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">PeanoNat</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="var">Eqb</span>.<br/>
-<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
-<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Inductive</span> <span class="id" title="var">AgentType</span> := <span class="id" title="var">Buyer</span> | <span class="id" title="var">Seller</span>.<br/>

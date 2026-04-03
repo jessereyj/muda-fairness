@@ -1,34 +1,3 @@
-(** Chapter 4 (Fairness Verification Layer)
-
-  Priority fairness (Chapter 3 Def. 7 / Chapter 4 verification):
-  - In every matching step (Phase P3), the matcher selects the highest-priority
-    feasible buyer; then for that buyer, the highest-priority feasible seller.
-
-  In Chapter 4 notation, feasibility is `feasible(b, s)` (price bound + positive
-  residuals) and the selected pair is the one appended to the match record.
-
-  This file proves the LTL property:
-    G(p_prioB_step) ∧ G(p_prioS_step)
-  constructively from the executable greedy selector in MUDA/Matching.v.
-
-  Chapter 4 notation (as in the thesis text):
-
-    φ_prio = G(
-      selected(b, s, x) ->
-      ¬ ∃ b', higher_priority(b', b) ∧ feasible(b', s, x)
-    )
-
-  Mechanization note:
-  - `selected(b,s,x)` is represented via the deterministic greedy selection
-    computed in Phase P3 (see `find_feasible` / `best_feasible_ask`).
-  - `higher_priority` and `feasible` use the Chapter 3 orders and residuals.
-  - We expose this as two step-level atomic propositions:
-      `p_prioB_step` (no higher-priority feasible buyer skipped)
-      `p_prioS_step` (no higher-priority feasible seller skipped)
-    and set `φ_prio := G(p_prioB_step) ∧ G(p_prioS_step)`.
-
-  No unproven postulates and no admitted proofs.
-*)
 From Stdlib Require Import List Bool Arith Lia.
 Import ListNotations.
 

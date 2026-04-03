@@ -1,14 +1,4 @@
-(** Chapter 4 (Foundation Layer) — Section 4.1.2 (Semantics)
-
-  This file defines satisfaction `satisfies` of LTL formulas over infinite
-  traces and proves the standard unfold lemmas for F and G.
-
-  Note: the thesis uses boolean valuations v : PROP -> {true,false}; this
-  mechanization uses `state := predicate -> Prop`, which is equivalent for
-  expressing truth of atomic propositions.
-*)
-From Stdlib Require Import List Bool Arith Lia.
-Import List.ListNotations.
+From Stdlib Require Import Arith.
 From LTL Require Import Syntax.
 
 Local Open Scope LTL_scope.
@@ -43,6 +33,8 @@ Fixpoint satisfies (σ : trace) (i : nat) (φ : LTL_formula) : Prop :=
 Definition models (σ : trace) (φ : LTL_formula) : Prop := satisfies σ 0 φ.
 Definition valid  (φ : LTL_formula) : Prop := forall σ i, satisfies σ i φ.
 
+Notation "σ ⊨[ i ] φ" := (satisfies σ i φ) (at level 70).
+Notation "σ , i ⊨ φ" := (satisfies σ i φ) (at level 70, only printing).
 Notation "σ ⊨ φ" := (models σ φ) (at level 70).
 Notation "⊨ φ"    := (valid φ)     (at level 70).
 

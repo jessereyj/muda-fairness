@@ -19,51 +19,6 @@
 <h1 class="libtitle">Library PriceFairness</h1>
 
 <div class="code">
-</div>
-
-<div class="doc">
-Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
-
-<div class="paragraph"> </div>
-
-  Price fairness: the clearing price (when defined) follows the rule and is
-  bounded by the marginal pair.
-
-<div class="paragraph"> </div>
-
-  Chapter 4 math notation view:
-  whenever `matched(b, s, q)` holds in a state, trades are evaluated against the
-  clearing price `price(x) = c` produced by MUDA.
-
-<div class="paragraph"> </div>
-
-  Chapter 4 price fairness formula (thesis notation):
-
-<div class="paragraph"> </div>
-
-    φ<i>price = G(
-      matched(b, s, q, x) -&gt; price(x) = p⋆(x)
-    )
-
-<div class="paragraph"> </div>
-
-  Mechanization note:
-<ul class="doclist">
-<li> The development exposes a MUDA-level price fairness package via atoms:
-      `p_has_cprice`   : a clearing price exists
-      `p_bounds_cstar` : the clearing price is bounded by the marginal pair
-      `p_price_rule`   : the clearing price follows the protocol rule
-    and sets `φ<i>price := G(p_has_cprice -&gt; (p_bounds_cstar ∧ p_price_rule))`.
-
-</li>
-<li> This matches the Chapter 4 intent that the observable clearing price in the
-    state is the unique price used for all matched trades.
-
-</li>
-</ul>
-
-</div>
-<div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span>.<br/>
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Matching</span> <span class="id" title="var">ClearingPrice</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
