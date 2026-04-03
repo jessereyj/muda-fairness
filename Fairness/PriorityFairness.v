@@ -5,16 +5,29 @@ From LTL      Require Import Syntax Semantics.
 From MUDA     Require Import Types State Sorting Matching Transitions Atoms.
 From Fairness Require Import Interpretation.
 
+(** Panel index (thesis ↔ code)
+
+  Chapter 4 (Priority fairness)
+  - priorityOK: LTL formula G(p_prioB_step) ∧ G(p_prioS_step)
+  - priority_fairness_LTL_initial: main theorem (holds for all initial states)
+
+  Note: the remaining Local lemmas relate thesis priority (prioB/prioS) to the
+  deterministic refinement used by sorting/matching and establish the pointwise
+  validity of the priority-step atoms.
+*)
+
 Local Open Scope LTL_scope.
 Local Open Scope bool_scope.
 
+(* priorityOK: LTL specification asserting priority-correct choice at every greedy step. *)
 Definition priorityOK : LTL_formula :=
   (G (Atom p_prioB_step)) ∧ (G (Atom p_prioS_step)).
 
 (* ------------------------------------------------------------------------- *)
 (* Relating thesis priority (prioB/prioS) to the deterministic refinement. *)
 
-Lemma prioB_implies_bid_priority : forall b1 b2,
+(* prioB_implies_bid_priority: thesis prioB implies the deterministic refinement bid_priority. *)
+Local Lemma prioB_implies_bid_priority : forall b1 b2,
   prioB b1 b2 -> bid_priority b1 b2.
 Proof.
   intros b1 b2 [Hgt | [Heq Hlt]].
@@ -22,7 +35,8 @@ Proof.
   - right. split; [exact Heq|]. left; exact Hlt.
 Qed.
 
-Lemma prioS_implies_ask_priority : forall a1 a2,
+(* prioS_implies_ask_priority: thesis prioS implies the deterministic refinement ask_priority. *)
+Local Lemma prioS_implies_ask_priority : forall a1 a2,
   prioS a1 a2 -> ask_priority a1 a2.
 Proof.
   intros a1 a2 [Hlt | [Heq Hlt]].
@@ -32,7 +46,8 @@ Qed.
 
 (* Boolean comparators correspond to their Prop-level refinements. *)
 
-Lemma bid_priorityb_sound : forall b1 b2,
+(* bid_priorityb_sound: boolean comparator true ⇒ Prop-level bid_priority. *)
+Local Lemma bid_priorityb_sound : forall b1 b2,
   bid_priorityb b1 b2 = true -> bid_priority b1 b2.
 Proof.
   intros b1 b2 Hb.
@@ -54,7 +69,8 @@ Proof.
         -- apply Nat.ltb_lt in Hid. exact Hid.
 Qed.
 
-Lemma ask_priorityb_sound : forall a1 a2,
+(* ask_priorityb_sound: boolean comparator true ⇒ Prop-level ask_priority. *)
+Local Lemma ask_priorityb_sound : forall a1 a2,
   ask_priorityb a1 a2 = true -> ask_priority a1 a2.
 Proof.
   intros a1 a2 Hb.
@@ -76,7 +92,8 @@ Proof.
         -- apply Nat.ltb_lt in Hid. exact Hid.
 Qed.
 
-Lemma bid_priorityb_complete : forall b1 b2,
+(* bid_priorityb_complete: Prop-level bid_priority ⇒ boolean comparator returns true. *)
+Local Lemma bid_priorityb_complete : forall b1 b2,
   bid_priority b1 b2 -> bid_priorityb b1 b2 = true.
 Proof.
   intros b1 b2 Hb.
@@ -95,7 +112,8 @@ Proof.
         -- apply Nat.ltb_lt. exact Hid.
 Qed.
 
-Lemma ask_priorityb_complete : forall a1 a2,
+(* ask_priorityb_complete: Prop-level ask_priority ⇒ boolean comparator returns true. *)
+Local Lemma ask_priorityb_complete : forall a1 a2,
   ask_priority a1 a2 -> ask_priorityb a1 a2 = true.
 Proof.
   intros a1 a2 Ha.
@@ -116,7 +134,8 @@ Qed.
 
 (* Transitivity of the deterministic refinements. *)
 
-Lemma bid_priority_trans : forall b1 b2 b3,
+(* bid_priority_trans: transitivity of the deterministic buyer refinement. *)
+Local Lemma bid_priority_trans : forall b1 b2 b3,
   bid_priority b1 b2 -> bid_priority b2 b3 -> bid_priority b1 b3.
 Proof.
   intros b1 b2 b3 H12 H23.
@@ -139,7 +158,8 @@ Proof.
         -- right. split; [lia|lia].
 Qed.
 
-Lemma ask_priority_trans : forall a1 a2 a3,
+(* ask_priority_trans: transitivity of the deterministic seller refinement. *)
+Local Lemma ask_priority_trans : forall a1 a2 a3,
   ask_priority a1 a2 -> ask_priority a2 a3 -> ask_priority a1 a3.
 Proof.
   intros a1 a2 a3 H12 H23.
@@ -164,7 +184,8 @@ Qed.
 (* ------------------------------------------------------------------------- *)
 (* Basic existence facts about best_feasible_ask. *)
 
-Lemma best_feasible_ask_none_no_feasible :
+(* best_feasible_ask_none_no_feasible: if no best ask exists, all candidates are infeasible. *)
+Local Lemma best_feasible_ask_none_no_feasible :
   forall b as_list ms,
     best_feasible_ask b as_list ms = None ->
     forall a', In a' as_list -> is_feasible b a' ms = false.
@@ -179,7 +200,8 @@ Proof.
       * eapply IH; eauto.
 Qed.
 
-Lemma best_feasible_ask_complete :
+(* best_feasible_ask_complete: existence of any feasible ask implies best_feasible_ask returns Some. *)
+Local Lemma best_feasible_ask_complete :
   forall b as_list ms,
     (exists a, In a as_list /\ is_feasible b a ms = true) ->
     exists a_best, best_feasible_ask b as_list ms = Some a_best.
@@ -200,7 +222,8 @@ Qed.
 (* ------------------------------------------------------------------------- *)
 (* Optimality of best_feasible_ask and find_feasible under the refined orders. *)
 
-Lemma best_feasible_ask_best :
+(* best_feasible_ask_best: returned best ask is maximal under ask_priority among feasible asks. *)
+Local Lemma best_feasible_ask_best :
   forall b as_list ms a_best,
     best_feasible_ask b as_list ms = Some a_best ->
     forall a',
@@ -242,7 +265,8 @@ Proof.
       * discriminate.
 Qed.
 
-Lemma find_feasible_none_no_feasible_bid :
+(* find_feasible_none_no_feasible_bid: if no feasible pair exists, every bid has no feasible ask. *)
+Local Lemma find_feasible_none_no_feasible_bid :
   forall bs as_list ms,
     find_feasible bs as_list ms = None ->
     forall b', In b' bs -> best_feasible_ask b' as_list ms = None.
@@ -260,7 +284,8 @@ Proof.
       * eapply IH; eauto.
 Qed.
 
-Lemma find_feasible_best :
+(* find_feasible_best: chosen bid is maximal under bid_priority among bids with feasible asks. *)
+Local Lemma find_feasible_best :
   forall bs as_list ms b a,
     find_feasible bs as_list ms = Some (b,a) ->
     forall b',
@@ -300,7 +325,8 @@ Qed.
 (* ------------------------------------------------------------------------- *)
 (* Priority atoms hold pointwise (hence globally on traces). *)
 
-Lemma priorityB_step_ok_global : forall s,
+(* priorityB_step_ok_global: buyer-priority atom holds for every state s (pointwise). *)
+Local Lemma priorityB_step_ok_global : forall s,
   priorityB_step_ok_prop s.
 Proof.
   intros s Hp3.
@@ -313,7 +339,8 @@ Proof.
   eapply (find_feasible_best (bids s) (asks s) (matches s) b a); eauto.
 Qed.
 
-Lemma find_feasible_returns_best_ask :
+(* find_feasible_returns_best_ask: for the chosen bid, find_feasible returns its best feasible ask. *)
+Local Lemma find_feasible_returns_best_ask :
   forall bs as_list ms b a,
     find_feasible bs as_list ms = Some (b,a) ->
     best_feasible_ask b as_list ms = Some a.
@@ -330,7 +357,8 @@ Proof.
     + eapply (IH as_list ms b a). exact H.
 Qed.
 
-Lemma priorityS_step_ok_global : forall s,
+(* priorityS_step_ok_global: seller-priority atom holds for every state s (pointwise). *)
+Local Lemma priorityS_step_ok_global : forall s,
   priorityS_step_ok_prop s.
 Proof.
   intros s Hp3.
@@ -344,26 +372,7 @@ Qed.
 (* ------------------------------------------------------------------------- *)
 (* LTL lift: priorityOK holds on the MUDA trace from the initial state. *)
 
-Lemma mu_trace_satisfies_prioB_initial :
-  forall bs as_list i,
-    satisfies (mu_trace (initial_state bs as_list)) i (Atom p_prioB_step).
-Proof.
-  intros bs as_list i.
-  apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) i p_prioB_step)).
-  unfold interp_atom.
-  exact (priorityB_step_ok_global (execute i (initial_state bs as_list))).
-Qed.
-
-Lemma mu_trace_satisfies_prioS_initial :
-  forall bs as_list i,
-    satisfies (mu_trace (initial_state bs as_list)) i (Atom p_prioS_step).
-Proof.
-  intros bs as_list i.
-  apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) i p_prioS_step)).
-  unfold interp_atom.
-  exact (priorityS_step_ok_global (execute i (initial_state bs as_list))).
-Qed.
-
+(* priority_fairness_LTL_initial: LTL lift — priorityOK holds on μ(initial_state). *)
 Theorem priority_fairness_LTL_initial :
   forall bs as_list,
     satisfies (mu_trace (initial_state bs as_list)) 0 priorityOK.
@@ -371,7 +380,13 @@ Proof.
   intros bs as_list.
   split.
   - rewrite satisfies_always_unfold.
-    intros j _. apply mu_trace_satisfies_prioB_initial.
+    intros j _.
+    apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) j p_prioB_step)).
+    unfold interp_atom.
+    exact (priorityB_step_ok_global (execute j (initial_state bs as_list))).
   - rewrite satisfies_always_unfold.
-    intros j _. apply mu_trace_satisfies_prioS_initial.
+    intros j _.
+    apply (proj2 (mu_trace_atom_at_execute (initial_state bs as_list) j p_prioS_step)).
+    unfold interp_atom.
+    exact (priorityS_step_ok_global (execute j (initial_state bs as_list))).
 Qed.

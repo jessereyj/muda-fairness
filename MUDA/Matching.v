@@ -1,8 +1,20 @@
 From Stdlib Require Import Arith List Bool PeanoNat Lia.
-From MUDA Require Import Eqb Types State Sorting.
+From MUDA Require Import Types State Sorting.
 Import ListNotations.
 Local Open Scope nat_scope.
 Local Open Scope bool_scope.
+
+(** Panel index (thesis ↔ code)
+
+  Chapter 3 (Greedy matching)
+  - is_feasible/feasible: feasibility test (Definition 1)
+  - best_feasible_ask, find_feasible: greedy selection under priority (Definition 8)
+  - create_match: traded quantity q = min(residual_bid, residual_ask) (Definition 9)
+  - match_step: one greedy matching round (appends at most one match)
+
+  Chapter 4 (Invariant preservation)
+  - allocOK_after_match: allocOK preserved when match_step succeeds
+*)
 
 (** Definition-1 (Feasibility), boolean form.
 
@@ -23,9 +35,11 @@ Definition feasible (b : Bid) (a : Ask) (ms : list Match) : Prop :=
    - then select the highest-priority feasible seller for that buyer
 *)
 
+(* better_ask: pick the higher-priority ask under ask_priorityb. *)
 Definition better_ask (a1 a2 : Ask) : Ask :=
   if ask_priorityb a1 a2 then a1 else a2.
 
+(* best_feasible_ask: highest-priority feasible ask for a given bid. *)
 Fixpoint best_feasible_ask (b : Bid) (as_list : list Ask) (ms : list Match)
   : option Ask :=
   match as_list with
@@ -40,6 +54,7 @@ Fixpoint best_feasible_ask (b : Bid) (as_list : list Ask) (ms : list Match)
       else rest
   end.
 
+(* find_feasible: pick a feasible (bid,ask) pair by greedy priority search. *)
 Fixpoint find_feasible (bs : list Bid) (as_list : list Ask) (ms : list Match)
   : option (Bid * Ask) :=
   match bs with
@@ -57,6 +72,7 @@ Fixpoint find_feasible (bs : list Bid) (as_list : list Ask) (ms : list Match)
       end
   end.
 
+(* best_feasible_ask_spec: selected ask is indeed feasible (boolean form). *)
 Lemma best_feasible_ask_spec :
   forall b as_list ms a,
     best_feasible_ask b as_list ms = Some a ->
@@ -76,6 +92,7 @@ Proof.
     + apply (IH a). exact H.
 Qed.
 
+(* find_feasible_spec: selected (bid,ask) pair is feasible (boolean form). *)
 Lemma find_feasible_spec :
   forall bs as_list ms b a,
     find_feasible bs as_list ms = Some (b,a) ->
@@ -95,8 +112,6 @@ Proof.
     + eapply (IH as_list ms b a). exact H.
 
 Qed.
-
-
 
 (** Definition-9 (Traded Unit Quantity).
 
@@ -124,11 +139,7 @@ Definition match_step (s : State) : option State :=
   | None => None
   end.
 
-(** Lemma (Match Monotonicity).
-
-    During matching, the match record grows monotonically.
-*)
-
+(* allocated_bid_app_single: effect on allocated_bid of appending one match. *)
 Lemma allocated_bid_app_single :
   forall b ms m,
     allocated_bid b (ms ++ [m]) =
@@ -140,6 +151,7 @@ Proof.
   - destruct (bid_eq_dec (matched_bid m0) b); simpl; rewrite IH; lia.
 Qed.
 
+(* allocated_ask_app_single: effect on allocated_ask of appending one match. *)
 Lemma allocated_ask_app_single :
   forall a ms m,
     allocated_ask a (ms ++ [m]) =
@@ -152,6 +164,7 @@ Proof.
 Qed.
 
 
+(* allocOK_after_match: allocOK is preserved by one successful match_step. *)
 Lemma allocOK_after_match :
   forall s s',
     allocOK s ->

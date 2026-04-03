@@ -21,7 +21,7 @@ s_j = (a_j, q_j^0, t_j),
 where p_i is the bid unit price, a_j is the ask unit price, q_i^0 and q_j^0 are initial unit quantities, and t_i and t_j are submission times.
 
 Notation.
-We use function-style projections p(b), q0(b), t(b) to denote the bid price, initial quantity, and time to submit the bid, and function-style projections a(s), q0(s), t(s) to denote the ask price, initial quantity, and time to submit the ask.
+We use function-style projections p(b), q(b), t(b) to denote the bid price, initial quantity, and time to submit the bid, and function-style projections a(s), q(s), t(s) to denote the ask price, initial quantity, and time to submit the ask.
 
 Remark (Implementation bookkeeping).
 For the mechanized model, "agent" information, i.e., whether it is a buyer or a seller, is stored separately from orders, and this information is included for each bid and ask. This does not affect the meaning of the above representations for orders.
@@ -44,10 +44,10 @@ allocB(b, M(x)) = Σ{ q | (b', s, q) ∈ M(x) and b = b'}, and
 allocS(s, M(x)) = Σ{ q | (b, s', q) ∈ M(x) and s = s'}.
 
 Finally, we define the residual unit quantity as:
-residB(b, x) = q0(b) - allocB(b, M(x)), and
-residS(s, x) = q0(s) - allocS(s, M(x)).
+residB(b, x) = q(b) - allocB(b, M(x)), and
+residS(s, x) = q(s) - allocS(s, M(x)).
 
-In the mechanized development, the transition rules ensure that bids allocation allocB(b, M(x)) <= q0(b) and asks allocation allocS(s, M(x)) <= q0(s). As a result, all residual quantities remain non-negative.
+In the mechanized development, the transition rules ensure that bids allocation allocB(b, M(x)) <= q(b) and asks allocation allocS(s, M(x)) <= q(s). As a result, all residual quantities remain non-negative.
 
 Remark (State vs. derived quantities).
 In the mechanized development presented in this thesis, the residual quantities are not state components. They are derived from the initial quantities and the match record M(x), by computing the allocated quantities from the match record and subtracting the allocated quantities from the initial quantities.
@@ -188,9 +188,9 @@ A trade is made to the match set.
 No other changes will be made to these variables.
 
 From Definition 5, we have that for any bid b and any state x
-q0(b) = allocB(b, M(x)) + residB(b, x)
+q(b) = allocB(b, M(x)) + residB(b, x)
 and similarly, for any ask s and any state x
-q0(s) = allocS(s, M(x)) + residS(s, x)
+q(s) = allocS(s, M(x)) + residS(s, x)
 
 These are the state invariants that we need to define quantity fairness temporally in Chapter 4.
 

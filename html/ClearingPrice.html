@@ -25,6 +25,42 @@
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Matching</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Panel index (thesis ↔ code)
+
+<div class="paragraph"> </div>
+
+  Chapter 3 (Clearing price)
+<ul class="doclist">
+<li> marginal_pair: select the marginal (last) matched pair
+
+</li>
+<li> determine_clearing_price: deterministic uniform price rule (option nat)
+
+</li>
+<li> do_clearing_price: Phase P4 action (compute and store clearing_price)
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  Chapter 4 (Price fairness support)
+<ul class="doclist">
+<li> wf_state: well-formedness invariant for match records
+
+</li>
+<li> clearing_price_bounds: bounds property for the computed clearing price
+
+</li>
+</ul>
+
+</div>
+<div class="code">
+
+<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat_scope</span>.<br/>
 
@@ -54,19 +90,6 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-
-<br/>
-</div>
-
-<div class="doc">
-Definition-10 (Clearing Price): Last marginal pair.
-
-<div class="paragraph"> </div>
-
-    The marginal pair is the last trade in the final match record.
-
-</div>
-<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">marginal_pair</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">option</span> (<span class="id" title="var">Bid</span> * <span class="id" title="var">Ask</span>) :=<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">rev</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;| [] =&gt; <span class="id" title="var">None</span><br/>
@@ -92,25 +115,6 @@ Definition-10 (Clearing Price): Last marginal pair.
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-</div>
-
-<div class="doc">
-Definition-10 (Clearing Price): Uniform clearing price.
-
-<div class="paragraph"> </div>
-
-  Chapter 5 scenarios use the convention:
-<ul class="doclist">
-<li> if the marginal seller is exhausted, use the marginal bid price
-
-</li>
-<li> otherwise, use the marginal ask price.
-
-</li>
-</ul>
-
-</div>
-<div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">determine_clearing_price</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">option</span> <span class="id" title="var">nat</span> :=<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">marginal_pair</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
 &nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
@@ -130,17 +134,6 @@ Definition-10 (Clearing Price): Uniform clearing price.
 &nbsp;&nbsp;&nbsp;; <span class="id" title="var">phase</span> := <span class="id" title="var">P5</span> |}.<br/>
 
 <br/>
-</div>
-
-<div class="doc">
-Proposition-6 (Clearing Price Boundedness).
-
-<div class="paragraph"> </div>
-
-    The computed clearing price is within the marginal ask/bid bounds.
-
-</div>
-<div class="code">
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">clearing_price_bounds</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">s</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">c</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">wf_state</span> <span class="id" title="var">s</span> -&gt;<br/>

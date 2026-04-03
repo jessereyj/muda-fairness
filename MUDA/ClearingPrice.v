@@ -3,13 +3,27 @@ Import ListNotations.
 From LTL  Require Import Syntax Semantics.
 From MUDA Require Import Types State Matching.
 
+(** Panel index (thesis ↔ code)
+
+  Chapter 3 (Clearing price)
+  - marginal_pair: select the marginal (last) matched pair
+  - determine_clearing_price: deterministic uniform price rule (option nat)
+  - do_clearing_price: Phase P4 action (compute and store clearing_price)
+
+  Chapter 4 (Price fairness support)
+  - wf_state: well-formedness invariant for match records
+  - clearing_price_bounds: bounds property for the computed clearing price
+*)
+
 Local Open Scope LTL_scope.
 Local Open Scope nat_scope.
 
+(* wf_state: well-formedness of matches (ask_price <= bid_price for every match). *)
 Definition wf_state (s : State) : Prop :=
   forall m, In m (matches s) ->
     ask_price (matched_ask m) <= price (matched_bid m).
 
+(* in_rev_l: list helper (rev membership implies original membership). *)
 Lemma in_rev_l {A} (l : list A) (x : A) : In x (rev l) -> In x l.
 Proof.
   induction l as [|h t IH]; simpl; intro H.
@@ -22,24 +36,21 @@ Proof.
       * contradiction.
 Qed.
 
+(* wf_state_initial: initial_state has no matches, hence wf_state holds trivially. *)
 Lemma wf_state_initial : forall bs as_list,
   wf_state (initial_state bs as_list).
 Proof.
   intros bs as_list m Hin. inversion Hin.
 Qed.
 
-(* Chapter 3 Definition numbering notes are recorded as Coqdoc comments below. *)
-
-(** Definition-10 (Clearing Price): Last marginal pair.
-
-    The marginal pair is the last trade in the final match record.
-*)
+(* marginal_pair: returns the (bid,ask) from the last match record, if any. *)
 Definition marginal_pair (s : State) : option (Bid * Ask) :=
   match rev (matches s) with
   | [] => None
   | m :: _ => Some (matched_bid m, matched_ask m)
   end.
 
+(* marginal_pair_price_bound: if wf_state holds, the marginal ask price is ≤ marginal bid price. *)
 Lemma marginal_pair_price_bound :
   forall s b a,
     wf_state s ->
@@ -58,12 +69,7 @@ Proof.
   exact Hwf.
 Qed.
 
-(** Definition-10 (Clearing Price): Uniform clearing price.
-
-  Chapter 5 scenarios use the convention:
-  - if the marginal seller is exhausted, use the marginal bid price
-  - otherwise, use the marginal ask price.
-*)
+(* determine_clearing_price: compute the uniform clearing price from the marginal pair. *)
 Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
@@ -78,6 +84,7 @@ Definition determine_clearing_price (s : State) : option nat :=
         else Some (ask_price a)
   end.
 
+(* do_clearing_price: Phase P4 transition (store clearing_price and move to P5). *)
 Definition do_clearing_price (s : State) : State :=
   {| bids := bids s
    ; asks := asks s
@@ -85,10 +92,7 @@ Definition do_clearing_price (s : State) : State :=
    ; clearing_price := determine_clearing_price s
    ; phase := P5 |}.
 
-(** Proposition-6 (Clearing Price Boundedness).
-
-    The computed clearing price is within the marginal ask/bid bounds.
-*)
+(* clearing_price_bounds: the computed clearing price lies in [ask_price a, price b] for the marginal pair. *)
 Lemma clearing_price_bounds :
   forall s b a c,
     wf_state s ->

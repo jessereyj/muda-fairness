@@ -63,7 +63,6 @@ LTL/Syntax.v
 LTL/Semantics.v
 
 # ===== MUDA Protocol (Layer 2) =====
-MUDA/Eqb.v
 MUDA/Types.v
 MUDA/State.v
 MUDA/Sorting.v

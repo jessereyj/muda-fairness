@@ -20,7 +20,7 @@
 
 <div class="code">
 <span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">PeanoNat</span> <span class="id" title="var">Lia</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Eqb</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Sorting</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Sorting</span>.<br/>
 <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat_scope</span>.<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
@@ -29,7 +29,38 @@
 </div>
 
 <div class="doc">
-Definition-1 (Feasibility), boolean form.
+Panel index (thesis ↔ code)
+
+<div class="paragraph"> </div>
+
+  Chapter 3 (Greedy matching)
+<ul class="doclist">
+<li> is_feasible/feasible: feasibility test (Definition 1)
+
+</li>
+<li> best_feasible_ask, find_feasible: greedy selection under priority (Definition 8)
+
+</li>
+<li> create_match: traded quantity q = min(residual_bid, residual_ask) (Definition 9)
+
+</li>
+<li> match_step: one greedy matching round (appends at most one match)
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  Chapter 4 (Invariant preservation)
+<ul class="doclist">
+<li> allocOK_after_match: allocOK preserved when match_step succeeds
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ Definition-1 (Feasibility), boolean form.
 
 <div class="paragraph"> </div>
 
@@ -168,19 +199,6 @@ Definition-8 (Greedy Matching Rule).
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">phase</span> := <span class="id" title="var">phase</span> <span class="id" title="var">s</span> |}<br/>
 &nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
 &nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
-
-<br/>
-</div>
-
-<div class="doc">
-Lemma (Match Monotonicity).
-
-<div class="paragraph"> </div>
-
-    During matching, the match record grows monotonically.
-
-</div>
-<div class="code">
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">allocated_bid_app_single</span> :<br/>

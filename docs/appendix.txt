@@ -55,7 +55,7 @@ If the goal is to see "where the code is" and "what is proved" quickly, the fast
 - MUDA/Transitions.v (δ and execute)
 - MUDA/State.v (state structure and derived quantities such as residuals)
 - MUDA/Atoms.v (the atomic state predicates used by the fairness formulas)
-- LTL/Syntax.v and LTL/Semantics.v (formula language and satisfaction relation (implemented as satisfies), written σ, i ⊨ φ)
+- LTL/Syntax.v and LTL/Semantics.v (formula language and satisfaction relation `satisfies`; satisfaction at time 0 is exposed as `σ ⊨ φ`)
 
 B.2 What is mechanized in this repository (scope)
 Based on the current project contents, the mechanized results in this repository cover:
@@ -109,15 +109,7 @@ Core entry points
 - Bid, Ask: orders with price, quantity, and time information
 - Match: recorded trades produced by matching
 Other notable helpers
-- bid_eq_dec, ask_eq_dec, match_eq_dec: decidable equality helpers used by executable computations
-
-MUDA/Eqb.v (executable equality interface)
-Core entry points
-- Eqb: typeclass for boolean equality
-- Notation x =? y: boolean equality operator
-Other notable helpers
-- EqbSpec: specification linking eqb to propositional equality
-- nat_eqb and nat_eqb_spec: instance and correctness proof for nat equality
+- bid_eq_dec, ask_eq_dec: decidable equality helpers used by executable computations
 
 MUDA/State.v (states and derived quantities)
 Core entry points
@@ -128,8 +120,17 @@ Core entry points
 - residual_bid, residual_ask: remaining quantity after accounting for matches
 - allocOK: allocation consistency predicate used by quantity fairness
 Other notable helpers
-- feasible_pair / feasible / matched: feasibility and match-record predicates
-- residualB / residualS: residual quantities lifted to a State
+- (Feasibility is defined in MUDA/Matching.v as `is_feasible` / `feasible`.)
+
+Note on residual notation
+- The thesis-level residual functions (often written residualB/residualS) are realized directly by
+  `residual_bid b (matches x)` and `residual_ask a (matches x)`; the development does not use separate
+  state-level wrapper definitions.
+
+Note on match-record membership notation
+- The thesis-level predicate `matched(b, s, q, x)` (an entry in the match record) is expressed directly
+  in Rocq by quantifying over the match record `matches x` and relating the projections `matched_bid`,
+  `matched_ask`, and `match_quantity` of a `Match` record.
 
 MUDA/Sorting.v (priority order and sorting)
 Core entry points
@@ -183,10 +184,8 @@ Core entry points
 LTL/Semantics.v (formula interpretation)
 Core entry points
 - trace: coinductive type of infinite traces of states
-- trace_at: state at time i on a trace
 - satisfies: satisfaction relation (trace, time, formula)
-Other notable helpers
-- models and valid: convenience wrappers (satisfaction at time 0, validity over all traces)
+- notation σ ⊨ φ: satisfaction at time 0
 
 Fairness/Interpretation.v (bridge: MUDA -> LTL)
 Core entry points
@@ -203,34 +202,29 @@ Core entry points
 - priority_fairness_LTL_initial: main theorem (priority fairness holds from all initial states)
 Other notable helpers
 - priorityB_step_ok_global and priorityS_step_ok_global: key invariants over the one-step transition (δ / step)
-- mu_trace_satisfies_prioB_initial and mu_trace_satisfies_prioS_initial: initial-state satisfaction lemmas
 
 Fairness/QuantityFairness.v (quantity fairness)
 Core entry points
 - quantityOK: LTL fairness formula (allocation consistency invariant)
 - quantity_fairness_LTL_initial: main theorem (quantity fairness holds from all initial states)
 Other notable helpers
-- allocOK_preserved_n: preservation of allocOK over execute n
-- mu_trace_satisfies_allocOK_initial: initial-state satisfaction lemma
 
 Fairness/PriceFairness.v (uniform price fairness)
 Core entry points
 - priceOK: LTL fairness formula relating has_cprice (clearing price logically determined) to bounds and price rule
 - uniform_price_fairness_LTL_initial: main theorem (uniform price fairness holds from all initial states)
 Other notable helpers
-- bounds_cstar_from_wf and bounds_cstar_preserved_n: bounds lemmas used in the proof
-- price_rule_fairness_LTL_initial: supporting lemma used to establish priceOK
 
 Example/Scenario1.v (concrete scenario and end-to-end checks)
 Core entry points
-- st0: concrete initial state for Scenario 1
-- run_s1: the scenario trace σ := μ(st0)
-- Scenario1_AllFairness: scenario-level end-to-end satisfaction of the combined fairness formula
+- st0: concrete initial state for Scenario 1 (Local)
+- run_s1: the scenario trace σ := μ(st0) (Local)
+- Scenario1_AllFairness: scenario-level satisfaction of the combined fairness formula (Local)
 Other notable helpers
-- scenario1_fairness: combined fairness formula (priorityOK and quantityOK and priceOK)
-- Scenario1_Priority / Scenario1_Quantity / Scenario1_UniformPrice: individual fairness proofs
-- Scenario1_Matches_After_Round1/2/3: concrete checks about the match list after execute
-- Scenario1_ClearingPrice_Is_8 and Scenario1_Final_Phase_And_Price: concrete checks about clearing price and final phase
+- scenario1_fairness: combined fairness formula (Local)
+- Scenario1_Priority / Scenario1_Quantity / Scenario1_UniformPrice: scenario-level instantiations of the general fairness theorems (Local)
+- Scenario1_Matches_After_Round1/2/3: concrete match-record checks after execute (Local)
+- Scenario1_ClearingPrice_Is_8 and Scenario1_Final_Phase_And_Price: concrete checks about clearing price and phase (Local)
 
 B.4.1 Cross-file dependency outline (what each Fairness proof uses)
 

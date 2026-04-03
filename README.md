@@ -69,8 +69,8 @@ Run `./stats.sh` to report:
 ### Quantity Fairness
 
 Quantity fairness is evaluated over the MUDA execution trace using the Chapter 4
-state predicates (math notation): residual conservation via `residualB(b)` and
-the match record (i.e., `matched(b, s, q)` entries).
+state predicates (math notation): residual conservation via the residual functions
+(`residual_bid`/`residual_ask` over the match record) and the match record entries.
 
 Proven for traces starting from initial states (as an invariant lifted to LTL).
 

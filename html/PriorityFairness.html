@@ -28,6 +28,33 @@
 <span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Panel index (thesis ↔ code)
+
+<div class="paragraph"> </div>
+
+  Chapter 4 (Priority fairness)
+<ul class="doclist">
+<li> priorityOK: LTL formula G(p_prioB_step) ∧ G(p_prioS_step)
+
+</li>
+<li> priority_fairness_LTL_initial: main theorem (holds for all initial states)
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  Note: the remaining Local lemmas relate thesis priority (prioB/prioS) to the
+  deterministic refinement used by sorting/matching and establish the pointwise
+  validity of the priority-step atoms.
+
+</div>
+<div class="code">
+
+<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
 
@@ -38,7 +65,7 @@
 <br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">prioB_implies_bid_priority</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">prioB_implies_bid_priority</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">prioB</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> -&gt; <span class="id" title="var">bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> [<span class="id" title="var">Hgt</span> | [<span class="id" title="var">Heq</span> <span class="id" title="var">Hlt</span>]].<br/>
@@ -47,7 +74,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">prioS_implies_ask_priority</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">prioS_implies_ask_priority</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">prioS</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> -&gt; <span class="id" title="var">ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> [<span class="id" title="var">Hlt</span> | [<span class="id" title="var">Heq</span> <span class="id" title="var">Hlt</span>]].<br/>
@@ -58,7 +85,7 @@
 <br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">bid_priorityb_sound</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">bid_priorityb_sound</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">bid_priorityb</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> = <span class="id" title="var">true</span> -&gt; <span class="id" title="var">bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">Hb</span>.<br/>
@@ -81,7 +108,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">ask_priorityb_sound</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">ask_priorityb_sound</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">ask_priorityb</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> = <span class="id" title="var">true</span> -&gt; <span class="id" title="var">ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">Hb</span>.<br/>
@@ -104,7 +131,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">bid_priorityb_complete</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">bid_priorityb_complete</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> -&gt; <span class="id" title="var">bid_priorityb</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> = <span class="id" title="var">true</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">Hb</span>.<br/>
@@ -124,7 +151,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">ask_priorityb_complete</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">ask_priorityb_complete</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> -&gt; <span class="id" title="var">ask_priorityb</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> = <span class="id" title="var">true</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">Ha</span>.<br/>
@@ -146,7 +173,7 @@
 <br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">bid_priority_trans</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">b3</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">bid_priority_trans</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">b3</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> -&gt; <span class="id" title="var">bid_priority</span> <span class="id" title="var">b2</span> <span class="id" title="var">b3</span> -&gt; <span class="id" title="var">bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b3</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">b3</span> <span class="id" title="var">H12</span> <span class="id" title="var">H23</span>.<br/>
@@ -170,7 +197,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">ask_priority_trans</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">a3</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">ask_priority_trans</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">a3</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> -&gt; <span class="id" title="var">ask_priority</span> <span class="id" title="var">a2</span> <span class="id" title="var">a3</span> -&gt; <span class="id" title="var">ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a3</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">a3</span> <span class="id" title="var">H12</span> <span class="id" title="var">H23</span>.<br/>
@@ -195,7 +222,7 @@
 <br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">best_feasible_ask_none_no_feasible</span> :<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">best_feasible_ask_none_no_feasible</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">best_feasible_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">None</span> -&gt;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">a'</span>, <span class="id" title="var">In</span> <span class="id" title="var">a'</span> <span class="id" title="var">as_list</span> -&gt; <span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a'</span> <span class="id" title="var">ms</span> = <span class="id" title="var">false</span>.<br/>
@@ -211,7 +238,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">best_feasible_ask_complete</span> :<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">best_feasible_ask_complete</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">as_list</span> /\ <span class="id" title="var">is_feasible</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">ms</span> = <span class="id" title="var">true</span>) -&gt;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">a_best</span>, <span class="id" title="var">best_feasible_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> <span class="id" title="var">a_best</span>.<br/>
@@ -232,7 +259,7 @@
 <br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">best_feasible_ask_best</span> :<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">best_feasible_ask_best</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">a_best</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">best_feasible_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> <span class="id" title="var">a_best</span> -&gt;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">a'</span>,<br/>
@@ -275,7 +302,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_none_no_feasible_bid</span> :<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">find_feasible_none_no_feasible_bid</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">None</span> -&gt;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b'</span>, <span class="id" title="var">In</span> <span class="id" title="var">b'</span> <span class="id" title="var">bs</span> -&gt; <span class="id" title="var">best_feasible_ask</span> <span class="id" title="var">b'</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">None</span>.<br/>
@@ -294,7 +321,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_best</span> :<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">find_feasible_best</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) -&gt;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b'</span>,<br/>
@@ -334,7 +361,7 @@
 <br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">priorityB_step_ok_global</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">priorityB_step_ok_global</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">priorityB_step_ok_prop</span> <span class="id" title="var">s</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">Hp3</span>.<br/>
@@ -348,7 +375,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">find_feasible_returns_best_ask</span> :<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">find_feasible_returns_best_ask</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">find_feasible</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>,<span class="id" title="var">a</span>) -&gt;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">best_feasible_ask</span> <span class="id" title="var">b</span> <span class="id" title="var">as_list</span> <span class="id" title="var">ms</span> = <span class="id" title="var">Some</span> <span class="id" title="var">a</span>.<br/>
@@ -366,7 +393,7 @@
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">priorityS_step_ok_global</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>,<br/>
+<span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">priorityS_step_ok_global</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">s</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">priorityS_step_ok_prop</span> <span class="id" title="var">s</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s</span> <span class="id" title="var">Hp3</span>.<br/>
@@ -380,28 +407,6 @@
 <br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_trace_satisfies_prioB_initial</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">i</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) <span class="id" title="var">i</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_prioB_step</span>).<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">i</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>) <span class="id" title="var">i</span> <span class="id" title="var">p_prioB_step</span>)).<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">exact</span> (<span class="id" title="var">priorityB_step_ok_global</span> (<span class="id" title="var">execute</span> <span class="id" title="var">i</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))).<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_trace_satisfies_prioS_initial</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">i</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) <span class="id" title="var">i</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_prioS_step</span>).<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">i</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>) <span class="id" title="var">i</span> <span class="id" title="var">p_prioS_step</span>)).<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">exact</span> (<span class="id" title="var">priorityS_step_ok_global</span> (<span class="id" title="var">execute</span> <span class="id" title="var">i</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))).<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
 <span class="id" title="keyword">Theorem</span> <span class="id" title="var">priority_fairness_LTL_initial</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) 0 <span class="id" title="var">priorityOK</span>.<br/>
@@ -409,9 +414,15 @@
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
 &nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">mu_trace_satisfies_prioB_initial</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>) <span class="id" title="var">j</span> <span class="id" title="var">p_prioB_step</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> (<span class="id" title="var">priorityB_step_ok_global</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))).<br/>
 &nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">mu_trace_satisfies_prioS_initial</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>) <span class="id" title="var">j</span> <span class="id" title="var">p_prioS_step</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> (<span class="id" title="var">priorityS_step_ok_global</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))).<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 </div>
 </div>

@@ -24,6 +24,33 @@
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">State</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Panel index (thesis ↔ code)
+
+<div class="paragraph"> </div>
+
+  Chapter 4 (MUDA → LTL bridge)
+<ul class="doclist">
+<li> p</i>*: predicate indices for the atomic propositions used in fairness specs
+
+</li>
+<li> interp_atom: interpret predicate indices as state predicates
+
+</li>
+<li> mu_trace / μ: induced infinite trace by iterating δ
+
+</li>
+<li> mu_trace_atom_at_execute: lift bridge for atoms (trace time i ↔ execute i)
+
+</li>
+</ul>
+
+</div>
+<div class="code">
+
+<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
 
@@ -74,6 +101,8 @@ Thesis-level alias: μ(x0) denotes the induced infinite trace.
 </div>
 <div class="code">
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">μ</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">trace</span> := <span class="id" title="var">mu_trace</span> <span class="id" title="var">s</span>.<br/>
+
+<br/>
 
 <br/>
 <span class="id" title="keyword">Lemma</span> <span class="id" title="var">mu_trace_atom_at_execute</span> :<br/>

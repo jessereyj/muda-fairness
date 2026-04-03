@@ -1,6 +1,19 @@
 From Stdlib Require Import List.
 From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
+(** Panel index (thesis ↔ code)
+
+  Chapter 3 (Deterministic STS)
+  - step: one-step transition over phases
+  - δ: thesis-level alias for the deterministic transition function
+  - execute: finite execution by iterating δ
+
+  Chapter 4 (Preservation lemmas for lifting)
+  - allocOK_after_sorting: sorting preserves allocOK
+  - wf_state_step_preservation, wf_state_execute_n: wf_state preserved along execute
+*)
+
+(* finish_matching: Phase P3 → P4 transition when no feasible pair remains. *)
 Definition finish_matching (s : State) : State :=
   {| bids := bids s;
      asks := asks s;
@@ -10,14 +23,7 @@ Definition finish_matching (s : State) : State :=
     clearing_price := clearing_price s;
      phase := P4 |}.
 
-(** Chapter 3 properties: determinism and terminal preservation.
-
-    The deterministic STS transition function `δ` from Chapter 3 is modeled
-    as `δ : State -> State`. Determinism is by construction.
-
-    For Phase P7 (terminal), Chapter 3 requires `δ(x) = x`; this is the
-    `P7 => s` branch below.
-*)
+(* step: one deterministic protocol step (case split on current phase). *)
 Definition step (s : State) : State :=
   match phase s with
   | P1 => {| bids := bids s;
@@ -46,10 +52,10 @@ Definition step (s : State) : State :=
   | P7 => s (* Terminal state *)
   end.
 
-(** Thesis-level alias: δ is the deterministic transition function. *)
+(* δ: thesis-level alias for the deterministic transition function step. *)
 Definition δ : State -> State := step.
 
-
+(* allocOK_after_sorting: sorting (P2) does not change matches, so allocOK is preserved. *)
 Lemma allocOK_after_sorting :
   forall s,
     phase s = P2 ->
@@ -62,6 +68,7 @@ Proof.
 Qed.
 
 
+(* execute: iterate δ for a fixed number of steps (used in Chapter 4 bridge lemma). *)
 Fixpoint execute (fuel : nat) (s : State) : State :=
   match fuel with
   | 0 => s
@@ -69,6 +76,7 @@ Fixpoint execute (fuel : nat) (s : State) : State :=
   end.
 
 
+(* wf_state_step_preservation: wf_state is invariant under a single protocol step. *)
 Lemma wf_state_step_preservation : forall s,
   wf_state s -> wf_state (step s).
 Proof.
@@ -101,6 +109,7 @@ Proof.
   - (* P7 stays same *) exact Hwf.
 Qed.
 
+(* wf_state_execute_n: wf_state is invariant along n-step executions. *)
 Lemma wf_state_execute_n : forall n s,
   wf_state s -> wf_state (execute n s).
 Proof.

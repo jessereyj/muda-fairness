@@ -23,6 +23,30 @@
 <span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Sorting</span> <span class="id" title="var">Matching</span> <span class="id" title="var">ClearingPrice</span> <span class="id" title="var">Transitions</span>.<br/>
 
 <br/>
+</div>
+
+<div class="doc">
+Panel index (thesis ↔ code)
+
+<div class="paragraph"> </div>
+
+  Chapter 4 (Atomic propositions over MUDA states)
+<ul class="doclist">
+<li> allocOK_prop: quantity accounting atom (initial = allocated + residual)
+
+</li>
+<li> has_clearing_price_prop, bounds_cstar_prop, price_rule_prop: price fairness atoms
+
+</li>
+<li> priorityB_step_ok_prop, priorityS_step_ok_prop: priority-step correctness atoms
+
+</li>
+</ul>
+
+</div>
+<div class="code">
+
+<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">allocOK_prop</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
 &nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">b</span>, <span class="id" title="var">quantity</span> <span class="id" title="var">b</span> = <span class="id" title="var">allocated_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) + <span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)) /\<br/>
 &nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">ask_quantity</span> <span class="id" title="var">a</span> = <span class="id" title="var">allocated_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>) + <span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>)).<br/>

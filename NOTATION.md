@@ -23,7 +23,7 @@ This section provides a stable cross-reference from Chapter 3 numbering (Definit
 ### Definitions (Chapter 3)
 
 1. **Feasibility**
-  - [MUDA/State.v](MUDA/State.v) (`feasible_pair`), and boolean form [MUDA/Matching.v](MUDA/Matching.v) (`is_feasible`).
+  - Prop and boolean feasibility are defined in [MUDA/Matching.v](MUDA/Matching.v) (`feasible`, `is_feasible`).
   - Executable feasibility in `is_feasible` checks: (i) `ask_price(a) <= price(b)` and (ii) both residual quantities are at least 1. The model allows an order to participate in multiple matches until its residual reaches 0 (Scenario 1 includes a bid matched in more than one round).
 
 2. **Traded Unit Quantity**
@@ -88,7 +88,7 @@ This section maps Chapter 4’s three-layer framework (foundation / MUDA trace i
 - Chapter 4 primitives are `¬`, `∧`, `X`, `F`, `G`. The code also provides `∨` and `→` as *derived connectives with standard semantics* (implemented as extra constructors) so fairness specs can be written in the same style as the thesis, without relying on classical logic.
 
 4.1.2 **Semantics**
-- Infinite traces and satisfaction: [LTL/Semantics.v](LTL/Semantics.v) (`trace`, `trace_at`, `satisfies`, `models`, `valid`).
+- Infinite traces and satisfaction: [LTL/Semantics.v](LTL/Semantics.v) (`trace`, `satisfies`, notation `σ ⊨ φ`).
 - Lemma (Semantics of G / Always): [LTL/Semantics.v](LTL/Semantics.v) (`satisfies_always_unfold`).
 
 **Note:** This repository version keeps the Chapter 4 *semantic* satisfaction layer only (syntax + semantics in [LTL/Syntax.v](LTL/Syntax.v) and [LTL/Semantics.v](LTL/Semantics.v)). It intentionally does not include a Hilbert-style proof system, soundness, or completeness development.
@@ -115,16 +115,17 @@ In the Rocq development, these are state-level predicates derived from the MUDA
 state components (orders, residuals, match record, clearing price).
 
 - `matched(b, s, q)` — true iff `(b, s, q)` is in the match record:
-  [MUDA/State.v](MUDA/State.v) (`matched`) over `matches`.
+  expressed directly by quantifying over `matches x` and relating the `Match` projections
+  (`matched_bid`, `matched_ask`, `match_quantity`).
 - `residualB(b) = r` — true iff buyer order `b` has residual `r`:
-  [MUDA/State.v](MUDA/State.v) (`residualB`) defined via `residual_bid`.
+  [MUDA/State.v](MUDA/State.v) computed as `residual_bid b (matches x)`.
 - `residualS(s) = r` — true iff seller order `s` has residual `r`:
-  [MUDA/State.v](MUDA/State.v) (`residualS`) defined via `residual_ask`.
+  [MUDA/State.v](MUDA/State.v) computed as `residual_ask s (matches x)`.
 - `price(x) = c` — true iff the clearing price stored in state `x` is `c`:
 - `price(x) = c` — true iff the clearing price stored in state `x` is `Some c`:
   [MUDA/State.v](MUDA/State.v) (`clearing_price` field of `State`).
 - `feasible(b, s)` — true iff `p(b) ≥ a(s)` and both residuals are positive:
-  [MUDA/State.v](MUDA/State.v) (`feasible`) / `feasible_pair`.
+  [MUDA/Matching.v](MUDA/Matching.v) (`feasible`) / `is_feasible`.
 
 The LTL layer then assigns truth values to a fixed set of *named* predicates
 (e.g., priority step correctness, quantity allocation bounds, clearing price
@@ -335,12 +336,15 @@ Definition residual_ask (a : Ask) (ms : list Match) : nat :=
 feasible(b, s) ⟺ price(b) ≥ ask_price(s) ∧ residual(b) > 0 ∧ residual(s) > 0
 ```
 
-**Code:** `MUDA/State.v`
+**Code:** [MUDA/Matching.v](MUDA/Matching.v)
 ```coq
-Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
-  price b >= ask_price a
-  /\ residual_bid b ms > 0
-  /\ residual_ask a ms > 0.
+Definition is_feasible (b : Bid) (a : Ask) (ms : list Match) : bool :=
+  Nat.leb (ask_price a) (price b)
+  && Nat.leb 1 (residual_bid b ms)
+  && Nat.leb 1 (residual_ask a ms).
+
+Definition feasible (b : Bid) (a : Ask) (ms : list Match) : Prop :=
+  is_feasible b a ms = true.
 ```
 
 **Mapping:** Direct correspondence.
