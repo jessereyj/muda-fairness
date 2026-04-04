@@ -1,4 +1,4 @@
-APPENDIX A — Supplementary MUDA Diagrams (Chapter 3 support)
+APPENDIX A -- Supplementary MUDA Diagrams (Chapter 3 support)
 
 Purpose
 This appendix contains supplementary diagrams that help explain the MUDA protocol description from Chapter 3. The figures are explanatory only: the Rocq development does not depend on them, but they help the reader understand the operational components and phase structure used by the deterministic state-transition model.
@@ -19,7 +19,7 @@ A.3 MUDA phase structure
 - What it illustrates: the high-level phase progression used in the deterministic execution model (pre-matching, matching/settlement, post-matching/finalization).
 
 
-APPENDIX B — Rocq formalization and verification artifacts (Where are the Rocq codes?)
+APPENDIX B -- Rocq formalization and verification artifacts (Where are the Rocq codes?)
 
 Purpose
 This appendix explains where the Rocq source code is located, what it contains, and how it connects to the thesis claims.
@@ -38,7 +38,7 @@ Note on generated documentation
 The html/ folder contains generated browsing documentation (coqdoc output). These HTML files are not the primary source; the primary source is the .v files listed above.
 
 Panel navigation note
-Each .v file begins with a short “Panel index (thesis ↔ code)” block, and each top-level Definition/Lemma/Theorem/Inductive/CoInductive/Fixpoint/Record has an immediate one-line “Name: purpose” comment. This is intended to make it easy for peer/panel reviewers to scan and map thesis claims to the mechanized artifacts.
+Each .v file begins with a short "Panel index (thesis <-> code)" block, and each top-level Definition/Lemma/Theorem/Inductive/CoInductive/Fixpoint/Record has an immediate one-line "Name: purpose" comment. This is intended to make it easy for peer/panel reviewers to scan and map thesis claims to the mechanized artifacts.
 
 Suggested reading order (quick navigation)
 If the goal is to see "where the code is" and "what is proved" quickly, the fastest path through the development is:
@@ -52,21 +52,21 @@ If the goal is to see "where the code is" and "what is proved" quickly, the fast
 - Fairness/PriceFairness.v
 
 3) Then open the bridge layer (how MUDA states become an LTL trace)
-- Fairness/Interpretation.v (μ and atom interpretation)
+- Fairness/Interpretation.v (mu and atom interpretation)
 
 4) Finally, drill down into the operational model and the state predicates
-- MUDA/Transitions.v (δ and execute)
+- MUDA/Transitions.v (delta and execute)
 - MUDA/State.v (state structure and derived quantities such as residuals)
 - MUDA/Atoms.v (the atomic state predicates used by the fairness formulas)
-- LTL/Syntax.v and LTL/Semantics.v (formula language and satisfaction relation `satisfies`; satisfaction at time 0 is exposed as `σ ⊨ φ`)
+- LTL/Syntax.v and LTL/Semantics.v (formula language and satisfaction relation `satisfies`; satisfaction at time 0 is exposed as `sigma |= phi`)
 
 B.2 What is mechanized in this repository (scope)
 Based on the current project contents, the mechanized results in this repository cover:
 
 1) A deterministic MUDA state-transition model
 - A concrete State record and derived quantities (residuals computed from the match record)
-- A deterministic transition function δ and finite execution by iteration
-- A coinductive infinite trace obtained by repeatedly applying δ; the final phase stutters (the transition function becomes id), so the trace is infinite
+- A deterministic transition function delta and finite execution by iteration
+- A coinductive infinite trace obtained by repeatedly applying delta; the final phase stutters (the transition function becomes id), so the trace is infinite
 
 2) LTL syntax and semantics needed for fairness verification
 - The syntax of formulas and their semantic evaluation over infinite traces
@@ -87,7 +87,7 @@ MUDA operational model (folder: MUDA/)
 - Sorting.v        Deterministic sorting/priority orderings used by the protocol
 - Matching.v       Deterministic matching mechanism (greedy matching) producing match records
 - ClearingPrice.v  Deterministic clearing price computation and price rule checks
-- Transitions.v    Deterministic transition function δ (implemented as step), phase progression, and execute (iteration)
+- Transitions.v    Deterministic transition function delta (implemented as step), phase progression, and execute (iteration)
 - Atoms.v          Atomic state predicates used by the LTL layer (e.g., allocation consistency, priority-step correctness, clearing-price conditions)
 
 LTL foundation (folder: LTL/)
@@ -95,7 +95,7 @@ LTL foundation (folder: LTL/)
 - Semantics.v      Satisfaction relation for formulas over infinite traces
 
 Fairness properties and proofs (folder: Fairness/)
-- Interpretation.v     Bridges MUDA states to LTL: atom interpretation and the infinite trace construction (μ)
+- Interpretation.v     Bridges MUDA states to LTL: atom interpretation and the infinite trace construction (mu)
 - PriorityFairness.v   Priority fairness formula and proof for traces from initial states
 - QuantityFairness.v   Quantity fairness formula and proof for traces from initial states
 - PriceFairness.v      Uniform price fairness formula and proof for traces from initial states
@@ -165,8 +165,8 @@ Other notable helpers
 
 MUDA/Transitions.v (deterministic STS)
 Core entry points
-- step: deterministic one-step transition of the protocol (implementation of δ)
-- execute: finite execution by iterating δ for a given fuel
+- step: deterministic one-step transition of the protocol (implementation of delta)
+- execute: finite execution by iterating delta for a given fuel
 Other notable helpers
 - finish_matching: helper used at the end of the matching phase
 - wf_state_step_preservation and wf_state_execute_n: key preservation lemmas across steps
@@ -188,12 +188,12 @@ LTL/Semantics.v (formula interpretation)
 Core entry points
 - trace: coinductive type of infinite traces of states
 - satisfies: satisfaction relation (trace, time, formula)
-- notation σ ⊨ φ: satisfaction at time 0
+- notation sigma |= phi: satisfaction at time 0
 
 Fairness/Interpretation.v (bridge: MUDA -> LTL)
 Core entry points
 - interp_atom: interpretation of each predicate as a state property
-- mu_trace: infinite trace generated by repeatedly applying δ to a MUDA state
+- mu_trace: infinite trace generated by repeatedly applying delta to a MUDA state
 - mu_trace_atom_at_execute: connects trace evaluation at time i with execute i
 Other notable helpers
 - p_allocOK, p_has_cprice, p_bounds_pstar, p_price_rule, p_prioB_step, p_prioS_step: predicate identifiers for the main atoms
@@ -204,7 +204,7 @@ Core entry points
 - priorityOK: LTL fairness formula for priority correctness
 - priority_fairness_LTL_initial: main theorem (priority fairness holds from all initial states)
 Other notable helpers
-- priorityB_step_ok_global and priorityS_step_ok_global: key invariants over the one-step transition (δ / step)
+- priorityB_step_ok_global and priorityS_step_ok_global: key invariants over the one-step transition (delta / step)
 
 Fairness/QuantityFairness.v (quantity fairness)
 Core entry points
@@ -221,7 +221,7 @@ Other notable helpers
 Example/Scenario1.v (concrete scenario and end-to-end checks)
 Core entry points
 - st0: concrete initial state for Scenario 1 (Local)
-- run_s1: the scenario trace σ := μ(st0) (Local)
+- run_s1: the scenario trace sigma := mu(st0) (Local)
 - Scenario1_AllFairness: scenario-level satisfaction of the combined fairness formula (Local)
 Other notable helpers
 - scenario1_fairness: combined fairness formula (Local)
@@ -236,7 +236,7 @@ This section lists, for each main Fairness result, the key external definitions 
 Fairness/PriorityFairness.v
 - Theorem priority_fairness_LTL_initial
   - Fairness/Interpretation.v: mu_trace, mu_trace_atom_at_execute, interp_atom, p_prioB_step, p_prioS_step
-  - LTL/Syntax.v: Atom, G, conjunction (∧)
+  - LTL/Syntax.v: Atom, G, conjunction (/\)
   - LTL/Semantics.v: satisfies, satisfies_always_unfold
   - MUDA/State.v: initial_state, bids/asks/matches projections from State
   - MUDA/Transitions.v: execute
@@ -259,7 +259,7 @@ Fairness/QuantityFairness.v
 Fairness/PriceFairness.v
 - Theorem uniform_price_fairness_LTL_initial
   - Fairness/Interpretation.v: mu_trace, mu_trace_atom_at_execute, interp_atom, p_has_cprice, p_bounds_pstar, p_price_rule
-  - LTL/Syntax.v: Atom, G, implication (→), conjunction (∧)
+  - LTL/Syntax.v: Atom, G, implication (->), conjunction (/\)
   - LTL/Semantics.v: satisfies, satisfies_always_unfold
   - MUDA/Atoms.v: bounds_pstar_prop, price_rule_prop
   - MUDA/ClearingPrice.v: determine_clearing_price, marginal_pair, clearing_price_bounds, wf_state
@@ -287,4 +287,4 @@ The project provides scripts to compile and to enforce that proofs are fully clo
 - ./build.sh    build all modules
 - ./check.sh    check that there are no admitted lemmas in the development
 
-These scripts compile the .v sources and provide the reproducibility basis for the mechanized fairness results described in Chapters 3–5.
+These scripts compile the .v sources and provide the reproducibility basis for the mechanized fairness results described in Chapters 3-5.

@@ -21,7 +21,7 @@ s_j = (a_j, q_j^0, t_j),
 where p_i is the bid unit price, a_j is the ask unit price, q_i^0 and q_j^0 are initial unit quantities, and t_i and t_j are submission times.
 
 Notation.
-We use function-style projections p(b), q(b), t(b) to denote the bid price, initial quantity, and time to submit the bid, and function-style projections a(s), q(s), t(s) to denote the ask price, initial quantity, and time to submit the ask.
+We use function-style projections p(b_i), q(b_i), t(b_i) to denote the bid unit price, initial unit quantity, and submission time of a bid, and function-style projections a(s_j), q(s_j), t(s_j) to denote the ask unit price, initial unit quantity, and submission time of an ask.
 
 Remark (Implementation bookkeeping).
 For the mechanized model, "agent" information, i.e., whether it is a buyer or a seller, is stored separately from orders, and this information is included for each bid and ask. This does not affect the meaning of the above representations for orders.
@@ -37,11 +37,11 @@ For tracking purposes, we can use the match record to determine the amount of ea
 
 Definition 5 (Residual Unit Quantity).
 Given the set B of submitted bids and the set S of submitted asks, we define the allocated quantity for an agent as the total quantity allocated in the trades in M(x):
-allocB: B x (finite sequence over B x S x N) → N, and
-allocS: S x (finite sequence over B x S x N) → N.
+allocB: B x (finite sequence over B x S x N) -> N, and
+allocS: S x (finite sequence over B x S x N) -> N.
 
-allocB(b, M(x)) = Σ{ q | (b', s, q) ∈ M(x) and b = b'}, and
-allocS(s, M(x)) = Σ{ q | (b, s', q) ∈ M(x) and s = s'}.
+allocB(b, M(x)) = sum{ q | (b', s, q) in M(x) and b = b'}, and
+allocS(s, M(x)) = sum{ q | (b, s', q) in M(x) and s = s'}.
 
 Finally, we define the residual unit quantity as:
 residB(b, x) = q(b) - allocB(b, M(x)), and
@@ -63,7 +63,7 @@ Residual Unit Quantity of Seller residS(s_j, x) > 0.
 
 
 Definition 7 (Priority Ordering).
-An agent is said to be ordered by priority as follows. 
+An agent is said to be ordered by priority as follows.
 For retrieving the list of buyers b_i and b_k,
 the selected buyers will return b_i >_B b_k if one condition is met p(b_i) > p(b_k),
 or if two conditions are met p(b_i) = p(b_k) and t(b_i) < t(b_k).
@@ -97,10 +97,10 @@ If M_final is empty, then the marginal matched pair is undefined.
 In the operational semantics, M_final is defined as M(x_P4), where x_P4 is the state after matching terminates.
 
 Definition 11 (Clearing Price).
-After termination of the matching, let x_P4 denote the state immediately after termination of the matching. Then, the clearing price p_star, if it exists, is obtained from the matching record M(x_P4) using the deterministic MUDA pricing rule defined below, based on the marginal matched pair from Definition 10. Let (b_star,s_star) denote the marginal pair of the matching record.
-The clearing price p_star is defined as:
-ResidS(s_star,x_P4) = 0 => p_star = p(b_star).
-ResidS(s_star,x_P4) != 0 => p_star = a(s_star).
+After termination of the matching, let x_P4 denote the state immediately after termination of the matching. The clearing price is denoted by pstar. Then, the clearing price pstar, if it exists, is obtained from the matching record M(x_P4) using the deterministic MUDA pricing rule defined below, based on the marginal matched pair from Definition 10. Let (b_star, s_star) denote the marginal pair of the matching record.
+The clearing price pstar is defined as:
+ResidS(s_star, x_P4) = 0 => pstar = p(b_star).
+ResidS(s_star, x_P4) != 0 => pstar = a(s_star).
 This defines a single clearing price computed from the match record. In the mechanized model, match entries do not carry per-trade price labels; instead the clearing price is computed (and after pricing, stored in the state) as the uniform price value used for settlement.
 
 Remark (No-trade case).
@@ -119,52 +119,56 @@ The MUDA protocol is modeled as a deterministic state transition system. Each st
 
 The state transition function defines the way in which the system progresses from one state to another according to the rule of the phase in which it is currently in.
 
-The state transition function δ maps each state into its image in the next state. Let's denote the state by x. Then δ(x) depends on the phase in which it currently is and the rule of that phase. For each state x, there is a unique state y for which δ(x) = y.
+The state transition function delta maps each state into its image in the next state. Let's denote the state by x. Then delta(x) depends on the phase in which it currently is and the rule of that phase. For each state x, there is a unique state y for which delta(x) = y.
 
-An execution is defined as a sequence of states starting from the initial state x0 and obtained by applying the state transition function δ repeatedly:
-x₀ = x0,
-for all i >= 0, xᵢ₊₁ = δ(xᵢ).
+An execution is defined as a sequence of states starting from the initial state x0 and obtained by applying the state transition function delta repeatedly:
+x(0) = x0,
+for all i >= 0, x(i+1) = delta(x(i)).
 
 The execution is uniquely defined for a deterministic state transition system.
 
-A state is called terminal if phase(x) = P7. For each terminal state x, δ(x) = x. This way, an infinite execution can always be constructed.
+A state is called terminal if phase(x) = P7. For each terminal state x, delta(x) = x. This way, an infinite execution can always be constructed.
 
-When the state is in phase P3 and there is no feasible pair, the state transition function δ advances the state into phase P4, keeping the submitted orders and match record unchanged.
+When the state is in phase P3 and there is no feasible pair, the state transition function delta advances the state into phase P4, keeping the submitted orders and match record unchanged.
 
 3.3 MUDA Protocol
 
-The protocol has seven phases from P1 through P7. The phase is used in determining the particular transition rule. The deterministic transition function δ is used for the execution.
+The protocol has seven phases from P1 through P7. The phase is used in determining the particular transition rule. The deterministic transition function delta is used for the execution.
 
 3.3.1 Pre-Match Phase
 
 P1 (Submission).
-Order positions are fixed. Residual amounts are the same as initial amounts, that is, residB(b, x) = q(b) for each b ∈ B and residS(s, x) = q(s) for each s ∈ S. Also, the match record is empty, that is, M(x) = empty. The system transitions to the next phase, which is Phase P2, that is, phase(δ(x)) = P2.
+Order positions are fixed. Residual amounts are the same as initial amounts, that is, residB(b, x) = q(b) for each b in B and residS(s, x) = q(s) for each s in S. Also, the match record is empty, that is, M(x) is empty. The system transitions to the next phase, which is Phase P2, that is, phase(delta(x)) = P2.
 
 P2 (Sorting).
-Orders are sorted on the basis of the deterministic refinement of priorities in Definition 7. Order residual amounts and the match record are the same as before. No trade takes place. Transition to Phase P3 occurs, that is, phase(δ(x)) = P3.
+Orders are sorted on the basis of the deterministic refinement of priorities in Definition 7. Order residual amounts and the match record are the same as before. No trade takes place. Transition to Phase P3 occurs, that is, phase(delta(x)) = P3.
+Orders are sorted on the basis of the deterministic refinement of priorities in Definition 7. Order residual amounts and the match record are the same as before. No trade takes place. Transition to Phase P3 occurs, that is, phase(delta(x)) = P3.
 
 P3 (Matching).
 The state satisfies phase(x) = P3. There is an existence of a feasible pair (b, s) where buyer b is selected from set B and seller s belongs to set S. In this situation, a trade is executed on a greedy matching rule, according to the definition presented in Definition 8. The match record is modified to find new residual quantities as per Definition 5.
 
-If no feasible pair (buyer, seller) exists, then there will be no match and thus matching process will stop leading us to Phase P4. That is, phase(δ(x)) = P4.
+If no feasible pair (buyer, seller) exists, then there will be no match and thus matching process will stop leading us to Phase P4. That is, phase(delta(x)) = P4.
 
 
 3.3.2 Settlement Phase
 
 P4 (Clearing Price).
-In the event of matching being completed, the protocol proceeds to Phase P4. If the clearing price pstar can be calculated from the match record using Definition 11, then no transaction takes place, while the match record stays unchanged. Phase P4 shifts the protocol into Phase P5, i.e., phase(δ(x))=P5.
+In the event of matching being completed, the protocol proceeds to Phase P4. If the clearing price pstar can be calculated from the match record using Definition 11, then no transaction takes place, while the match record stays unchanged. Phase P4 shifts the protocol into Phase P5, i.e., phase(delta(x)) = P5.
+In the event of matching being completed, the protocol proceeds to Phase P4. If the clearing price pstar can be calculated from the match record using Definition 11, then no transaction takes place, while the match record stays unchanged. Phase P4 shifts the protocol into Phase P5, i.e., phase(delta(x)) = P5.
 
 
 3.3.3 Post-Match Phase
 
 P5 (Finalization).
-The final match is characterized by M_final = M(x). There are no changes to any other state component. This transition results in the system moving to Phase P6, which is stated by phase(δ(x)) = P6.
+The final match is characterized by M_final = M(x). There are no changes to any other state component. This transition results in the system moving to Phase P6, which is stated by phase(delta(x)) = P6.
+The final match is characterized by M_final = M(x). There are no changes to any other state component. This transition results in the system moving to Phase P6, which is stated by phase(delta(x)) = P6.
 
 P6 (Bookkeeping).
 Additional values are derived from the final match record for reporting and/or settlement purposes. In the mechanized model, the State record fields bids, asks, matches, and clearing_price are left unchanged in this phase, and only the phase component advances to P7. Residual quantities are not stored in the state; they are derived from initial quantities and the match record.
 
 P7 (Terminal/Rejection).
-The state satisfies phase(x) = P7. Agents not contained in the match are left unmatched. There are no changes to any state component. The transition satisfies δ(x) = x. The execution trace is an infinitely repeating sequence of states.
+The state satisfies phase(x) = P7. Agents not contained in the match are left unmatched. There are no changes to any state component. The transition satisfies delta(x) = x. The execution trace is an infinitely repeating sequence of states.
+The state satisfies phase(x) = P7. Agents not contained in the match are left unmatched. There are no changes to any state component. The transition satisfies delta(x) = x. The execution trace is an infinitely repeating sequence of states.
 
 3.4 Fairness Mechanism
 

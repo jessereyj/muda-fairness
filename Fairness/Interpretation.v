@@ -18,7 +18,7 @@ Local Open Scope bool_scope.
 Definition p_allocOK      : predicate := 0.
 (* p_has_cprice: predicate index for “clearing price exists”. *)
 Definition p_has_cprice   : predicate := 1.
-(* p_bounds_pstar: predicate index for marginal-pair bounds on the clearing price p_star. *)
+(* p_bounds_pstar: predicate index for marginal-pair bounds on the clearing price pstar. *)
 Definition p_bounds_pstar : predicate := 2.
 (* p_price_rule: predicate index for the deterministic clearing-price rule. *)
 Definition p_price_rule   : predicate := 3.

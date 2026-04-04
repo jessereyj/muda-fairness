@@ -6,9 +6,11 @@ DISCUSSION
 
 This chapter analyzes the Scenario 1 execution from Chapter 5 and relates it to the fairness properties defined in Chapter 4. No new execution scenarios are introduced. The discussion interprets the execution using the deterministic operational semantics from Chapter 3 and the LTL semantics from Chapter 4.
 
-Let x0 be the initial state for Scenario 1. Since the transition system is deterministic, x0 induces a unique infinite execution trace σ, obtained by iterating the deterministic transition function δ and stuttering after reaching the terminal phase, where δ(x) = x when phase(x) = P7.
+This chapter is an illustration of the general results from Chapter 4 and does not introduce new proofs.
 
-LTL satisfaction is evaluated using the Chapter 4 relation σ, i ⊨ φ.
+Let x0 be the initial state for Scenario 1. Since the transition system is deterministic, x0 induces a unique infinite execution trace sigma, obtained by iterating the deterministic transition function delta and stuttering after reaching the terminal phase, where delta(x) = x when phase(x) = P7.
+
+LTL satisfaction is evaluated using the Chapter 4 relation sigma, i |= phi.
 
 The fairness properties discussed here are formally proven in Chapter 4 and mechanically checked in Rocq.
 
@@ -18,7 +20,7 @@ Priority fairness concerns the matching step. Whenever the mechanism selects whi
 
 In Scenario 1, each time the trace enters Phase P3 and a match is produced, the selected buyer and seller follow the intended greedy priority rule. Outside Phase P3, the execution only updates state information or progresses through phases, so there is no opportunity to violate priority.
 
-Therefore, the execution trace satisfies the priority fairness invariant, consistent with the general result proven in Chapter 4, that is, σ ⊨ priorityOK.
+Therefore, the execution trace satisfies the priority fairness invariant, consistent with the general result proven in Chapter 4, that is, sigma |= priorityOK.
 
 6.3 Quantity Fairness
 
@@ -26,7 +28,7 @@ Quantity fairness is an accounting requirement. For each order, the initial quan
 
 In Scenario 1, each matching step adds entries to the match record, and the residual quantities correspond exactly to what remains after allocation. When the execution reaches the terminal phase and then stutters, the match record no longer changes, and the derived residual quantities remain constant. The same conservation relation therefore holds at every step.
 
-Thus, the execution trace satisfies the quantity fairness invariant, consistent with the general result proven in Chapter 4, that is, σ ⊨ quantityOK.
+Thus, the execution trace satisfies the quantity fairness invariant, consistent with the general result proven in Chapter 4, that is, sigma |= quantityOK.
 
 6.4 Price Fairness
 
@@ -34,14 +36,14 @@ Price fairness captures the uniform pricing rule of the mechanism. When a cleari
 
 In Scenario 1, the guard is false before any match exists, so the price constraint does not apply at the beginning of the trace. Once matches exist and a marginal pair is determined, the guard becomes true. From that point onward, the clearing price satisfies the marginal bounds and follows the uniform pricing rule.
 
-Therefore, the execution trace satisfies the price fairness invariant, consistent with the general result proven in Chapter 4, that is, σ ⊨ priceOK.
+Therefore, the execution trace satisfies the price fairness invariant, consistent with the general result proven in Chapter 4, that is, sigma |= priceOK.
 
 6.5 Integration with LTL Semantics
 
-The trace σ provides the structure for evaluating LTL formulas. Each time index i corresponds to the MUDA state reached after i deterministic steps from x0, and atomic propositions are evaluated from that state.
+The trace sigma provides the structure for evaluating LTL formulas. Each time index i corresponds to the MUDA state reached after i deterministic steps from x0, and atomic propositions are evaluated from that state.
 
 Chapter 5 illustrates how fairness is realized on a concrete execution trace. In this trace, priorityOK, quantityOK, and priceOK hold at time 0. Since each formula is an invariant expressed using G, satisfaction at time 0 implies that the corresponding property holds at every state along the execution trace.
 
 This Scenario 1 result is a concrete instance of the general theorems in Chapter 4. Chapter 4 establishes that for all inputs bs and as_list, the induced execution trace from initial_state bs as_list satisfies the priority, quantity, and price fairness formulas. Chapter 6 uses the Scenario 1 trace to show how these general results appear in a concrete execution and how the step-by-step behavior aligns with the proven invariants.
 
-Since each fairness formula has the form G φ, satisfaction at time 0 implies that the property holds at all indices of the execution trace.
+Since each fairness formula has the form G phi, satisfaction at time 0 implies that the property holds at all indices of the execution trace.
