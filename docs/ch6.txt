@@ -30,7 +30,7 @@ Thus, the execution trace satisfies the quantity fairness invariant, consistent 
 
 6.4 Price Fairness
 
-Price fairness captures the uniform pricing rule of the mechanism. When a clearing price is well-defined from the current match record, the mechanism must produce a single clearing price that lies within the marginal bid and ask bounds and is applied uniformly to all matched trades. When no clearing price can yet be determined, the obligation is not imposed.
+Price fairness captures the uniform pricing rule of the mechanism. When a clearing price is well-defined from the current match record, the mechanism must produce a single clearing price that lies within the marginal bid and ask bounds and follows the deterministic pricing rule. When no clearing price can yet be determined, the obligation is not imposed.
 
 In Scenario 1, the guard is false before any match exists, so the price constraint does not apply at the beginning of the trace. Once matches exist and a marginal pair is determined, the guard becomes true. From that point onward, the clearing price satisfies the marginal bounds and follows the uniform pricing rule.
 
@@ -42,6 +42,6 @@ The trace σ provides the structure for evaluating LTL formulas. Each time index
 
 Chapter 5 illustrates how fairness is realized on a concrete execution trace. In this trace, priorityOK, quantityOK, and priceOK hold at time 0. Since each formula is an invariant expressed using G, satisfaction at time 0 implies that the corresponding property holds at every state along the execution trace.
 
-This Scenario 1 result is a concrete instance of the general theorems in Chapter 4. Chapter 4 establishes that for every initial state, the induced execution trace satisfies the priority, quantity, and price fairness formulas. Chapter 6 uses the Scenario 1 trace to show how these general results appear in a concrete execution and how the step-by-step behavior aligns with the proven invariants.
+This Scenario 1 result is a concrete instance of the general theorems in Chapter 4. Chapter 4 establishes that for all inputs bs and as_list, the induced execution trace from initial_state bs as_list satisfies the priority, quantity, and price fairness formulas. Chapter 6 uses the Scenario 1 trace to show how these general results appear in a concrete execution and how the step-by-step behavior aligns with the proven invariants.
 
 Since each fairness formula has the form G φ, satisfaction at time 0 implies that the property holds at all indices of the execution trace.

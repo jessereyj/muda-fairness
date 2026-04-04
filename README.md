@@ -68,11 +68,12 @@ Run `./stats.sh` to report:
 
 ### Quantity Fairness
 
-Quantity fairness is evaluated over the MUDA execution trace using the Chapter 4
-state predicates (math notation): residual conservation via the residual functions
-(`residual_bid`/`residual_ask` over the match record) and the match record entries.
+Quantity fairness in this repo is an accounting consistency invariant: for each order,
+the initial quantity is exactly decomposed into allocated quantity (from the match record)
+plus residual quantity (derived from the match record).
 
-Proven for traces starting from initial states (as an invariant lifted to LTL).
+This is a conservation-style property (no over-allocation and arithmetic consistency),
+not an efficiency/maximality statement.
 
 ### Priority Fairness
 
@@ -82,11 +83,12 @@ the priority orderings).
 
 ### Uniform Price Fairness
 
-Uniform price fairness states that trades recorded in the match record are
-priced consistently with the clearing price carried by the state (i.e.,
-`clearing_price(x) = Some c`) as determined by MUDA.
+Uniform price fairness is verified as a property of the clearing price computed from
+the match record by `determine_clearing_price`.
 
-Proven for traces starting from initial states.
+Separately, the development proves that once the protocol stores a clearing price in the
+state field `clearing_price` (post-pricing phases), that stored value agrees with
+`determine_clearing_price` and therefore satisfies the same bounds/rule properties.
 
 See the Chapter 4 predicate notation mapping in [NOTATION.md](NOTATION.md) and
 the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
@@ -104,7 +106,7 @@ the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 - The three fairness properties in this repo are expressed as invariants, so `G` (plus propositional connectives) is sufficient for them:
 	- Priority: `G(p_prioB_step) ∧ G(p_prioS_step)` in [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
 	- Quantity: `G(p_allocOK)` in [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
-		- Price: `G(p_has_cprice → (p_bounds_pstar ∧ p_price_rule))` in [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
+	- Price: `G(p_has_cprice → (p_bounds_pstar ∧ p_price_rule))` in [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
 
 3) **Can all three fairness properties be verified using Rocq?**
 - Yes. Each property is proven for MUDA traces from initial states:
@@ -120,6 +122,8 @@ the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 - Lemmas and theorems closed with `Qed`, reported by `stats.sh`
 - Admitted lemmas: **0**, enforced by `check.sh`
 All fairness theorems are proven using `Qed`. No fairness proof uses `Admitted`.
+
+Note: `check.sh` checks for literal `Admitted.` in the current `.v` sources; it is not a broader repository trust audit.
 
 This refactored version contains no admitted proofs in the `.v` sources under `LTL/`, `MUDA/`, `Fairness/`, and `Example/`.
 

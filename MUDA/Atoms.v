@@ -1,5 +1,5 @@
 From Stdlib Require Import List Arith Bool.
-From MUDA Require Import Types State Sorting Matching ClearingPrice Transitions.
+From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
 (** Panel index (thesis ↔ code)
 
@@ -30,6 +30,18 @@ Definition bounds_pstar_prop (s : State) : Prop :=
   match marginal_pair s, determine_clearing_price s with
   | Some (b,a), Some c => ask_price a <= c /\ c <= price b
   | _, _ => True
+  end.
+
+(* cprice_field_ok_prop: once the protocol is past pricing, the stored clearing_price
+   (if present) agrees with determine_clearing_price. *)
+Definition cprice_field_ok_prop (s : State) : Prop :=
+  match phase s with
+  | P1 | P2 | P3 | P4 => True
+  | _ =>
+      match clearing_price s with
+      | None => True
+      | Some c => determine_clearing_price s = Some c
+      end
   end.
 
 

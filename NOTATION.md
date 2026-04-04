@@ -121,9 +121,12 @@ state components (orders, residuals, match record, clearing price).
   [MUDA/State.v](MUDA/State.v) computed as `residual_bid b (matches x)`.
 - `residualS(s) = r` — true iff seller order `s` has residual `r`:
   [MUDA/State.v](MUDA/State.v) computed as `residual_ask s (matches x)`.
-- `price(x) = c` — true iff the clearing price stored in state `x` is `c`:
-- `price(x) = c` — true iff the clearing price stored in state `x` is `Some c`:
+- `price(x) = c` — (computed price) true iff `determine_clearing_price x = Some c`:
+  this is the notion used by the Chapter 4 price-fairness atoms in [MUDA/Atoms.v](MUDA/Atoms.v).
+- `clearing_price(x) = Some c` — (stored field) true iff the MUDA state record stores `Some c`:
   [MUDA/State.v](MUDA/State.v) (`clearing_price` field of `State`).
+
+After the pricing transition (Phase P4), the development also proves that whenever the stored field is populated it agrees with the computed `determine_clearing_price` value (see [Fairness/PriceFairness.v](Fairness/PriceFairness.v)).
 - `feasible(b, s)` — true iff `p(b) ≥ a(s)` and both residuals are positive:
   [MUDA/Matching.v](MUDA/Matching.v) (`feasible`) / `is_feasible`.
 

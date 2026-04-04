@@ -115,7 +115,7 @@ p_star = p(b2) = 8
 
 In the mechanization, this computation is performed by the Phase P4 pricing transition, and the resulting post-pricing state, where the clearing price field is set, is in Phase P5.
 
-This price is applied uniformly to all matched trades.
+From this point onward, the computed clearing price is fixed by the match record and the deterministic pricing rule. In the mechanized execution, the post-pricing state in Phase P5 stores this value in the clearing_price field and subsequent phases preserve it.
 
 5.1.6 Priority Fairness (Illustration)
 
@@ -182,4 +182,4 @@ In this execution:
 
 p_star = 8
 
-All matched trades are executed at the clearing price p_star. This illustrates how the marginal pair and residual condition determine the uniform clearing price in the operational execution.
+The computed clearing price p_star is determined from the marginal pair and the residual condition according to the deterministic pricing rule. This illustrates the concrete value returned by the mechanized determine_clearing_price function and, after pricing, the value stored in the state’s clearing_price field.

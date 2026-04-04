@@ -143,6 +143,18 @@ Definition match_step (s : State) : option State :=
   | None => None
   end.
 
+(* match_step_preserves_clearing_price: a successful match_step does not change clearing_price. *)
+Lemma match_step_preserves_clearing_price :
+  forall s s',
+    match_step s = Some s' ->
+    clearing_price s' = clearing_price s.
+Proof.
+  intros s s' Hm.
+  unfold match_step in Hm.
+  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
+  inversion Hm; subst s'; simpl; reflexivity.
+Qed.
+
 (* allocated_bid_app_single: effect on allocated_bid of appending one match. *)
 Lemma allocated_bid_app_single :
   forall b ms m,

@@ -203,6 +203,8 @@ echo ""
 # Optional: generate HTML documentation for enabled files
 info "Generating HTML docs (optional step)..."
 mkdir -p html || true
+# Remove stale pages from previous runs (so html/ reflects only the currently enabled .v files)
+find html -maxdepth 1 -type f -name "*.html" -delete 2>/dev/null || true
 if rocq doc -html -d html ${ENABLED_VFILES}; then
     info "✓ HTML docs generated under ./html"
 else

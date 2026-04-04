@@ -92,6 +92,17 @@ Definition do_clearing_price (s : State) : State :=
    ; clearing_price := determine_clearing_price s
    ; phase := P5 |}.
 
+(* determine_clearing_price_do_clearing_price: do_clearing_price does not change the computed price. *)
+Lemma determine_clearing_price_do_clearing_price :
+  forall s,
+    determine_clearing_price (do_clearing_price s) = determine_clearing_price s.
+Proof.
+  intro s.
+  unfold determine_clearing_price, do_clearing_price.
+  simpl.
+  reflexivity.
+Qed.
+
 (* clearing_price_bounds: the computed clearing price lies in [ask_price a, price b] for the marginal pair. *)
 Lemma clearing_price_bounds :
   forall s b a c,
