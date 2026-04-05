@@ -111,7 +111,7 @@ Purpose notes (Chapter 4)
 ### 4.3 Fairness Verification Layer (Atoms + LTL Theorems)
 
 - MUDA predicates as atoms (allocOK, has_cprice, bounds_pstar, price_rule, prioB_step_ok, prioS_step_ok): [MUDA/Atoms.v](MUDA/Atoms.v) (state-level predicates) + [Fairness/Interpretation.v](Fairness/Interpretation.v) (atom numbering and interpretation).
-- Fairness LTL formulas and mechanically-checked proofs:
+- Fairness LTL formulae and mechanically-checked proofs:
   - [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
   - [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
   - [Fairness/PriceFairness.v](Fairness/PriceFairness.v)

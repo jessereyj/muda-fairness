@@ -14,7 +14,7 @@ Delimit Scope LTL_scope with LTL.
 (* predicate: propositional variables (PROP) are represented by nat indices. *)
 Definition predicate := nat.
 
-(* LTL_formula: abstract syntax tree for LTL formulas over predicates. *)
+(* LTL_formula: abstract syntax tree for LTL formulae over predicates. *)
 Inductive LTL_formula : Type :=
   | Atom       : predicate -> LTL_formula
   | Not        : LTL_formula -> LTL_formula

@@ -182,7 +182,7 @@ Core entry points
 LTL/Syntax.v (formula language)
 Core entry points
 - predicate: the type of atomic proposition identifiers
-- LTL_formula: inductive definition of LTL formulas (including X, F, G)
+- LTL_formula: inductive definition of LTL formulae (including X, F, G)
 
 LTL/Semantics.v (formula interpretation)
 Core entry points
