@@ -1,199 +1,227 @@
-CHAPTER 4
+Chapter 4
 
 FORMAL LOGIC AND VERIFICATION
 
-This chapter presents the formal language and semantics used to specify and verify properties of MUDA executions.
+This chapter describes the formal language used to express and verify properties of MUDA executions.
 
-First, it defines Linear Temporal Logic (LTL) using trace semantics.
+First, it gives the syntax and trace semantics of Linear Temporal Logic (LTL) formalized in Rocq.
 
-Second, it explains how the deterministic MUDA transition system from Chapter 3 induces an infinite execution trace (via terminal stuttering).
+Second, it introduces the deterministic MUDA transition system from Chapter 3 and explains the induction of an infinite execution trace through terminal stuttering.
 
-Third, it defines MUDA-specific atomic propositions as state-level predicates and explains how they are interpreted at each position of the MUDA execution trace via a fixed interpretation function.
+Third, it defines atomic propositions particular to MUDA as state predicates, and describes their interpretation on MUDA execution traces through a fixed interpretation function.
 
-The Rocq development mechanizes the LTL syntax and trace semantics, the MUDA-to-trace interpretation, and the mechanically checked proofs of the three fairness properties.
+The entire machinery developed here is formalized and verified in Rocq: the LTL syntax and semantics, the MUDA trace interpretation through stuttering, and the mechanically checked proofs of the fairness properties.
 
-The Rocq development defines LTL with the temporal operators X (next), F (eventually), and G (always). The operators X and F are included in the formal syntax for completeness, but they are not used in the fairness verification results of this thesis. The fairness properties verified in this thesis are invariance properties and are stated using G only.
+This thesis uses LTL with the X, F, and G operators. Operators X and F are provided in the mechanization for completeness. However, the LTL formalization is not used for verification of fairness properties, which are invariance properties formulated using the operator G only.
 
-All fairness properties in this chapter are invariants. Each property is expressed in the form G phi, which states that phi holds at every position of the execution trace. This matches the nature of MUDA correctness, where violations must not occur at any step of the execution.
+All fairness properties considered in this chapter are invariant properties. Each is formulated in terms of G phi, stating that phi holds at every position along the infinite execution trace.
 
-The framework is organized into three layers:
+The framework can be viewed as comprising three layers:
 
-Foundation layer: LTL syntax and trace semantics (see Syntax.v and Semantics.v).
-MUDA protocol layer: deterministic transition system and infinite executions via terminal stuttering (see Transitions.v and Interpretation.v).
-Fairness verification layer: LTL fairness formulas and mechanically checked proofs on MUDA traces (see PriorityFairness.v, QuantityFairness.v, PriceFairness.v).
+foundation layer: LTL formalization in terms of syntax and semantics (see Syntax.v and Semantics.v);
+
+MUDA protocol layer: deterministic MUDA transition system and induction of an infinite execution trace via terminal stuttering (see Transitions.v and Interpretation.v);
+
+fairness verification layer: LTL fairness formulae and proofs over MUDA traces (see PriorityFairness.v, QuantityFairness.v, and PriceFairness.v).
 
 4.1 Foundation Layer
 
-This thesis uses semantic satisfaction over a fixed, MUDA-induced trace and does not require a proof system; completeness is not required for this verification approach since satisfaction is shown directly over induced traces, rather than deriving formulas.
+This thesis employs semantic satisfaction over a fixed, MUDA-induced trace. Hence, no proof system is required. Completeness is unnecessary because the trace is used to show satisfaction rather than derivability of formulae.
 
-The fairness properties considered in this thesis are invariance properties. Therefore, they can be expressed using the temporal operator G, and no additional temporal operators are required.
+As in this chapter, the properties of interest are invariance properties. They are formulated in terms of the temporal operator G.
 
 4.1.1 Syntax
 
-Let PROP be the set of atomic propositions. In this development, PROP is implemented as nat (natural-number indices). Atomic propositions are written as Atom p where p : nat (see Syntax.v).
+Let PROP denote the set of atomic propositions. For purposes of mechanization, atomic propositions are implemented as natural number indices. Thus, in this development PROP is implemented as nat. An atomic proposition is written as Atom p where p : nat (see Syntax.v).
 
-Formulas are built from atomic propositions using propositional connectives and temporal operators. The mechanization provides X, F, and G; the fairness specifications in this thesis use G only.
+Propositional logic is extended by propositional connectives. Temporal logic adds the temporal operators X, F, and G.
 
 Propositional: ~, /\, \/, ->
+
 Temporal: X (next), F (eventually), G (always)
 
-Grammar (informal):
+The following gives the informal grammar of LTL formulae.
+
+Grammar (informal)
+
 phi ::= Atom(p) | ~phi | (phi /\ psi) | (phi \/ psi) | (phi -> psi) | X phi | F phi | G phi
 
-These formulas are interpreted over MUDA execution traces defined below.
+These LTL formulae are interpreted over MUDA execution traces defined below.
 
 4.1.2 Semantics
 
-A valuation is a function v : PROP -> Prop. An infinite trace is a sequence of valuations:
+A valuation is a map v : PROP -> Prop. An infinite trace is an infinite sequence of valuations:
+
 sigma = (v0, v1, v2, ...)
 
-Satisfaction sigma, i |= phi is defined as follows:
+Satisfaction over an infinite trace is denoted by sigma, i |= phi. For a given valuation, the satisfaction predicate is defined recursively according to the following rules.
 
 Propositional rules:
-sigma, i |= Atom(p) iff vi(p) holds
-sigma, i |= ~phi iff not (sigma, i |= phi)
+
+sigma, i |= Atom(p) iff vi(p)
+
+sigma, i |= ~phi iff not(sigma, i |= phi)
+
 sigma, i |= (phi /\ psi) iff (sigma, i |= phi) and (sigma, i |= psi)
+
 sigma, i |= (phi \/ psi) iff (sigma, i |= phi) or (sigma, i |= psi)
-sigma, i |= (phi -> psi) iff not (sigma, i |= phi) or (sigma, i |= psi)
+
+sigma, i |= (phi -> psi) iff not(sigma, i |= phi) or (sigma, i |= psi)
 
 Temporal rules:
+
 sigma, i |= X phi iff sigma, i+1 |= phi
-sigma, i |= G phi iff for all j >= i, sigma, j |= phi
+
+sigma, i |= G phi iff sigma, j |= phi for all j >= i
+
 sigma, i |= F phi iff there exists j >= i such that sigma, j |= phi
 
-Write sigma |= phi to mean sigma, 0 |= phi.
+Denote satisfaction sigma, 0 |= phi by sigma |= phi.
 
 4.2 MUDA Protocol Layer (Executions as Infinite Traces)
 
-This section connects the deterministic MUDA execution from Chapter 3 to the trace semantics used for LTL satisfaction.
+This section relates the MUDA transition function defined in Chapter 3 to the trace semantics necessary for LTL satisfaction.
 
-A MUDA execution is generated by the deterministic transition function delta from Chapter 3. The deterministic transition function is written mathematically as delta : State -> State and corresponds in the mechanization to step (see Transitions.v), with delta provided as a thesis-level alias.
+An MUDA execution is generated by the deterministic transition function delta of Chapter 3. The deterministic transition function is defined formally as delta : State -> State and corresponds to step in Rocq (see Transitions.v) defined as delta under thesis level alias.
 
-Given an initial state x0, the finite-step execution is defined as:
+Given an initial state x0, the finite execution is defined as follows.
+
 xi = execute i x0
 
-where execute iterates delta i times.
+Here, execute i denotes application of delta i times.
 
-Although matching terminates, LTL requires an infinite trace. When a terminal state is reached, the execution is extended by stuttering. If phase(x) = P7, then delta(x) = x. The execution therefore becomes an infinite sequence by repeating the terminal state.
+Even though the transition eventually matches, LTL requires an infinite trace. Once a terminal state is reached, the MUDA execution is prolonged using stuttering. More precisely, once phase(x) = P7, then delta(x) = x. Therefore, MUDA execution becomes an infinite sequence of terminal states.
 
-Terminal stuttering ensures that every finite execution induces an infinite trace required for LTL semantics.
+Inducing terminal stuttering ensures that every finite MUDA execution induces an infinite trace as required by LTL.
 
-Since the transition system is deterministic, each initial state induces a unique execution trace. Therefore, verifying sigma |= phi establishes that the MUDA execution from that initial state satisfies phi globally.
+Since the MUDA transition system is deterministic, each initial state induces a unique execution trace. Hence, a proof that the MUDA trace sigma |= phi establishes that the MUDA execution trace from that state satisfies phi globally.
 
 4.3 Atomic Propositions and Interpretation
 
-Atomic propositions are state-level predicates defined in Atoms.v. The mapping from PROP = nat to these predicates is defined in Interpretation.v using the function:
+The state-level atomic propositions are defined in Atoms.v. The mapping from PROP = nat to the state-level predicates is defined in Interpretation.v through the function interp_atom as follows.
 
 interp_atom : State -> nat -> Prop
 
-The interpretation function lifts state-level predicates to trace-level formulas by evaluating each atomic predicate at every state of the execution trace.
+The function lifts state predicates into trace predicates as follows: interp_atom (execute i x0)(p) returns the truth value of atomic proposition p at position i in trace generated from state x0.
 
-The infinite trace is defined as:
-mu(x0), where the i-th valuation is given by interp_atom (execute i x0).
+An infinite trace from state x0 is defined as:
 
-The mapping includes:
+mu(x0), whose i-th valuation is interp_atom (execute i x0)
 
-p_allocOK, p_has_cprice, p_bounds_pstar, p_price_rule, p_prioB_step, p_prioS_step, and phase predicates.
+The atomic propositions include the following predicates defined as follows:
 
-Each predicate corresponds directly to definitions from Chapter 3, including allocation consistency, priority selection, and clearing price correctness.
+p_allocOK, p_has_cprice, p_bounds_pstar, p_price_rule, p_prioB_step, p_prioS_step, and the phase predicates.
 
-The interpretation function correctly reflects the state-level predicates defined in Atoms.v. Therefore, satisfaction of atomic propositions corresponds directly to evaluation of these predicates on execution states.
+Each predicate corresponds directly to definitions in Chapter 3 (e.g., allocation consistency, priority selection, and clearing price correctness).
 
-This correspondence is formalized by the lemma mu_trace_atom_at_execute, which states that atomic propositions evaluated on the trace coincide with their evaluation on execution states.
+Interpretation correctly reflects state-level predicates defined in Atoms.v, so evaluation of the atom predicate on the MUDA trace corresponds directly to evaluation of the predicates on the state.
 
-In the remainder of this chapter, we refer to the repeated use of this correspondence together with the standard unfolding of G (formalized in the mechanization as the lemma satisfies_always_unfold) to move from state-level predicates about execute i x0 to LTL satisfaction statements about mu(x0). This step is referred to as the LTL lift step.
+This correspondence is established in the mechanization by the following lemma.
 
-This lift step is used repeatedly when stating and proving the fairness invariants as LTL properties in Sections 4.4 and 4.5.
+Lemma mu_trace_atom_at_execute (forall i, atomic predicate evaluated at position i on MUDA trace coincides with that evaluated at state execute i x0).
 
-Stuttering and the lifting step play distinct roles in connecting the MUDA operational model to LTL semantics.
+In what follows, this lifting step will repeatedly be applied together with satisfies_always_unfold (unfolding of G in Rocq), in order to lift statements about execute i x0 predicates to LTL satisfaction over the trace mu(x0). This lifting step is referred to as LTL lift step.
 
-Stuttering ensures that every MUDA execution induces an infinite trace, as required by LTL. Formally, once phase(x) = P7 holds, delta(x) = x and the execution trace becomes a constant sequence. This avoids special termination cases when evaluating LTL formulae, and ensures that once the protocol reaches its final state, no new violations of fairness can occur.
+The LTL lift step is used repeatedly when specifying and proving the fairness properties as LTL in Sections 4.4 and 4.5.
 
-The lifting step connects state-level predicates to trace-level satisfaction. The fairness properties are defined as predicates over execution states, such as allocOK(x) or bounds_pstar(x). However, LTL formulae are interpreted over positions of an execution trace. The lifting step uses the correspondence between execute i x0 and the i-th position of the trace mu(x0), together with the interpretation function for atomic propositions, to translate state-based statements into temporal statements. This allows properties proven over all reachable states to be expressed as LTL invariants of the form sigma |= G phi.
+Both the process of stuttering and the process of LTL lifting serve different purposes.
+
+Stuttering makes sure that every MUDA execution generates an infinite trace, which is necessary in order to make sense of an LTL formula. That is, once phase(x) = P7, it follows that delta(x) = x so that the MUDA execution becomes an infinite constant sequence. This makes sure that there is no need for special handling of terminal states in formula evaluation. Once the protocol reaches its terminal state, it is impossible to violate the fairness property further.
+
+The LTL lifting step connects satisfaction of the LTL formulae over execution trace and satisfaction of state-level predicates. The fairness properties are formulated in terms of predicates over the MUDA execution states (e.g., allocOK(x) and bounds_pstar(x)). Yet, in the framework of LTL, formulae are evaluated over infinite traces. In essence, the LTL lift step is a step translating statements about states execute i x0 into LTL formulae over positions i of trace mu(x0) using the interpretation function.
+
+As a result, properties formulated over all reachable states can be translated into LTL formulae, which establish the property in question for all states reachable during the execution.
 
 4.3.1 Formal Priority Correctness
 
-Priority fairness concerns the correctness of the deterministic greedy selection step in Phase P3. This step-based notion is expressed as a predicate of the current state x by inspecting the deterministic selector computed from x.
+Priority fairness is concerned with the deterministic greedy selection step in Phase P3. Such a step-based notion is formalized as predicate on state x by inspecting deterministic selector.
 
-These predicates formalize that no higher-priority feasible alternative is skipped by the deterministic selector.
+These predicates formalize the fact that no higher-priority feasible alternative is ignored by the deterministic selector.
 
-Let x be a state. The two priority step predicates are defined in Atoms.v as follows.
+Suppose state x. The two predicates of priority fairness for state x are defined in Atoms.v as follows.
 
-Buyer-step priority correctness, priorityB_step_ok_prop(x), states that if phase(x) = P3 and the selector finds a feasible pair with chosen buyer b, then no feasible buyer with higher priority than b exists in x. Formally, for all buyers b' in bids(x), if prioB(b', b) holds, then there does not exist any seller a' in asks(x) such that feasibility holds for the pair (b', a') with respect to matches(x).
+Definition priorityB_step_ok_prop (buyer-step priority correctness): Suppose phase(x) = P3. Assume that the deterministic selector picks a pair (b,a). Then, no buyer b' in bids(x) has higher priority compared to b and is feasible. That is, for all buyers b' in bids(x), if prioB(b', b) holds, then there does not exist any seller a' in asks(x) such that the pair (b', a') is feasible with respect to matches(x).
 
-Seller-step priority correctness, priorityS_step_ok_prop(x), states that if phase(x) = P3 and the selector chooses the pair (b, a), then no feasible seller with higher priority than a exists for the chosen buyer b in x. Formally, for all sellers a' in asks(x), if prioS(a', a) holds and feasibility holds for (b, a'), then a contradiction follows.
+Definition priorityS_step_ok_prop (seller-step priority correctness): Suppose phase(x) = P3. Assume that the deterministic selector picked the pair (b,a). Then, no seller a' in asks(x) has higher priority compared to a and is feasible for the chosen buyer b in state x. That is, for all sellers a' in asks(x), if prioS(a', a) and the feasibility of (b, a') holds, then a contradiction follows.
 
 4.4 Fairness Specifications (LTL)
 
-All fairness properties are expressed as LTL formulae over the MUDA trace sigma = mu(initial_state(bs, as_list)).
+Every fairness property is formulated in terms of LTL formula over trace sigma = mu(initial_state(bs, as_list)).
 
 4.4.1 Priority Fairness
 
-Define:
-priorityOK := (G (Atom p_prioB_step)) /\ (G (Atom p_prioS_step))
+Define priorityOK := (G (Atom p_prioB_step)) /\ (G (Atom p_prioS_step))
 
-Priority fairness states that at every step where a matching decision is made, the mechanism respects the priority ordering of agents. The predicates p_prioB_step and p_prioS_step encode the correctness of the deterministic selection for buyers and sellers, respectively. The use of G ensures that this condition holds at every position along the execution trace, not only at specific matching steps. Outside Phase P3, these predicates hold trivially since no matching decision is performed.
+Priority fairness says that at each moment the priority criterion is satisfied. In essence, this means that, when selecting a matching pair, the protocol should respect the priority ordering of agents. The predicate p_prioB_step and p_prioS_step guarantee that for buyers and sellers, respectively, the criteria for correct selection is met. Here, the temporal operator G is used in order to ensure that the predicates hold at every step of the protocol execution, not just during actual matching decisions. Outside Phase P3, these predicates hold trivially because matching decisions are not performed.
 
 4.4.2 Quantity Fairness
 
-Define:
-quantityOK := G (Atom p_allocOK)
+Define quantityOK := G (Atom p_allocOK)
 
-Quantity fairness expresses conservation of units across the execution. The predicate p_allocOK states that, for each agent, the initial quantity is exactly decomposed into allocated and residual quantities. The temporal operator G enforces that this accounting identity holds at every state of the execution trace, including after termination where the system stutters.
+Quantity fairness guarantees that the total units consumed by each participant does not exceed the supply (demand) available in that participant's initial inventory. In other words, this property formalizes the conservation of units across the protocol run. The predicate p_allocOK is true if the initial quantity in state is exactly divided into allocated and residual quantity for every participant. The operator G makes sure that the allocation is always balanced.
 
-Implementation note (decidable equality).
-In the mechanization, the allocated quantity functions scan the match record and must test whether a match refers to a given bid or ask. This is implemented using decidable equality functions for the relevant record types (e.g., bid_eq_dec and ask_eq_dec), generated using the standard decide equality mechanism. This supports executable definitions and does not change the mathematical statement of the fairness properties.
+Implementation Note (decidable equality).
+
+For efficiency purposes, the allocation predicates have been formulated using decidable equality (see bid_eq_dec and ask_eq_dec), generated automatically using the standard Coq decide equality command.
 
 4.4.3 Price Fairness
 
-Define:
-priceOK := G (Atom p_has_cprice -> (Atom p_bounds_pstar /\ Atom p_price_rule))
+Define priceOK := G (Atom p_has_cprice -> (Atom p_bounds_pstar /\ Atom p_price_rule))
 
-Price fairness captures the uniform pricing rule of MUDA. The predicate p_has_cprice acts as a guard that indicates when a clearing price pstar is well-defined from the current match record. When this condition holds, the clearing price must lie within the marginal bid and ask bounds, and must follow the deterministic pricing rule. The implication ensures that the pricing constraint is enforced only when a clearing price exists. The use of G guarantees that this condition holds at every step of the execution trace.
+Price fairness specifies the fact that the uniform pricing policy of MUDA is followed. The predicate p_has_cprice is a predicate on whether the clearing price is well-defined from the match record in state x. If this is true, the clearing price must fall between the marginal buyer and seller bids, and satisfy the deterministic pricing criterion. This property is stated using implication since it only needs to hold if a clearing price is actually defined.
 
-Outside the pricing-relevant conditions (e.g., when no marginal pair exists, or in phases before pricing), the corresponding atoms are defined to hold trivially; the non-trivial constraints apply exactly when a clearing price is defined.
+Note that, outside of pricing-relevant conditions (e.g., if no marginal pair is present), or outside the relevant phases (before phase P7), atoms p_bounds_pstar and p_price_rule hold trivially. These non-trivial conditions hold exactly when a clearing price is well-defined.
 
 4.5 Fairness Verification (Theorems and Proof Sketches)
 
-Theorems are proven for all traces generated from all initial states.
+For each fairness property, a mechanized theorem is given asserting that the property holds for all traces generated from any initial state.
 
 Theorem 1 (Priority Fairness).
+
 For all inputs bs and as_list, let sigma = mu(initial_state(bs, as_list)). Then:
+
 sigma |= (G (Atom p_prioB_step)) /\ (G (Atom p_prioS_step)).
 
-This result states that the fairness property holds at every state along the execution trace induced by any input lists bs and as_list.
+This theorem states that the fairness property holds for all states of all traces induced by arbitrary input lists bs and as_list.
 
-Mechanized theorem: priority_fairness_LTL_initial.
+Rocq: priority_fairness_LTL_initial.
 
-Proof (sketch).
-Fix an arbitrary index j >= 0 and let x = execute j (initial_state(bs, as_list)). By the interpretation lemma, satisfaction at position j reduces to evaluation of the corresponding state predicates on x. Each predicate is guarded by phase(x) = P3; outside Phase P3 it holds trivially because no matching decision is made in those states. When phase(x) = P3, the deterministic selector ensures that no feasible order with higher priority exists. Therefore, the predicates hold for every j, and the G formulas follow.
+Proof sketch.
+
+Fix any j >= 0 and let x = execute j (initial_state(bs, as_list)). Then, by definition, the satisfaction sigma, j |= (... G ...) is equivalent to the satisfaction of predicates on x by the interpretation lemma. Both p_prioB_step and p_prioS_step are guarded by the assumption that phase(x) = P3. In this case, the deterministic selector ensures that no better feasible orders can exist, hence both predicates are satisfied.
 
 Theorem 2 (Quantity Fairness).
+
 For all inputs bs and as_list, let sigma = mu(initial_state(bs, as_list)). Then:
+
 sigma |= G (Atom p_allocOK).
 
-This result states that the fairness property holds at every state along the execution trace induced by any input lists bs and as_list.
+This theorem states that the fairness property holds for all states of all traces induced by arbitrary input lists bs and as_list.
 
-Mechanized theorem: quantity_fairness_LTL_initial.
+Rocq: quantity_fairness_LTL_initial.
 
-Proof (sketch).
-The predicate allocOK holds in the initial state and is preserved by each transition. Fix an arbitrary index j and consider x = execute j (initial_state(bs, as_list)). Induction over execute establishes allocOK(x) for all indices. A lemma connects allocOK to allocOK_prop, which is the interpretation of Atom p_allocOK. The lifting step yields the LTL result.
+Proof sketch.
+
+The predicate allocOK holds for initial state, and is maintained by each state transition. Fix any j and consider state x = execute j (initial_state(bs, as_list)). Using induction on execute establishes the predicate allocOK(x). Lemma allocOK_to_allocOK_prop connects the allocOK(x) with atom predicate p_allocOK(x). Lifting of the predicate yields the theorem.
 
 Theorem 3 (Price Fairness).
+
 For all inputs bs and as_list, let sigma = mu(initial_state(bs, as_list)). Then:
+
 sigma |= G (Atom p_has_cprice -> (Atom p_bounds_pstar /\ Atom p_price_rule)).
 
-This result states that the fairness property holds at every state along the execution trace induced by any input lists bs and as_list.
+This theorem states that the fairness property holds for all states of all traces induced by arbitrary input lists bs and as_list.
 
-Mechanized theorem: uniform_price_fairness_LTL_initial.
+Rocq: uniform_price_fairness_LTL_initial.
 
-Proof (sketch).
-Fix an arbitrary index j and let x = execute j (initial_state(bs, as_list)). Satisfaction reduces to evaluation of the pricing predicates at x. The pricing lemmas establish boundedness of pstar and correctness of the deterministic pricing rule whenever p_has_cprice holds. The implication therefore holds pointwise for every j and lifts to G.
+Proof sketch.
+
+Fix any j and let x = execute j (initial_state(bs, as_list)). Then, the satisfaction sigma, j |= (...) reduces to the evaluation of pricing lemmas, which show that, in state x, if p_has_cprice(x) holds, then the clearing price is indeed bounded and follows the pricing rule.
 
 4.6 Verification vs. Satisfiability
 
-This thesis does not search for traces satisfying a formula. It fixes the MUDA-induced trace from an initial state and proves in Rocq that this trace satisfies the fairness formulas. Since the transition system is deterministic, each initial state induces a unique infinite trace. The proofs establish that all such traces satisfy the fairness properties.
+This thesis does not seek any traces satisfying the fairness formulae. It takes the MUDA-induced trace for arbitrary initial state and demonstrates the satisfaction of the formulae over this trace using the Rocq prover. As noted above, due to determinism of the MUDA transition system, each initial state induces an unique MUDA trace.
 
-Therefore, the verification establishes that all executions generated by the MUDA transition system from initial_state inputs satisfy the specified fairness properties.
+Hence, the verification shows that all executions of MUDA generated by transition system with inputs as initial states satisfy the fairness properties.
 
-Thus, fairness is established for all executions generated by the MUDA transition system.
+Thus, fairness is guaranteed for all executions generated by the MUDA transition system.
