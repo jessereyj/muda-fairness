@@ -8,6 +8,8 @@ This chapter analyzes the Scenario 1 execution from Chapter 5 and relates it to 
 
 This chapter is an illustration of the general results from Chapter 4 and does not introduce new proofs.
 
+The scenario illustrates the verified properties but does not constitute a proof.
+
 Let x0 be the initial state for Scenario 1. Since the transition system is deterministic, x0 induces a unique infinite execution trace sigma, obtained by iterating the deterministic transition function delta and stuttering after reaching the terminal phase, where delta(x) = x when phase(x) = P7.
 
 LTL satisfaction is evaluated using the Chapter 4 relation sigma, i |= phi.

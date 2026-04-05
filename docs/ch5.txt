@@ -41,30 +41,47 @@ residB(b1, x0) = 5
 residB(b2, x0) = 4
 residS(s1, x0) = 3
 residS(s2, x0) = 4
-M(x0) = empty
+M(x0) is empty
 pstar is not yet determined
 
 5.1.3 Execution Trace
+
+Following the trace semantics defined in Chapter 4, the execution of the MUDA protocol is interpreted as an infinite trace. Each step of the execution corresponds to a position in the trace. The state at position i is obtained by applying the transition function i times from the initial state.
+
+When the protocol reaches the terminal phase P7, the transition function returns the same state. The trace therefore continues by repeating this state. This follows the stuttering construction.
+
+The evaluation of fairness properties at each step is based on the corresponding MUDA state. This follows the lifting of state predicates to trace positions.”
 
 The execution trace proceeds through the seven protocol phases.
 
 Note that the Phase P2 sorting transition produces a Phase P3 state before any match is executed.
 
-The clearing price pstar is computed by the Phase P4 pricing transition, so it first appears in the successor Phase P5 state.
+The clearing price is computed during the transition from Phase P4 and is first stored in the state at Phase P5.
 
 Each row corresponds to xi = execute i x0.
 
 State | Phase | Residual Quantities | Match Record | Clearing Price
 x0 | P1 | b1=5, b2=4, s1=3, s2=4 | empty | undefined
+At step 0, the trace position 0 corresponds to the MUDA state after 0 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x1 | P2 | b1=5, b2=4, s1=3, s2=4 | empty | undefined
+At step 1, the trace position 1 corresponds to the MUDA state after 1 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x2 | P3 | b1=5, b2=4, s1=3, s2=4 | empty | undefined
+At step 2, the trace position 2 corresponds to the MUDA state after 2 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x3 | P3 | b1=2, b2=4, s1=0, s2=4 | [(b1, s1, 3)] | undefined
+At step 3, the trace position 3 corresponds to the MUDA state after 3 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x4 | P3 | b1=0, b2=4, s1=0, s2=2 | [(b1, s1, 3), (b1, s2, 2)] | undefined
+At step 4, the trace position 4 corresponds to the MUDA state after 4 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x5 | P3 | b1=0, b2=2, s1=0, s2=0 | [(b1, s1, 3), (b1, s2, 2), (b2, s2, 2)] | undefined
+At step 5, the trace position 5 corresponds to the MUDA state after 5 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x6 | P4 | b1=0, b2=2, s1=0, s2=0 | same as x5 | undefined
+At step 6, the trace position 6 corresponds to the MUDA state after 6 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x7 | P5 | b1=0, b2=2, s1=0, s2=0 | same as x5 | pstar = 8
+At step 7, the trace position 7 corresponds to the MUDA state after 7 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x8 | P6 | b1=0, b2=2, s1=0, s2=0 | same as x5 | pstar = 8
+At step 8, the trace position 8 corresponds to the MUDA state after 8 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
 x9 | P7 | b1=0, b2=2, s1=0, s2=0 | same as x5 | pstar = 8
+At step 9, the trace position 9 corresponds to the MUDA state after 9 transitions. The predicates evaluated at this step follow the lifting defined in Chapter 4.
+Since the protocol has reached Phase P7, the transition function returns the same state. The trace continues by repeating this state, following the stuttering construction. The fairness properties remain satisfied in all subsequent positions.
 
 After x9, the execution trace continues by repeating x9.
 

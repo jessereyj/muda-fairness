@@ -30,18 +30,16 @@ Definition priorityOK : LTL_formula :=
 Local Lemma prioB_implies_bid_priority : forall b1 b2,
   prioB b1 b2 -> bid_priority b1 b2.
 Proof.
-  intros b1 b2 [Hgt | [Heq Hlt]].
-  - left; exact Hgt.
-  - right. split; [exact Heq|]. left; exact Hlt.
+  intros b1 b2 H.
+  exact (MUDA.Sorting.prioB_implies_bid_priority b1 b2 H).
 Qed.
 
 (* prioS_implies_ask_priority: thesis prioS implies the deterministic refinement ask_priority. *)
 Local Lemma prioS_implies_ask_priority : forall a1 a2,
   prioS a1 a2 -> ask_priority a1 a2.
 Proof.
-  intros a1 a2 [Hlt | [Heq Hlt]].
-  - left; exact Hlt.
-  - right. split; [exact Heq|]. left; exact Hlt.
+  intros a1 a2 H.
+  exact (MUDA.Sorting.prioS_implies_ask_priority a1 a2 H).
 Qed.
 
 (* Boolean comparators correspond to their Prop-level refinements. *)
@@ -51,22 +49,7 @@ Local Lemma bid_priorityb_sound : forall b1 b2,
   bid_priorityb b1 b2 = true -> bid_priority b1 b2.
 Proof.
   intros b1 b2 Hb.
-  unfold bid_priorityb in Hb.
-  apply Bool.orb_true_iff in Hb.
-  destruct Hb as [Hprice | Heq].
-  - left. apply Nat.ltb_lt in Hprice. lia.
-  - apply Bool.andb_true_iff in Heq.
-    destruct Heq as [Hpeqt Ht].
-    right. split.
-    + apply Nat.eqb_eq in Hpeqt. exact Hpeqt.
-    + apply Bool.orb_true_iff in Ht.
-      destruct Ht as [Hts | Hid].
-      * left. apply Nat.ltb_lt in Hts. exact Hts.
-      * apply Bool.andb_true_iff in Hid.
-        destruct Hid as [Htseq Hid].
-        right. split.
-        -- apply Nat.eqb_eq in Htseq. exact Htseq.
-        -- apply Nat.ltb_lt in Hid. exact Hid.
+  exact (MUDA.Sorting.bid_priorityb_true_priority b1 b2 Hb).
 Qed.
 
 (* ask_priorityb_sound: boolean comparator true ⇒ Prop-level ask_priority. *)
@@ -74,22 +57,7 @@ Local Lemma ask_priorityb_sound : forall a1 a2,
   ask_priorityb a1 a2 = true -> ask_priority a1 a2.
 Proof.
   intros a1 a2 Hb.
-  unfold ask_priorityb in Hb.
-  apply Bool.orb_true_iff in Hb.
-  destruct Hb as [Hprice | Heq].
-  - left. apply Nat.ltb_lt in Hprice. exact Hprice.
-  - apply Bool.andb_true_iff in Heq.
-    destruct Heq as [Hpeqt Ht].
-    right. split.
-    + apply Nat.eqb_eq in Hpeqt. exact Hpeqt.
-    + apply Bool.orb_true_iff in Ht.
-      destruct Ht as [Hts | Hid].
-      * left. apply Nat.ltb_lt in Hts. exact Hts.
-      * apply Bool.andb_true_iff in Hid.
-        destruct Hid as [Htseq Hid].
-        right. split.
-        -- apply Nat.eqb_eq in Htseq. exact Htseq.
-        -- apply Nat.ltb_lt in Hid. exact Hid.
+  exact (MUDA.Sorting.ask_priorityb_true_priority a1 a2 Hb).
 Qed.
 
 (* bid_priorityb_complete: Prop-level bid_priority ⇒ boolean comparator returns true. *)

@@ -38,10 +38,36 @@ html/      - Generated browsing documentation (coqdoc output)
 ./stats.sh
 ```
 
+### Watch mode (rebuild on changes)
+
+```bash
+./watch.sh
+```
+
+### Generate unused-symbol report
+
+```bash
+./unused_symbols.sh
+```
+
+This writes/updates `UNUSED_SYMBOLS.md` (heuristic report based on cross-file textual references).
+
 ## Requirements
 
 - **Rocq** 9.1.0 or compatible
 - **Bash** for build scripts
+- **Python 3** (for `./unused_symbols.sh`)
+
+## Scripts
+
+This repository provides these shell entry points:
+
+- [build.sh](build.sh) — clean + compile all `.v` files (and generate HTML docs)
+- [clean.sh](clean.sh) — remove build artifacts
+- [check.sh](check.sh) — ensure there are no `Admitted.` proofs
+- [stats.sh](stats.sh) — summary statistics (counts, admitted lemmas, etc.)
+- [watch.sh](watch.sh) — rebuild repeatedly while editing
+- [unused_symbols.sh](unused_symbols.sh) — regenerate `UNUSED_SYMBOLS.md` using [scripts/unused_symbols.py](scripts/unused_symbols.py)
 
 ## Build Process
 
@@ -114,6 +140,18 @@ the corresponding Rocq definitions in [MUDA/State.v](MUDA/State.v).
 	- Quantity: `quantity_fairness_LTL_initial` in [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
 	- Price: `uniform_price_fairness_LTL_initial` in [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
 - The build/check scripts enforce that no proofs are left unfinished (see `./check.sh`).
+
+## Chapter 5 (Scenario 1): executable trace alignment
+
+Chapter 5 uses a concrete market instance to align thesis-level “time index / predicate evaluation” prose with the mechanized execution trace.
+
+- Scenario file: [Example/Scenario1.v](Example/Scenario1.v)
+- Purpose:
+	- Fix a concrete initial state `st0 := initial_state bs_s1 as_s1` and its induced infinite trace `run_s1 := mu_trace st0`.
+	- Pin down specific execution checkpoints using `execute t st0` (e.g., when the match record grows and when the clearing price becomes stored).
+	- Instantiate the general fairness theorems on this concrete trace.
+- Where the Chapter 5 mapping is documented:
+	- The “time index convention” and atom/predicate interpretation notes are recorded in [NOTATION.md](NOTATION.md) (see the Chapter 5 section).
 
 ## Verification Status
 

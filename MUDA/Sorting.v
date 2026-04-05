@@ -1,4 +1,5 @@
-From Stdlib Require Import List Arith Bool.
+From Stdlib Require Import List Arith Bool Lia.
+From Stdlib.Sorting Require Import Sorted Permutation.
 Import ListNotations.
 From MUDA Require Import Types State.
 
@@ -87,3 +88,80 @@ Definition do_sorting (s : State) : State :=
      matches := matches s;
      clearing_price := clearing_price s;
      phase := P3 |}.
+
+
+(** * Proof support: comparator correctness and thesis correspondence *)
+
+(** ** Boolean comparator soundness (strict) *)
+
+Lemma bid_priorityb_true_priority :
+  forall b1 b2,
+    bid_priorityb b1 b2 = true -> bid_priority b1 b2.
+Proof.
+  intros b1 b2 H.
+  unfold bid_priorityb in H.
+  apply Bool.orb_true_iff in H as [Hprice|Hrest].
+  - left. apply Nat.ltb_lt in Hprice. lia.
+  - apply Bool.andb_true_iff in Hrest as [Heq Ht].
+    apply Nat.eqb_eq in Heq.
+    right.
+    split; [exact Heq|].
+    apply Bool.orb_true_iff in Ht as [Hts|Hid].
+    + left. apply Nat.ltb_lt in Hts. exact Hts.
+    + apply Bool.andb_true_iff in Hid as [Heqts Hltid].
+      apply Nat.eqb_eq in Heqts.
+      apply Nat.ltb_lt in Hltid.
+      right. split; [exact Heqts|exact Hltid].
+Qed.
+
+Lemma ask_priorityb_true_priority :
+  forall a1 a2,
+    ask_priorityb a1 a2 = true -> ask_priority a1 a2.
+Proof.
+  intros a1 a2 H.
+  unfold ask_priorityb in H.
+  apply Bool.orb_true_iff in H as [Hprice|Hrest].
+  - left. apply Nat.ltb_lt in Hprice. exact Hprice.
+  - apply Bool.andb_true_iff in Hrest as [Heq Ht].
+    apply Nat.eqb_eq in Heq.
+    right.
+    split; [exact Heq|].
+    apply Bool.orb_true_iff in Ht as [Hts|Hid].
+    + left. apply Nat.ltb_lt in Hts. exact Hts.
+    + apply Bool.andb_true_iff in Hid as [Heqts Hltid].
+      apply Nat.eqb_eq in Heqts.
+      apply Nat.ltb_lt in Hltid.
+      right. split; [exact Heqts|exact Hltid].
+Qed.
+
+
+(** ** Explicit correspondence to the thesis priority relations (Definition 7)
+
+    The deterministic refinement agrees with the thesis order, and only adds an
+    extra deterministic tie-break when price and time are equal.
+*)
+
+Lemma prioB_implies_bid_priority :
+  forall b1 b2,
+    prioB b1 b2 -> bid_priority b1 b2.
+Proof.
+  intros b1 b2 H.
+  unfold prioB in H.
+  unfold bid_priority.
+  destruct H as [Hgt|[Heq Hlt]].
+  - left; exact Hgt.
+  - right. split; [exact Heq|]. left; exact Hlt.
+Qed.
+
+Lemma prioS_implies_ask_priority :
+  forall a1 a2,
+    prioS a1 a2 -> ask_priority a1 a2.
+Proof.
+  intros a1 a2 H.
+  unfold prioS in H.
+  unfold ask_priority.
+  destruct H as [Hlt|[Heq Hlt_ts]].
+  - left; exact Hlt.
+  - right. split; [exact Heq|]. left; exact Hlt_ts.
+Qed.
+

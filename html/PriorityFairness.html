@@ -68,18 +68,16 @@ Panel index (thesis ↔ code)
 <span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">prioB_implies_bid_priority</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">prioB</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> -&gt; <span class="id" title="var">bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> [<span class="id" title="var">Hgt</span> | [<span class="id" title="var">Heq</span> <span class="id" title="var">Hlt</span>]].<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">left</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hgt</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">right</span>. <span class="id" title="tactic">split</span>; [<span class="id" title="tactic">exact</span> <span class="id" title="var">Heq</span>|]. <span class="id" title="tactic">left</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hlt</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exact</span> (<span class="id" title="var">MUDA.Sorting.prioB_implies_bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">H</span>).<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Local Lemma</span> <span class="id" title="var">prioS_implies_ask_priority</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">prioS</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> -&gt; <span class="id" title="var">ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> [<span class="id" title="var">Hlt</span> | [<span class="id" title="var">Heq</span> <span class="id" title="var">Hlt</span>]].<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">left</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hlt</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">right</span>. <span class="id" title="tactic">split</span>; [<span class="id" title="tactic">exact</span> <span class="id" title="var">Heq</span>|]. <span class="id" title="tactic">left</span>; <span class="id" title="tactic">exact</span> <span class="id" title="var">Hlt</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exact</span> (<span class="id" title="var">MUDA.Sorting.prioS_implies_ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">H</span>).<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
@@ -89,22 +87,7 @@ Panel index (thesis ↔ code)
 &nbsp;&nbsp;<span class="id" title="var">bid_priorityb</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> = <span class="id" title="var">true</span> -&gt; <span class="id" title="var">bid_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">Hb</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">bid_priorityb</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hb</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.orb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hb</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hb</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hprice</span> | <span class="id" title="var">Heq</span>].<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">left</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hprice</span>. <span class="id" title="var">lia</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Heq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Heq</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hpeqt</span> <span class="id" title="var">Ht</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>. <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hpeqt</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hpeqt</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.orb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Ht</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Ht</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hts</span> | <span class="id" title="var">Hid</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">left</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hts</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hts</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hid</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hid</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Htseq</span> <span class="id" title="var">Hid</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>. <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Htseq</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Htseq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hid</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hid</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exact</span> (<span class="id" title="var">MUDA.Sorting.bid_priorityb_true_priority</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> <span class="id" title="var">Hb</span>).<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
@@ -112,22 +95,7 @@ Panel index (thesis ↔ code)
 &nbsp;&nbsp;<span class="id" title="var">ask_priorityb</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> = <span class="id" title="var">true</span> -&gt; <span class="id" title="var">ask_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">Hb</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">ask_priorityb</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hb</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.orb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hb</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hb</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hprice</span> | <span class="id" title="var">Heq</span>].<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">left</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hprice</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hprice</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Heq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Heq</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hpeqt</span> <span class="id" title="var">Ht</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>. <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hpeqt</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hpeqt</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.orb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Ht</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Ht</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hts</span> | <span class="id" title="var">Hid</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">left</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hts</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hts</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hid</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hid</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Htseq</span> <span class="id" title="var">Hid</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>. <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Htseq</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Htseq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hid</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hid</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exact</span> (<span class="id" title="var">MUDA.Sorting.ask_priorityb_true_priority</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> <span class="id" title="var">Hb</span>).<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>

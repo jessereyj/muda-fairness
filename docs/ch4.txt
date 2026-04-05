@@ -61,6 +61,8 @@ where execute iterates delta i times.
 
 Although matching terminates, LTL requires an infinite trace. When a terminal state is reached, the execution is extended by stuttering. If phase(x) = P7, then delta(x) = x. The execution therefore becomes an infinite sequence by repeating the terminal state.
 
+Terminal stuttering ensures that every finite execution induces an infinite trace required for LTL semantics.
+
 Since the transition system is deterministic, each initial state induces a unique execution trace. Therefore, verifying sigma |= phi establishes that the MUDA execution from that initial state satisfies phi globally.
 
 4.3 Atomic Propositions and Interpretation
@@ -68,6 +70,8 @@ Since the transition system is deterministic, each initial state induces a uniqu
 Atomic propositions are state-level predicates defined in Atoms.v. The mapping from PROP = nat to these predicates is defined in Interpretation.v using the function:
 
 interp_atom : State -> nat -> Prop
+
+The interpretation function lifts state-level predicates to trace-level formulas by evaluating each atomic predicate at every state of the execution trace.
 
 The infinite trace is defined as:
 mu(x0), where the i-th valuation is given by interp_atom (execute i x0).

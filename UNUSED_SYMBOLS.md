@@ -5,18 +5,18 @@ Heuristic only: comments are not stripped; qualified names/notations can confuse
 ## Summary
 | File | Top-level symbols | Unused outside file | Unused anywhere (heuristic) |
 |---|---:|---:|---:|
+| Fairness/PriceFairness.v | 9 | 7 | 0 |
 | MUDA/Types.v | 12 | 6 | 0 |
-| MUDA/Sorting.v | 11 | 4 | 0 |
-| MUDA/Matching.v | 12 | 3 | 0 |
+| MUDA/Sorting.v | 15 | 4 | 0 |
+| MUDA/Transitions.v | 11 | 4 | 0 |
+| MUDA/Matching.v | 13 | 3 | 0 |
 | Fairness/Interpretation.v | 11 | 2 | 0 |
-| MUDA/ClearingPrice.v | 8 | 2 | 0 |
-| MUDA/Transitions.v | 6 | 2 | 0 |
-| Fairness/PriceFairness.v | 2 | 0 | 0 |
+| MUDA/ClearingPrice.v | 9 | 2 | 0 |
 | Fairness/PriorityFairness.v | 2 | 0 | 0 |
 | Fairness/QuantityFairness.v | 2 | 0 | 0 |
 | LTL/Semantics.v | 3 | 0 | 0 |
 | LTL/Syntax.v | 2 | 0 | 0 |
-| MUDA/Atoms.v | 6 | 0 | 0 |
+| MUDA/Atoms.v | 7 | 0 | 0 |
 | MUDA/State.v | 8 | 0 | 0 |
 
 ## Per-file details
@@ -31,11 +31,18 @@ Unused outside file:
 - `nth_phase`
 
 ### Fairness/PriceFairness.v
-- Total symbols: 2
-- Unused outside file: 0
+- Total symbols: 9
+- Unused outside file: 7
 - Unused anywhere (heuristic): 0
 
-(Every symbol is referenced from another file.)
+Unused outside file:
+- `cprice_post_pricing_initial`
+- `cprice_post_pricing_execute_initial`
+- `cprice_field_ok_initial`
+- `cprice_field_ok_execute_initial`
+- `clearing_price_field_agrees_determine_initial`
+- `clearing_price_field_bounds_initial`
+- `clearing_price_field_rule_initial`
 
 ### Fairness/PriorityFairness.v
 - Total symbols: 2
@@ -66,14 +73,14 @@ Unused outside file:
 (Every symbol is referenced from another file.)
 
 ### MUDA/Atoms.v
-- Total symbols: 6
+- Total symbols: 7
 - Unused outside file: 0
 - Unused anywhere (heuristic): 0
 
 (Every symbol is referenced from another file.)
 
 ### MUDA/ClearingPrice.v
-- Total symbols: 8
+- Total symbols: 9
 - Unused outside file: 2
 - Unused anywhere (heuristic): 0
 
@@ -82,7 +89,7 @@ Unused outside file:
 - `marginal_pair_price_bound`
 
 ### MUDA/Matching.v
-- Total symbols: 12
+- Total symbols: 13
 - Unused outside file: 3
 - Unused anywhere (heuristic): 0
 
@@ -92,7 +99,7 @@ Unused outside file:
 - `allocated_ask_app_single`
 
 ### MUDA/Sorting.v
-- Total symbols: 11
+- Total symbols: 15
 - Unused outside file: 4
 - Unused anywhere (heuristic): 0
 
@@ -110,13 +117,15 @@ Unused outside file:
 (Every symbol is referenced from another file.)
 
 ### MUDA/Transitions.v
-- Total symbols: 6
-- Unused outside file: 2
+- Total symbols: 11
+- Unused outside file: 4
 - Unused anywhere (heuristic): 0
 
 Unused outside file:
 - `finish_matching`
 - `wf_state_step_preservation`
+- `cprice_field_ok_step_preservation`
+- `cprice_post_pricing_step_preservation`
 
 ### MUDA/Types.v
 - Total symbols: 12

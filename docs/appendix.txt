@@ -30,7 +30,7 @@ The Rocq code is included with the project repository. The mechanized developmen
 - MUDA/        MUDA operational model (types, state, sorting, matching, clearing price, transitions, atomic predicates)
 - LTL/         Linear Temporal Logic syntax and semantic interpretation over infinite traces
 - Fairness/    Interpretation of atoms over MUDA states, fairness formulas, and mechanized proofs
-- Example/     Concrete executable scenario(s) and instantiation proofs (Scenario 1)
+- Example/     Concrete executable scenario(s) and instantiation checks (Scenario 1; illustration-only)
 
 In addition, the root of the repository contains build and checking scripts (e.g., build.sh and check.sh) and the project configuration (_CoqProject).
 
@@ -38,13 +38,13 @@ Note on generated documentation
 The html/ folder contains generated browsing documentation (coqdoc output). These HTML files are not the primary source; the primary source is the .v files listed above.
 
 Panel navigation note
-Each .v file begins with a short "Panel index (thesis <-> code)" block, and each top-level Definition/Lemma/Theorem/Inductive/CoInductive/Fixpoint/Record has an immediate one-line "Name: purpose" comment. This is intended to make it easy for peer/panel reviewers to scan and map thesis claims to the mechanized artifacts.
+Most .v files begin with a short "Panel index (thesis <-> code)" block, and many key top-level Definition/Lemma/Theorem items have a nearby one-line "Name: purpose" comment. This is intended to make it easy for peer/panel reviewers to scan and map thesis claims to the mechanized artifacts.
 
 Suggested reading order (quick navigation)
 If the goal is to see "where the code is" and "what is proved" quickly, the fastest path through the development is:
 
 1) Start from the concrete example and the end-to-end claims
-- Example/Scenario1.v (defines an initial market instance, runs execute-based checks, and proves the fairness formulas for that scenario)
+- Example/Scenario1.v (defines an initial market instance and runs execute-based checks; it also instantiates the general fairness theorems for Scenario 1 as an illustration)
 
 2) Then open the three fairness theorems (what is proved, in general)
 - Fairness/PriorityFairness.v
@@ -101,7 +101,7 @@ Fairness properties and proofs (folder: Fairness/)
 - PriceFairness.v      Uniform price fairness formula and proof for traces from initial states
 
 Executable scenario(s) (folder: Example/)
-- Scenario1.v          Concrete initial market instance, execute-based trace checks, and scenario-level proofs of the fairness formulas
+- Scenario1.v          Concrete initial market instance and execute-based trace checks; instantiates the general fairness theorems for Scenario 1 as an illustration
 
 B.4 Key entry points per file (main definitions and results)
 This section lists the main entry points per file. Each file lists (1) the core definitions/results to read first and (2) other notable helpers that support the proofs.
@@ -157,7 +157,7 @@ Other notable helpers
 
 MUDA/ClearingPrice.v (clearing price computation)
 Core entry points
-- determine_clearing_price: computes the clearing price as an option
+- determine_clearing_price: computes the clearing price pstar as an option
 - do_clearing_price: updates the state with the computed clearing price
 - clearing_price_bounds: main lemma relating the computed price to bounds conditions
 Other notable helpers
@@ -218,7 +218,7 @@ Core entry points
 - uniform_price_fairness_LTL_initial: main theorem (uniform price fairness holds from all initial states)
 Other notable helpers
 
-Example/Scenario1.v (concrete scenario and end-to-end checks)
+Example/Scenario1.v (illustration-only concrete scenario and end-to-end checks)
 Core entry points
 - st0: concrete initial state for Scenario 1 (Local)
 - run_s1: the scenario trace sigma := mu(st0) (Local)
@@ -258,6 +258,96 @@ Fairness/QuantityFairness.v
 
 Fairness/PriceFairness.v
 - Theorem uniform_price_fairness_LTL_initial
+
+
+B.4.2 Derived facts used later (Chapter 3 navigation)
+
+Purpose
+These items are listed only as navigation aids (they are referenced by the Chapter 4/5 mechanization), not as additional theory beyond the Chapter 3 operational model.
+
+1) Residuals and accounting identities
+- Residuals are computed from initial quantities and the match record: MUDA/State.v (allocated_bid, allocated_ask, residual_bid, residual_ask).
+- The development maintains the intended “no over-allocation” bounds via invariants used in the fairness proofs (see MUDA/Matching.v and MUDA/Transitions.v for preservation lemmas).
+
+2) Halting condition of Phase P3
+- Matching stops when no feasible pair is found: MUDA/Matching.v (find_feasible, match_step).
+
+3) Transition from P3 to P4
+- Implemented in MUDA/Transitions.v (delta/step uses finish_matching when match_step returns None).
+
+4) Clearing price stability after matching
+- Computed in P4 and preserved in later phases by delta:
+  MUDA/ClearingPrice.v (do_clearing_price), MUDA/Transitions.v (step cases for P5–P7).
+
+5) Clearing price boundedness
+- Bounding lemma for the computed uniform price: MUDA/ClearingPrice.v (clearing_price_bounds).
+
+
+B.5 Proof coverage notes (module-by-module)
+
+Purpose
+This subsection records a lightweight proof-coverage/status summary for the main modules, to help readers distinguish (i) definition-only specification layers, (ii) minimal supporting lemmas, and (iii) proof-bearing core protocol modules.
+
+Layer summary (reader guide)
+- Definitional/specification layers (no proof obligations expected here):
+  - LTL/Syntax.v
+  - MUDA/State.v
+  - MUDA/Atoms.v
+- Bridge layer (connects MUDA to the LTL layer):
+  - Fairness/Interpretation.v
+- Proof-bearing operational support (core protocol components + key auxiliary lemmas):
+  - MUDA/Sorting.v
+  - MUDA/Matching.v
+  - MUDA/ClearingPrice.v
+  - MUDA/Transitions.v
+- Main fairness proofs (general theorems proved for all initial states):
+  - Fairness/PriorityFairness.v
+  - Fairness/QuantityFairness.v
+  - Fairness/PriceFairness.v
+- Illustration-only concrete scenario (executable validation + instantiation of the general theorems):
+  - Example/Scenario1.v
+
+LTL/Syntax.v
+- Definitions only (LTL abstract syntax + surface notations). No proofs in this file; no LTL meta-theory beyond syntax.
+
+LTL/Semantics.v
+- Minimal trace semantics layer with one unfolding lemma used throughout the fairness proofs: satisfies_always_unfold.
+
+MUDA/Types.v
+- Routine decidable equality helpers are formally proved. Low-risk proof content.
+
+MUDA/State.v
+- Definitions only (state record + derived computations like allocation and residuals).
+
+MUDA/Sorting.v
+- Proof-bearing support for deterministic priority handling: proves soundness facts relating the boolean comparators to the refined priority relations, and proves that the thesis priority relations imply the deterministic refinement used by the executable model.
+
+MUDA/Matching.v
+- Proof-bearing core: proves feasibility/correctness facts about the greedy selectors and preserves allocation bounds when a match is appended.
+
+MUDA/ClearingPrice.v
+- Good local proof coverage for price determination and bounds, under the well-formed-state predicate wf_state.
+
+MUDA/Transitions.v
+- Central glue proofs: lifts local invariants through protocol execution and is used directly in the final fairness theorems.
+
+MUDA/Atoms.v
+- Specification/atom definition layer only. No proofs; this is expected (atoms are used by the LTL layer and discharged in the Fairness proofs).
+
+Fairness/Interpretation.v
+- Small but essential bridge lemma(s) connecting MUDA execution semantics to the LTL atom interpretation.
+
+Fairness/QuantityFairness.v
+- Complete safety proof for quantity accounting over all executions from initial states.
+
+Fairness/PriceFairness.v
+- Complete safety proof for the implemented uniform-price rule and stored-field consistency.
+
+Fairness/PriorityFairness.v
+- Most substantial proof file: comparator soundness/completeness, transitivity, greedy optimality lemmas, and the LTL priority theorem.
+
+Example/Scenario1.v
+- Illustration-only concrete checked examples (executable validation). Primarily cbv/reflexivity-style checks plus scenario-level instantiations of the general theorems.
   - Fairness/Interpretation.v: mu_trace, mu_trace_atom_at_execute, interp_atom, p_has_cprice, p_bounds_pstar, p_price_rule
   - LTL/Syntax.v: Atom, G, implication (->), conjunction (/\)
   - LTL/Semantics.v: satisfies, satisfies_always_unfold
@@ -279,7 +369,9 @@ Chapter 4/5 (Fairness specifications and mechanized proofs)
 - Fairness/PriorityFairness.v
 - Fairness/QuantityFairness.v
 - Fairness/PriceFairness.v
-- Example/Scenario1.v (concrete instantiation)
+
+Chapter 5 (Scenario 1 illustration)
+- Example/Scenario1.v (illustration-only instantiation and executable checks)
 
 B.6 Verification and reproducibility checks
 The project provides scripts to compile and to enforce that proofs are fully closed (no unfinished proofs). Typical commands used for validation are:
