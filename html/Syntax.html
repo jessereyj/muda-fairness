@@ -19,28 +19,30 @@
 <h1 class="libtitle">Library Syntax</h1>
 
 <div class="code">
+
+<br/>
 </div>
 
 <div class="doc">
-Chapter 4 (Foundation Layer) — Section 4.1.1 (Syntax)
+Panel index (thesis ↔ code)
 
 <div class="paragraph"> </div>
 
-  This file defines the LTL language used throughout the development.
+  Chapter 4.1.1 (Syntax)
+<ul class="doclist">
+<li> predicate: PROP implemented as nat indices
 
-<div class="paragraph"> </div>
+</li>
+<li> LTL_formula: LTL grammar (Atom, ¬, ∧, ∨, →, X, F, G)
 
-  Thesis: PROP = N, and formulas are built from atomic propositions using
-  ¬, ∧, X, and U, with F and G as abbreviating operators.
+</li>
+<li> Notation block: surface syntax used in docs and proofs
 
-<div class="paragraph"> </div>
-
-  Code: atomic propositions are indexed by `predicate := nat`.
+</li>
+</ul>
 
 </div>
 <div class="code">
-<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span>.<br/>
-<span class="id" title="keyword">Import</span> <span class="id" title="var">List.ListNotations</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Declare Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
@@ -58,11 +60,9 @@ Chapter 4 (Foundation Layer) — Section 4.1.1 (Syntax)
 &nbsp;&nbsp;| <span class="id" title="var">Implies</span>    : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
 &nbsp;&nbsp;| <span class="id" title="keyword">Next</span>       : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
 &nbsp;&nbsp;| <span class="id" title="var">Always</span>     : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
-&nbsp;&nbsp;| <span class="id" title="var">Eventually</span> : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span><br/>
-&nbsp;&nbsp;| <span class="id" title="var">Until</span>      : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span>.<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Eventually</span> : <span class="id" title="var">LTL_formula</span> -&gt; <span class="id" title="var">LTL_formula</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">top</span> : <span class="id" title="var">LTL_formula</span> := <span class="id" title="var">Or</span> (<span class="id" title="var">Atom</span> 0) (<span class="id" title="var">Not</span> (<span class="id" title="var">Atom</span> 0)).<br/>
 
 <br/>
 <span class="id" title="keyword">Notation</span> &quot;¬ φ"     := (<span class="id" title="var">Not</span> φ)                   (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 75, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">LTL_scope</span>.<br/>
@@ -72,11 +72,9 @@ Chapter 4 (Foundation Layer) — Section 4.1.1 (Syntax)
 <span class="id" title="keyword">Notation</span> &quot;'X' φ"   := (<span class="id" title="keyword">Next</span> φ)                  (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 75) : <span class="id" title="var">LTL_scope</span>.<br/>
 <span class="id" title="keyword">Notation</span> &quot;'G' φ"   := (<span class="id" title="var">Always</span> φ)                (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 75) : <span class="id" title="var">LTL_scope</span>.<br/>
 <span class="id" title="keyword">Notation</span> &quot;'F' φ"   := (<span class="id" title="var">Eventually</span> φ)            (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 75) : <span class="id" title="var">LTL_scope</span>.<br/>
-<span class="id" title="keyword">Notation</span> &quot;φ ⟪U⟫ ψ" := (<span class="id" title="var">Until</span> φ ψ)               (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 85, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">LTL_scope</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Notation</span> &quot;phi 'IMPLIES' psi" := (<span class="id" title="var">Implies</span> <span class="id" title="var">phi</span> <span class="id" title="var">psi</span>) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 90, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>).<br/>
-<span class="id" title="keyword">Notation</span> &quot;phi 'UNTIL' psi"   := (<span class="id" title="var">Until</span>   <span class="id" title="var">phi</span> <span class="id" title="var">psi</span>) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 85, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>).<br/>
 
 <br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>

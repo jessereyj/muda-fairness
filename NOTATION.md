@@ -2,123 +2,146 @@
 
 This document maps mathematical notation from the thesis (Chapters 3-4) to the corresponding Rocq/Coq definitions in the codebase.
 
+Proof-status note
+This file is a notation and cross-reference bridge. It does not attempt to document proof completeness per module.
+For a lightweight, module-by-module proof coverage/status summary, see Appendix B.5 in [docs/appendix.txt](docs/appendix.txt).
+
 ## Chapter 3 Numbering Index
 
-This section provides a stable cross-reference from Chapter 3 numbering (Structural Assumptions / Definitions / Propositions) to the corresponding Rocq symbols. The code uses descriptive identifiers (not numeric labels); the numeric labels are recorded here and in Coqdoc comments in the relevant `.v` files.
+This section provides a stable cross-reference from Chapter 3 numbering (Definitions / Propositions / phase rules) to the corresponding Rocq symbols. The code uses descriptive identifiers (not numeric labels); the numeric labels are recorded here and in Coqdoc comments in the relevant `.v` files.
 
-### Structural Assumptions (Chapter 3, Section 3.3)
+### Structural properties and execution (Chapter 3)
 
-1. **Order components remain constant**
-  - Transitions never mutate `Bid`/`Ask` record fields; sorting only permutes lists.
-  - See [MUDA/Sorting.v](MUDA/Sorting.v) (`sort_bids`, `sort_asks`, `do_sorting`) and [MUDA/Matching.v](MUDA/Matching.v) (`match_step`).
-  - **Assumption note:** the *existence/correctness* of `sort_bids`/`sort_asks` is axiomatized (as permitted by the thesis scope). The rest of the protocol and all fairness theorems are proved relative to these sorting assumptions.
+1. **Order immutability (Definition 3)**
+  - The transition function δ does not alter order components (price, initial quantity, submission time); Phase P2 only permutes the bid/ask lists.
+  - See [MUDA/Sorting.v](MUDA/Sorting.v) (`do_sorting`) and [MUDA/Transitions.v](MUDA/Transitions.v) (`δ` / `step`).
 
 2. **Determinism (one successor)**
-  - `delta` is modeled as a function `step : State -> State`.
-  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`step`).
+  - The deterministic transition function δ is modeled as a total function `δ : State -> State` (an alias of `step`).
+  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`δ`, underlying `step`).
 
-3. **Terminal preservation**
-  - If `phase = P7` then `step s = s`.
-  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`step`, `P7` branch).
+3. **Terminal state preservation**
+  - If `phase = P7` then `δ s = s`.
+  - See [MUDA/Transitions.v](MUDA/Transitions.v) (`δ`, underlying `step`, `P7` branch).
+
+4. **P3 halting advances to P4**
+  - When `phase = P3` and no feasible pair exists, δ advances the phase to `P4` with orders and match record unchanged.
+  - See [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `match_step`) and [MUDA/Transitions.v](MUDA/Transitions.v) (`finish_matching`, `δ` / `step`).
 
 ### Definitions (Chapter 3)
 
-1. **Feasibility**
-  - [MUDA/State.v](MUDA/State.v) (`feasible_pair`), and boolean form [MUDA/Matching.v](MUDA/Matching.v) (`is_feasible`).
+Definition 1 (Order).
+- Bid/ask orders with unit price, initial unit quantity, and submission time ↔ record types `Bid` and `Ask` in [MUDA/Types.v](MUDA/Types.v).
+- Thesis projection notation `p(b)`, `q(b)`, `t(b)` and `a(s)`, `q(s)`, `t(s)` ↔ record fields:
+  `price` / `quantity` / `ts` for bids and `ask_price` / `ask_quantity` / `ask_ts` for asks.
 
-2. **Traded Unit Quantity**
-  - [MUDA/Matching.v](MUDA/Matching.v) (`create_match` uses `Nat.min`).
+Definition 2 (Agent).
+- Agent kind (buyer vs seller) ↔ `AgentType`/`Agent` in [MUDA/Types.v](MUDA/Types.v) and the ownership fields `buyer : Agent` / `seller : Agent` in `Bid`/`Ask`.
 
-3. **Priority Ordering**
-  - [MUDA/Sorting.v](MUDA/Sorting.v) (`bid_priority`, `ask_priority`, `prioB`, `prioS`).
+Definition 3 (Order Immutability).
+- δ never mutates submitted order components; sorting only reorders the lists.
+- See [MUDA/Transitions.v](MUDA/Transitions.v) (`δ` / `step`) and [MUDA/Sorting.v](MUDA/Sorting.v) (`do_sorting`).
 
-4. **Priority-Consistent Selection**
-  - Encoded as priority-respecting axioms/predicates used in fairness:
-    [MUDA/Atoms.v](MUDA/Atoms.v) (`greedy_respects_priority_bids`, `greedy_respects_priority_asks`, `priorityB_step_ok_prop`, `priorityS_step_ok_prop`).
+Definition 4 (Match Record).
+- Thesis `M(x)` (finite sequence of executed trades) ↔ Code `matches x : list Match` in [MUDA/State.v](MUDA/State.v) (with `Match` in [MUDA/Types.v](MUDA/Types.v)).
 
-5. **Unit Allocation**
-  - [MUDA/State.v](MUDA/State.v) (`allocated_bid`, `allocated_ask`, plus residuals `residual_bid`, `residual_ask`).
+Definition 5 (Residual Unit Quantity).
+- Thesis `allocB(b, M(x))`, `allocS(s, M(x))` ↔ Code `allocated_bid b (matches x)`, `allocated_ask a (matches x)` in [MUDA/State.v](MUDA/State.v).
+- Thesis `residB(b, x)`, `residS(s, x)` ↔ Code `residual_bid b (matches x)`, `residual_ask a (matches x)` in [MUDA/State.v](MUDA/State.v).
 
-6. **Greedy Matching Rule**
-  - [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `match_step`).
+Definition 6 (Feasibility).
+- Prop and boolean feasibility are defined in [MUDA/Matching.v](MUDA/Matching.v) (`feasible`, `is_feasible`).
+- Thesis feasibility uses strict positivity (`residB > 0`, `residS > 0`); in the code (with `nat` residuals) this is implemented as `Nat.leb 1 (residual_*) = true`.
 
-7. **Match Monotonicity**
-  - [MUDA/Matching.v](MUDA/Matching.v) (`match_step_monotonic`) and post-matching stability via [MUDA/Atoms.v](MUDA/Atoms.v) (`match_final_prop`).
+Definition 7 (Priority Ordering).
+- Thesis priority relations `>_B` / `>_S` ↔ Code `prioB` / `prioS` in [MUDA/Sorting.v](MUDA/Sorting.v).
+- Deterministic refinement (tie-breaking by identifiers) ↔ Code `bid_priority` / `ask_priority` plus boolean comparators `bid_priorityb` / `ask_priorityb` in [MUDA/Sorting.v](MUDA/Sorting.v).
 
-8. **Last Marginal Pair**
-  - [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`marginal_pair`).
+Definition 8 (Greedy Matching Rule).
+- Buyer/seller selection under the deterministic refinement ↔ Code selectors `find_feasible` and `best_feasible_ask` in [MUDA/Matching.v](MUDA/Matching.v).
+- State update by adding one trade to the match record ↔ Code `match_step` (appends at most one match using `matches s ++ [m]`).
+- The “no higher-priority feasible agent is skipped” view exposed to LTL ↔ atoms `priorityB_step_ok_prop`, `priorityS_step_ok_prop` in [MUDA/Atoms.v](MUDA/Atoms.v).
 
-9. **Uniform Clearing Price**
-  - [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`determine_clearing_price`).
+Definition 9 (Traded Unit Quantity).
+- Thesis $q = \min(\mathrm{residB}, \mathrm{residS})$ ↔ Code `create_match` uses `Nat.min` in [MUDA/Matching.v](MUDA/Matching.v).
 
-10. **Rejection at Termination**
-  - [MUDA/Atoms.v](MUDA/Atoms.v) (`occurs_bid`, `occurs_ask`, `rejected_bid_prop`, `rejected_ask_prop`).
+Definition 10 (Marginal Matched Pair).
+- Thesis “last element of `M_final`” ↔ Code `marginal_pair` in [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v).
 
-### Propositions (Chapter 3, Section 3.6)
+Definition 11 (Clearing Price).
+- Thesis clearing price `pstar` (sometimes written as $p^*$) ↔ Code `determine_clearing_price : State -> option nat` in [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v).
+- Pricing transition (Phase P4) that stores the computed uniform price ↔ `do_clearing_price` in [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) and Phase handling in [MUDA/Transitions.v](MUDA/Transitions.v).
 
-1. **Residual Non-negativity**
-  - Residuals are `nat`-valued: [MUDA/State.v](MUDA/State.v) (`residual_bid`, `residual_ask`).
-
-2. **Conservation of Quantity in Phase P3**
-  - Residuals are defined from allocation: [MUDA/State.v](MUDA/State.v) (`residual_* = initial - allocated_*`).
-
-3. **Halting Condition of Phase P3**
-  - Matching stops when no feasible pair is found: [MUDA/Matching.v](MUDA/Matching.v) (`find_feasible`, `find_feasible_None_forall`).
-
-4. **Transition from P3 to P4**
-  - Implemented in [MUDA/Transitions.v](MUDA/Transitions.v) (`step` uses `finish_matching` when `match_step` returns `None`).
-
-5. **Clearing Price Stability After Matching**
-  - Computed in P4 and preserved in later phases by `step`:
-    [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`do_clearing_price`), [MUDA/Transitions.v](MUDA/Transitions.v) (`step` cases for P5–P7).
-
-6. **Clearing Price Boundedness**
-  - Proved as [MUDA/ClearingPrice.v](MUDA/ClearingPrice.v) (`clearing_price_bounds`).
-
-7. **Justified Rejection at Termination**
-  - Captured by [MUDA/Atoms.v](MUDA/Atoms.v) (`rejection_justified_prop`) and used in fairness proofs: [Fairness/JustifiedRejection.v](Fairness/JustifiedRejection.v).
+Navigation note
+Some short “derived fact” navigation pointers used by the Chapter 4/5 mechanization are recorded in Appendix B.4.2 in [docs/appendix.txt](docs/appendix.txt).
 
 ## Chapter 4 Index
 
 This section maps Chapter 4’s three-layer framework (foundation / MUDA trace interface / fairness verification) to the Rocq development.
+All fairness properties verified in this development are invariants, stated in the form `G φ`. The temporal operators `X` and `F` are available in the syntax but are not used in the fairness proofs.
 
 ### 4.1 Foundation Layer
 
 4.1.1 **Syntax**
-- Atomic proposition index set PROP = N: [LTL/Syntax.v](LTL/Syntax.v) (`predicate := nat`, `LTL_formula`, `X`, `U`, and abbreviations `F`, `G`).
+- Let `PROP` be the set of atomic propositions; in this development `PROP` is implemented as `nat`:
+  [LTL/Syntax.v](LTL/Syntax.v) (`predicate := nat`, `Atom`, `LTL_formula`).
+- Formulas are built using propositional connectives and temporal operators:
+  - Propositional: `¬` (written `~`), `∧` (`/\`), `∨` (`\/`), `→` (`->`)
+  - Temporal: `X`, `F`, `G`
+- Informal grammar (as in Chapter 4):
+  `phi ::= Atom(p) | ~phi | (phi /\ psi) | (phi \/ psi) | (phi -> psi) | X phi | F phi | G phi`.
 
 4.1.2 **Semantics**
-- Infinite traces and satisfaction: [LTL/Semantics.v](LTL/Semantics.v) (`trace`, `trace_at`, `satisfies`, `models`, `valid`).
-- Lemma 1 (Semantics of F and G): [LTL/Semantics.v](LTL/Semantics.v) (`satisfies_eventually_unfold`, `satisfies_always_unfold`).
+- Infinite traces and satisfaction: [LTL/Semantics.v](LTL/Semantics.v) (`trace`, `satisfies`, notation `σ ⊨ φ`).
+- Lemma (Semantics of G / Always): [LTL/Semantics.v](LTL/Semantics.v) (`satisfies_always_unfold`).
 
-4.1.4 **Axiomatic System**
-- Hilbert-style calculus (A0–A3, MP, necessitation restricted to tautologies): [LTL/Axioms.v](LTL/Axioms.v) (`Provable`, `Ax1`, `Ax2`, `Ax3`).
-
-**Assumption note:** the propositional-tautology predicate `IsPropTaut` is left abstract, and the semantic validity of tautologies is assumed as `A0_valid` (see [LTL/Soundness.v](LTL/Soundness.v)). This matches the thesis treatment of propositional reasoning as standard background.
-
-4.1.5 **Meta-theoretic properties**
-- Soundness (Theorem 2): [LTL/Soundness.v](LTL/Soundness.v) (`soundness`).
-- Weak completeness / adequacy / consistency (Theorems 3–4, Corollary 1): [LTL/Completeness.v](LTL/Completeness.v) (`WeakCompleteness`, `Adequacy`, `Consistency`).
-
-**Assumption note:** weak completeness is obtained from a canonical-countermodel assumption (`canonical_countermodel`) in [LTL/Completeness.v](LTL/Completeness.v), consistent with the thesis’s “standard completeness” positioning.
+**Note:** This repository version keeps the Chapter 4 *semantic* satisfaction layer only (syntax + semantics in [LTL/Syntax.v](LTL/Syntax.v) and [LTL/Semantics.v](LTL/Semantics.v)). It intentionally does not include a Hilbert-style proof system, soundness, or completeness development.
 
 ### 4.2 MUDA Protocol Layer (Traces + Atomic Propositions)
 
-- Determinism (unique trace from an initial state): Chapter 3 `step : State -> State` used coinductively (by construction) in [MUDA/Transitions.v](MUDA/Transitions.v) (`step`).
-- Stuttering after termination (P7 fixed point): [MUDA/Transitions.v](MUDA/Transitions.v) (`step`, `P7 => s`).
-- MUDA execution as infinite valuation trace: [Fairness/Interpretation.v](Fairness/Interpretation.v) (`interp_atom`, `mu_trace`).
-- Trace identification lemma (link to i-fold execution): [Fairness/Interpretation.v](Fairness/Interpretation.v) (`mu_trace_at_execute`, `mu_trace_atom_at_execute`).
+- Determinism (unique trace from an initial state): Chapter 3 transition function `δ : State -> State` (alias of `step`) in [MUDA/Transitions.v](MUDA/Transitions.v) (`δ`, `step`).
+- Stuttering after termination (P7 fixed point): [MUDA/Transitions.v](MUDA/Transitions.v) (`δ` / `step`, `P7 => s`).
+- MUDA execution as infinite valuation trace: [Fairness/Interpretation.v](Fairness/Interpretation.v) (`interp_atom`, `μ` / `mu_trace`).
+- Trace identification lemma (link to i-fold execution for atoms): [Fairness/Interpretation.v](Fairness/Interpretation.v) (`mu_trace_atom_at_execute`).
+
+Purpose notes (Chapter 4)
+- **Stuttering:** LTL is interpreted over infinite traces, while MUDA executions terminate; repeating the terminal state (P7 fixed point) yields an infinite execution without adding special termination cases.
+- **Lifting step:** fairness atoms are state predicates on `execute i x0`; `mu_trace_atom_at_execute` (plus the standard unfolding of `G` via `satisfies_always_unfold`) bridges these state-level facts to trace-level satisfaction statements `μ x0 ⊨ G φ`.
 
 ### 4.3 Fairness Verification Layer (Atoms + LTL Theorems)
 
-- MUDA predicates as atoms (allocOK, no_feasible, has_cprice, bounds, etc.): [MUDA/Atoms.v](MUDA/Atoms.v) (state-level predicates) + [Fairness/Interpretation.v](Fairness/Interpretation.v) (atom numbering and interpretation).
-- Fairness LTL formulas and mechanically-checked proofs:
+- MUDA predicates as atoms (allocOK, has_cprice, bounds_pstar, price_rule, prioB_step_ok, prioS_step_ok): [MUDA/Atoms.v](MUDA/Atoms.v) (state-level predicates) + [Fairness/Interpretation.v](Fairness/Interpretation.v) (atom numbering and interpretation).
+- Fairness LTL formulae and mechanically-checked proofs:
   - [Fairness/PriorityFairness.v](Fairness/PriorityFairness.v)
   - [Fairness/QuantityFairness.v](Fairness/QuantityFairness.v)
   - [Fairness/PriceFairness.v](Fairness/PriceFairness.v)
-  - [Fairness/MatchFinality.v](Fairness/MatchFinality.v)
-  - [Fairness/Maximality.v](Fairness/Maximality.v)
-  - [Fairness/JustifiedRejection.v](Fairness/JustifiedRejection.v)
+
+#### Chapter 4 Atomic Proposition Notation
+
+The thesis presents atomic propositions using mathematical predicate notation.
+In the Rocq development, these are state-level predicates derived from the MUDA
+state components (orders, residuals, match record, clearing price).
+
+- `matched(b, s, q)` — true iff `(b, s, q)` is in the match record:
+  expressed directly by quantifying over `matches x` and relating the `Match` projections
+  (`matched_bid`, `matched_ask`, `match_quantity`).
+- `residualB(b) = r` — true iff buyer order `b` has residual `r`:
+  [MUDA/State.v](MUDA/State.v) computed as `residual_bid b (matches x)`.
+- `residualS(s) = r` — true iff seller order `s` has residual `r`:
+  [MUDA/State.v](MUDA/State.v) computed as `residual_ask s (matches x)`.
+- `price(x) = c` — (computed price) true iff `determine_clearing_price x = Some c`:
+  this is the notion used by the Chapter 4 price-fairness atoms in [MUDA/Atoms.v](MUDA/Atoms.v).
+- `clearing_price(x) = Some c` — (stored field) true iff the MUDA state record stores `Some c`:
+  [MUDA/State.v](MUDA/State.v) (`clearing_price` field of `State`).
+
+After the pricing transition (Phase P4), the development also proves that whenever the stored field is populated it agrees with the computed `determine_clearing_price` value (see [Fairness/PriceFairness.v](Fairness/PriceFairness.v)).
+- `feasible(b, s)` — true iff `p(b) ≥ a(s)` and both residuals are positive:
+  [MUDA/Matching.v](MUDA/Matching.v) (`feasible`) / `is_feasible`.
+
+The LTL layer then assigns truth values to a fixed set of *named* predicates
+(e.g., priority step correctness, quantity allocation bounds, clearing price
+bounds/rule) using [Fairness/Interpretation.v](Fairness/Interpretation.v)
+(`interp_atom`, `μ` / `mu_trace`).
 
 ## Core Data Types
 
@@ -132,7 +155,24 @@ Record Agent := { agent_id : nat; agent_type : AgentType }.
 
 **Thesis:** Not explicitly modeled—agents are implicit in bid/ask ownership.
 
+**Chapter 3 note (one order per agent):** The thesis states “Each agent submits exactly one order.”
+
+- **Modeling choice:** this development represents the submitted orders as lists `bids : list Bid` and `asks : list Ask` inside the MUDA state.
+- **What is enforced:** order *immutability* is enforced by transitions (orders are not mutated).
+- **What is not enforced by the core model:** uniqueness (“one order per agent”) is not encoded as a global invariant; instead it is a property of the concrete inputs used in examples/scenarios.
+
 **Note:** The `Agent` type enables tracking ownership and partitioning bids/asks by participant. This is an implementation refinement that doesn't affect the protocol logic described in the thesis.
+
+---
+
+## Order Immutability
+
+**Thesis (Definition 3):** Once an order is submitted, its components remain unchanged throughout the execution trace.
+
+**Code:** Transitions never mutate the contents of `Bid`/`Ask` records; the only Phase that changes order presentation is P2 sorting, which reorders the lists.
+
+- Sorting step: [MUDA/Sorting.v](MUDA/Sorting.v) (`do_sorting`)
+- Deterministic transition: [MUDA/Transitions.v](MUDA/Transitions.v) (`δ` / `step`) preserves `bids`/`asks` outside of Phase P2
 
 ---
 
@@ -221,14 +261,14 @@ Record Match := {
 
 **Thesis Notation (Chapter 3, Section 3.2):**
 ```
-x = (B, S, orders, residuals, M, p*, phase)
+x = (B, S, orders, residuals, M, pstar, phase)
 ```
 - `B` = set of bids
 - `S` = set of asks
 - `orders` = combined orders
 - `residuals` = remaining quantities
-- `M` = set of matches
-- `p*` = clearing price
+- `M(x)` = match record (finite sequence of executed trades)
+- `pstar` = clearing price (uniform price computed from the final match record; sometimes written as `p*`)
 - `phase` = current phase
 
 **Code:** `MUDA/State.v`
@@ -248,7 +288,7 @@ Record State := {
 - Thesis `B` ↔ Code `bids`
 - Thesis `S` ↔ Code `asks`
 - Thesis `M` ↔ Code `matches`
-- Thesis `p*` ↔ Code `clearing_price`
+- Thesis `pstar` ↔ Code `clearing_price`
 - Thesis `orders` ↔ Code derives from `bids` and `asks`
 - Thesis `residuals` ↔ Code **computed dynamically** (see Allocation Functions below)
 
@@ -307,12 +347,15 @@ Definition residual_ask (a : Ask) (ms : list Match) : nat :=
 feasible(b, s) ⟺ price(b) ≥ ask_price(s) ∧ residual(b) > 0 ∧ residual(s) > 0
 ```
 
-**Code:** `MUDA/State.v`
+**Code:** [MUDA/Matching.v](MUDA/Matching.v)
 ```coq
-Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
-  price b >= ask_price a
-  /\ residual_bid b ms > 0
-  /\ residual_ask a ms > 0.
+Definition is_feasible (b : Bid) (a : Ask) (ms : list Match) : bool :=
+  Nat.leb (ask_price a) (price b)
+  && Nat.leb 1 (residual_bid b ms)
+  && Nat.leb 1 (residual_ask a ms).
+
+Definition feasible (b : Bid) (a : Ask) (ms : list Match) : Prop :=
+  is_feasible b a ms = true.
 ```
 
 **Mapping:** Direct correspondence.
@@ -321,9 +364,9 @@ Definition feasible_pair (b:Bid) (a:Ask) (ms:list Match) : Prop :=
 
 ## Clearing Price
 
-**Thesis (Chapter 3, Definition 9):**
-- Marginal pair `(b*, s*)` is the last match in `M`
-- Clearing price `p*` determined by residuals of marginal pair
+**Thesis (Chapter 3, Definitions 10–11):**
+- Marginal pair `(b_star, s_star)` is the last match in `M_final` (Definition 10)
+- Clearing price `pstar` is determined from the marginal pair and whether the marginal seller is exhausted (Definition 11)
 
 **Code:** `MUDA/ClearingPrice.v`
 ```coq
@@ -338,8 +381,8 @@ Definition determine_clearing_price (s : State) : option nat :=
   | None => None
   | Some (b, a) =>
       if (residual_ask a (matches s) =? 0)
-      then Some (ask_price a)
-      else Some (price b)
+      then Some (price b)
+      else Some (ask_price a)
   end.
 ```
 
@@ -350,52 +393,33 @@ Definition determine_clearing_price (s : State) : option nat :=
 
 ---
 
-## Rejection
+## Rejection (not mechanized in this repository snapshot)
 
-**Thesis (Chapter 3, Definition 10):**
-- An agent is rejected at termination iff it does not appear in the final match record.
+**Thesis (Chapter 3, Phase P7 / Terminal-Rejection):**
+- Agents not contained in the final match record are left unmatched at termination.
 
-**Code:** `MUDA/Atoms.v`
-```coq
-Definition occurs_bid (b : Bid) (ms : list Match) : Prop :=
-  exists m, In m ms /\ matched_bid m = b.
-
-Definition occurs_ask (a : Ask) (ms : list Match) : Prop :=
-  exists m, In m ms /\ matched_ask m = a.
-
-Definition rejected_bid_prop (b : Bid) (s : State) : Prop :=
-  In b (bids s) /\ ~ occurs_bid b (matches s).
-
-Definition rejected_ask_prop (a : Ask) (s : State) : Prop :=
-  In a (asks s) /\ ~ occurs_ask a (matches s).
-```
-
-**Mapping:**
-- Thesis “appears in final match record” ↔ Code `occurs_bid` / `occurs_ask` over `matches`
-- Thesis “rejected” ↔ Code `rejected_bid_prop` / `rejected_ask_prop`
+**Repository scope note:**
+This repository snapshot focuses on the Chapter 3–5 fairness layer (priority, quantity, uniform price). It does not include rejection predicates/atoms in `MUDA/Atoms.v`, and no mechanized fairness result in this repo depends on rejection.
 
 ---
 
 ## Temporal Semantics
 
 **Thesis (Chapter 4, Section 4.3):**
-- Omega-run: `ω = x₀x₁x₂...`
+- Infinite run: `omega = x0 x1 x2 ...`
 - Stuttering after terminal state
 
 **Code:** `Fairness/Interpretation.v`
 ```coq
 CoFixpoint mu_trace (s : State) : trace :=
-  Trace (interp_atom s)
-        (match phase s with
-         | P7 => mu_trace (step s)
-         | _  => mu_trace (step s)
-         end).
+  Trace (interp_atom s) (mu_trace (δ s)).
 ```
 
 **Mapping:**
-- Thesis `ω` ↔ Code `mu_trace s` (coinductive trace)
-- Thesis stuttering (implicit in `x₇ = x₈ = ...`) ↔ Code `step` becomes identity at `P7`
-- Thesis “xhalt” intuition (“post-matching forever”) ↔ Code guard `phase_ge_4` (phases `P4`–`P7`)
+- Thesis `omega` ↔ Code `μ s` (alias of `mu_trace s`, a coinductive trace)
+- Thesis stuttering (implicit in `x7 = x8 = ...`) ↔ Code δ becomes identity at `P7`
+
+**Note:** `μ` / `mu_trace` always advances by δ; terminal stuttering is ensured because `δ s = s` when `phase s = P7`.
 
 **Note:** Coq's `CoFixpoint` mechanizes infinite traces. The thesis describes this conceptually without implementation syntax.
 
@@ -408,27 +432,128 @@ CoFixpoint mu_trace (s : State) : trace :=
 **Code:** `MUDA/Atoms.v` and `Fairness/Interpretation.v`
 ```coq
 Definition allocOK_prop (s : State) : Prop := ...
-Definition no_feasible_prop (s : State) : Prop := ...
 Definition has_clearing_price_prop (s : State) : Prop := ...
 (* etc. *)
 
 Definition interp_atom (s : State) (p : predicate) : Prop :=
   match p with
   | 0 => allocOK_prop s
-  | 1 => phase s = P7
-  | 2 => no_feasible_prop s
-  | 3 => has_clearing_price_prop s
-  | 4 => bounds_cstar_prop s
-  | 5 => match_keep_prop s
-  | 6 => priorityB_step_ok_prop s
-  | 7 => priorityS_step_ok_prop s
-  | 8 => rejection_justified_prop s
-  | 9 => price_rule_prop s
-  (* phase atoms p_phase(k) are encoded separately *)
+  | 1 => has_clearing_price_prop s
+  | 2 => bounds_pstar_prop s
+  | 3 => price_rule_prop s
+  | 4 => priorityB_step_ok_prop s
+  | 5 => priorityS_step_ok_prop s
+  | p' =>
+      (* phase atoms: p_phase(i) = 10+i, for i in {1..7} *)
+      if andb (Nat.leb (10 + 1) p') (Nat.leb p' (10 + 7)) then
+        let i := (p' - 10) in
+        phase s =
+          match i with
+          | 1 => P1 | 2 => P2 | 3 => P3 | 4 => P4
+          | 5 => P5 | 6 => P6 | _ => P7
+          end
+      else False
   end.
 ```
 
-**Mapping:** Thesis uses informal predicates; code defines them as computable `Prop` values and maps them to LTL predicates via a numbered encoding.
+**Mapping:** Thesis uses informal predicates; code defines them as computable `Prop` values and maps them to LTL predicates via a numbered encoding. This repo version includes only the atoms needed for priority/quantity/price fairness.
+
+---
+
+## Chapter 5 (Scenario 1): Execution Index and Predicate Evaluation
+
+This section rewrites the Chapter 5 "predicate evaluation" in terms of the *actual* state sequence used by the mechanization.
+
+### Time index convention
+
+In [Example/Scenario1.v](Example/Scenario1.v), the trace is defined as:
+
+- `st0 := initial_state bs_s1 as_s1`
+- `run_s1 := mu_trace st0` (equivalently, `run_s1 := μ st0`)
+
+The LTL semantics are aligned with the deterministic STS iteration:
+
+- Time `t = 0` corresponds to state `st0`.
+- Time `t = n` corresponds to `execute n st0`.
+
+### Concrete execution checkpoints (Scenario 1)
+
+The file [Example/Scenario1.v](Example/Scenario1.v) contains concrete checks that pin down when matches and the clearing price appear:
+
+- `matches (execute 3 st0) = [m1]`
+- `matches (execute 4 st0) = [m1; m2]`
+- `matches (execute 5 st0) = [m1; m2; m3]`
+- `phase (execute 6 st0) = P4`
+- `phase (execute 7 st0) = P5` and `clearing_price (execute 7 st0) = Some 8`
+
+For Chapter 5 prose, the key alignment point is:
+
+- the clearing price is *computed* by the P4 pricing transition, but the state *that carries* `clearing_price = Some 8` is the next state (phase `P5`).
+
+### Predicate evaluation (atoms)
+
+The relevant atomic predicates are defined in [MUDA/Atoms.v](MUDA/Atoms.v) and mapped into LTL atoms by `interp_atom` in [Fairness/Interpretation.v](Fairness/Interpretation.v).
+
+Below is the intended interpretation for Scenario 1 along the states `execute t st0` (time `t` in the LTL trace).
+
+##### Time-index table (t = 0..7)
+
+This table is written to match the concrete checks in [Example/Scenario1.v](Example/Scenario1.v). It uses:
+
+- `|matches|` = length of the match record `matches (execute t st0)`
+- `cprice_field` = the state field `clearing_price (execute t st0)`
+- `has_cprice` = `has_clearing_price_prop (execute t st0)` (defined via `determine_clearing_price`, not the field)
+
+| t | phase | |matches| | cprice_field | has_cprice |
+|--:|:------|--------:|:------------|:----------|
+| 0 | P1 | 0 | None | False |
+| 1 | P2 | 0 | None | False |
+| 2 | P3 | 0 | None | False |
+| 3 | P3 | 1 | None | True |
+| 4 | P3 | 2 | None | True |
+| 5 | P3 | 3 | None | True |
+| 6 | P4 | 3 | None | True |
+| 7 | P5 | 3 | Some 8 | True |
+
+Notes:
+
+- The `t = 3,4,5` match record sizes are exactly those proven by `Scenario1_Matches_After_Round{1,2,3}`.
+- The `t = 6` and `t = 7` phases are exactly those proven by `Scenario1_Enters_P4` and `Scenario1_Final_Phase_And_Price`.
+- `has_cprice` becomes true at `t = 3` because from that point the match record is non-empty, so `marginal_pair` exists and `determine_clearing_price` is defined.
+
+#### Phase atoms
+
+The phase atoms are encoded as `p_phase(i) = 10 + i` for `i in {1..7}`.
+
+At any time `t`, exactly one of these phase atoms is true, namely the one corresponding to `phase (execute t st0)`.
+
+#### Named fairness atoms (indices 0..5)
+
+These are the atoms used by the three fairness formulas (`priorityOK`, `quantityOK`, `priceOK`):
+
+| Atom index | Name (informal) | Coq predicate (in MUDA/Atoms.v) | How it is used |
+|-----------:|------------------|---------------------------------|----------------|
+| 0 | allocOK | `allocOK_prop` | Quantity fairness: `G allocOK` |
+| 1 | has_cprice | `has_clearing_price_prop` | Price fairness guard: `G(has_cprice -> ...)` |
+| 2 | bounds_pstar | `bounds_pstar_prop` | Price fairness: marginal bounds when defined |
+| 3 | price_rule | `price_rule_prop` | Price fairness: clearing price rule when applicable |
+| 4 | prioB_step_ok | `priorityB_step_ok_prop` | Priority fairness: `G prioB_step_ok` |
+| 5 | prioS_step_ok | `priorityS_step_ok_prop` | Priority fairness: `G prioS_step_ok` |
+
+#### Scenario 1 truth summary (aligned to the mechanization)
+
+- `allocOK_prop` holds at all times on `run_s1` (this is exactly `Scenario1_Quantity : run_s1 ⊨ quantityOK`).
+- `priorityB_step_ok_prop` and `priorityS_step_ok_prop` hold at all times on `run_s1` (this is exactly `Scenario1_Priority : run_s1 ⊨ priorityOK`).
+- `has_clearing_price_prop` becomes true once there is at least one match in the record, because it is defined using `determine_clearing_price` (which depends on `marginal_pair`, i.e. the last match). In Scenario 1, this is from time `t = 3` onward, because `matches (execute 3 st0) = [m1]`.
+- `bounds_pstar_prop` and `price_rule_prop` are the conjuncts enforced by the price fairness theorem whenever `has_clearing_price_prop` is true (this is exactly `Scenario1_UniformPrice : run_s1 ⊨ priceOK`).
+
+#### Important alignment note (priority atoms)
+
+Although priority is conceptually "step-based", the mechanization exposes it as *state predicates* that inspect what the deterministic greedy selector would choose in that state. Concretely, both priority atoms are of the form:
+
+- `phase s = P3 -> ...`
+
+So outside phase `P3` these atoms hold trivially (because the antecedent is false). This is why a global invariant `G(prio*_step_ok)` is the correct LTL encoding for the intended per-round constraint.
 
 ---
 
@@ -441,7 +566,7 @@ Definition interp_atom (s : State) (p : predicate) : Prop :=
 | State residuals | Explicit component | Computed functions | Avoid redundancy, ensure consistency |
 | Allocation sum | Set notation | Recursive function | Decidable, constructive |
 | Trace construction | Conceptual ω-run | `CoFixpoint` | Mechanized coinduction |
-| Match list | Abstract set `M` | `list Match` with append | Executable, provable monotonicity |
-| Rejection | Non-occurrence in `M_fin` | `occurs_*` over `matches` | Matches Chapter 3 definition |
+| Match list | Match record `M(x)` (finite sequence) | `list Match` with append | Executable, provable monotonicity |
+| Rejection | Mentioned in Chapter 3 | Not included in this repo snapshot | Out of scope for current fairness proofs |
 
 These choices are **standard practice in formal verification**: the thesis emphasizes mathematical clarity and essential logic, while the code provides a mechanically checkable implementation with necessary bookkeeping. The correctness of the formalization depends on faithful implementation of the thesis's core definitions (matching, feasibility, clearing price), which has been achieved.

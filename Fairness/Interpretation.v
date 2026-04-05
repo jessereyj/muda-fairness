@@ -1,56 +1,52 @@
-(** Chapter 4 (MUDA Protocol Layer) — Section 4.1.3 / 4.2 (Traces + Atomic Predicates)
-
-    This file bridges MUDA executions (Chapter 3, deterministic `step`) to LTL
-    trace semantics (Chapter 4):
-
-    - Defines a fixed numbering of MUDA-specific atomic propositions `p_*`.
-    - Defines `interp_atom : State -> predicate -> Prop`.
-    - Defines the infinite trace `mu_trace` by iterating `step` and relying on
-      terminal stuttering (P7 is a fixed point of `step`).
-*)
-From Stdlib Require Import List Bool PeanoNat.
+From Stdlib Require Import Bool PeanoNat.
 From LTL  Require Import Syntax Semantics.
 From MUDA Require Import State Transitions Atoms.
+
+(** Panel index (thesis ↔ code)
+
+  Chapter 4 (MUDA → LTL bridge)
+  - p_*: predicate indices for the atomic propositions used in fairness specs
+  - interp_atom: interpret predicate indices as state predicates
+  - mu_trace / μ: induced infinite trace by iterating δ
+  - mu_trace_atom_at_execute: lift bridge for atoms (trace time i ↔ execute i)
+*)
 
 Local Open Scope LTL_scope.
 Local Open Scope bool_scope.  
 
+(* p_allocOK: predicate index for allocOK_prop (quantity accounting). *)
 Definition p_allocOK      : predicate := 0.
-Definition p_terminal     : predicate := 1.
-Definition p_no_feasible  : predicate := 2.
-Definition p_has_cprice   : predicate := 3.
-Definition p_bounds_cstar : predicate := 4.
-Definition p_match_keep   : predicate := 5.
-Definition p_prioB_step   : predicate := 6.
-Definition p_prioS_step   : predicate := 7.
-Definition p_rejection_justified : predicate := 8.
-Definition p_price_rule         : predicate := 9.
+(* p_has_cprice: predicate index for “clearing price exists”. *)
+Definition p_has_cprice   : predicate := 1.
+(* p_bounds_pstar: predicate index for marginal-pair bounds on the clearing price pstar. *)
+Definition p_bounds_pstar : predicate := 2.
+(* p_price_rule: predicate index for the deterministic clearing-price rule. *)
+Definition p_price_rule   : predicate := 3.
+(* p_prioB_step: predicate index for the buyer-side priority-step atom. *)
+Definition p_prioB_step   : predicate := 4.
+(* p_prioS_step: predicate index for the seller-side priority-step atom. *)
+Definition p_prioS_step   : predicate := 5.
 
-(* Chapter 4 match-finality atom: matches are stable after matching ends. *)
-Definition p_match_final : predicate := 10.
-
+(* p_phase: encoding of phase atoms p_phase(i) = 10+i. *)
 Definition p_phase (i : nat) : predicate := (10 + i)%nat.
 
+(* nth_phase: decode index i into the corresponding protocol phase. *)
 Definition nth_phase (i : nat) : Phase :=
   match i with
   | 1 => P1 | 2 => P2 | 3 => P3 | 4 => P4
   | 5 => P5 | 6 => P6 | _ => P7
   end.
 
+(* interp_atom: interpret predicate indices as concrete state propositions. *)
 Definition interp_atom (s : State) : predicate -> Prop :=
   fun p =>
     match p with
     | 0 => allocOK_prop s
-    | 1 => phase s = P7
-    | 2 => no_feasible_prop s
-    | 3 => has_clearing_price_prop s
-    | 4 => bounds_cstar_prop s
-    | 5 => match_keep_prop s
-    | 6 => priorityB_step_ok_prop s
-    | 7 => priorityS_step_ok_prop s
-  | 8 => rejection_justified_prop s
-    | 9 => price_rule_prop s
-    | 10 => match_final_prop s
+    | 1 => has_clearing_price_prop s
+    | 2 => bounds_pstar_prop s
+    | 3 => price_rule_prop s
+    | 4 => priorityB_step_ok_prop s
+    | 5 => priorityS_step_ok_prop s
     | p' =>
         (* decode phase atoms *)
         if andb (Nat.leb (p_phase 1) p') (Nat.leb p' (p_phase 7)) then
@@ -58,46 +54,17 @@ Definition interp_atom (s : State) : predicate -> Prop :=
         else False
     end.
 
-Definition phase_ge_4 : LTL_formula :=
-  Atom (p_phase 4) ∨ Atom (p_phase 5) ∨ Atom (p_phase 6) ∨ Atom (p_phase 7).
-
-Lemma interp_atom_phase_4 : forall s, interp_atom s (p_phase 4) <-> phase s = P4.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_5 : forall s, interp_atom s (p_phase 5) <-> phase s = P5.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_6 : forall s, interp_atom s (p_phase 6) <-> phase s = P6.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
-Lemma interp_atom_phase_7 : forall s, interp_atom s (p_phase 7) <-> phase s = P7.
-Proof.
-  intro s. unfold interp_atom, p_phase, nth_phase. simpl. tauto.
-Qed.
-
+(* mu_trace: coinductively unfold the infinite trace induced by iterating δ. *)
 CoFixpoint mu_trace (s : State) : trace :=
-  Trace (interp_atom s)
-        (match phase s with
-         | P7 => mu_trace (step s)   (* still advance execute; avoid self-loop for lemma *)
-         | _  => mu_trace (step s)
-         end).
+  Trace (interp_atom s) (mu_trace (δ s)).
 
-Lemma mu_trace_at_execute : forall s n,
-  trace_at (mu_trace s) n = interp_atom (execute n s).
-Proof.
-  intros s n.
-  revert s.
-  induction n as [|n IH]; intros s; simpl.
-  - reflexivity.
-  - destruct (phase s) eqn:Hp; simpl; apply IH.
-Qed.
+(* μ: thesis-level alias for the induced infinite trace μ(x0) (Chapter 4). *)
+Definition μ (s : State) : trace := mu_trace s.
 
+(* Bridge lemma (Chapter 4 “lift step”): evaluating Atom p at time i on μ(s)
+   coincides with evaluating p on the state reached by executing i steps. *)
+
+(* mu_trace_atom_at_execute: bridge lemma (time i on μ(s) equals execute i on states). *)
 Lemma mu_trace_atom_at_execute :
   forall s i p,
     satisfies (mu_trace s) i (Atom p) <-> interp_atom (execute i s) p.
@@ -107,10 +74,10 @@ Proof.
     unfold satisfies; revert s p.
     induction i as [|i IH]; intros s p; simpl.
     + intros H; exact H.
-    + destruct (phase s); simpl; auto.
+    + auto.
   - (* ← *)
     unfold satisfies; revert s p.
     induction i as [|i IH]; intros s p; simpl.
     + intros H; exact H.
-    + destruct (phase s); simpl; auto.
+    + auto.
 Qed.

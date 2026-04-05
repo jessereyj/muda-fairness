@@ -1,0 +1,201 @@
+APPENDIX A -- Supplementary MUDA Diagrams (Chapter 3 support)
+
+Purpose
+
+The purpose of this appendix is to provide supplementary figures that are useful in understanding the description of the MUDA protocol discussed in Chapter 3 of this thesis. Although these figures are not necessary in deriving the MUDA model and in the formal proof, they are useful in understanding the structure of the model and the way the different operational components of the protocol work together.
+
+Each figure included in this appendix corresponds to a component of the deterministic state-transition system presented in Chapter 3.
+
+A.1 MUDA Figures
+
+Figure file: Fig1_1_MUDA_Mechanism.png
+
+This figure shows the MUDA matching mechanism and the feasibility condition used during the matching phase. In order for a buyer and a seller to be compatible, the bid price must be greater than or equal to the ask price.
+
+The feasibility condition used in the MUDA protocol is based on the following checks:
+
+1) Comparison of the bid and the ask.
+
+2) Availability of remaining quantity on both the bid side and the ask side.
+
+These conditions should be met in order for the trade to take place. Figure~\ref{fig:app-muda-mechanism} is the visual representation of the different components of the protocol.
+
+\begin{figure}[t]
+
+	\centering
+
+	\includegraphics[width=\linewidth]{Fig1_1_MUDA_Mechanism.png}
+
+	\caption[MUDA mechanism.]{MUDA mechanism and the feasibility condition}
+
+	\label{fig:app-muda-mechanism}
+
+\end{figure}
+
+Figure~\ref{fig:app-muda-comparison} depicts the positioning of the MUDA protocol in the larger context of auction protocols. The MUDA protocol is located within the larger category of auction protocols. The MUDA protocol is classified as a double auction protocol because buyers make bids and sellers make offers. The MUDA protocol is also classified as a batch protocol because buyers make bids and sellers make offers before the matching is executed. The whole market is cleared at once. The MUDA protocol is also classified as a multi-unit auction protocol because buyers and sellers make offers for more than one unit of the commodity being traded.
+
+\begin{figure}[t]
+
+	\centering
+
+	\includegraphics[width=\linewidth]{Fig1_2_MUDA_Comparison.png}
+
+	\caption[MUDA compared to other auction models.]{Positioning of the MUDA protocol in the larger context of auction protocols}
+
+	\label{fig:app-muda-comparison}
+
+\end{figure}
+
+Figure~\ref{fig:app-muda-phases} depicts the phases of the MUDA protocol as presented in Chapter~3. The execution of the MUDA protocol is composed of three conceptual phases.
+
+The first phase is the pre-matching phase, during which the bids and the offers are made and sorted in accordance with the priority sorting. The second phase is the matching and settlement phase, during which the buyer--seller pairs are matched using the greedy matching mechanism and the clearing price is computed. The third phase is the post-matching phase, during which the execution is over and the state is finalized.
+
+These phases represent the deterministic STS of the MUDA protocol presented in Chapter~3 and provide a high-level view of the execution of the MUDA protocol.
+
+\begin{figure}[t]
+
+	\centering
+
+	\includegraphics[width=\linewidth]{Fig1_3_MUDA_Phases.png}
+
+	\caption[MUDA phases execution.]{MUDA protocol phases: pre-match, settlement, post-match}
+
+	\label{fig:app-muda-phases}
+
+\end{figure}
+
+APPENDIX B – Rocq Formalization Artifacts
+
+Purpose
+
+The purpose of this appendix is to describe the structure of the Rocq development that accompanies this thesis, as well as to explain how it supports the formal definitions and theorems developed in Chapters 3-5. The Rocq development encompasses: (i) operational semantics of deterministic MUDA, (ii) syntactic and trace semantic framework for interpretation of LTL formulae over infinite execution sequences, and (iii) proofs of the three fairness properties developed in Chapter 4.
+
+Standard metatheoretical results concerning LTL are referenced in Chapter 4 when required. Rocq development concentrates on syntactic and trace semantics necessary for evaluation of the fairness properties in MUDA traces.
+
+B.1 Location of Rocq Source Code Files
+
+Rocq source code files are found in the project repository. They are source files with extension .v located in the following folders:
+
+- MUDA/       MUDA operational semantics (types, states, sorting, matching, clearing price, transitions, atomic predicates)
+
+- LTL/        Syntax and trace semantics of LTL over infinite traces
+
+- Fairness/   Interpretation layer and formal fairness proofs
+
+- Example/    Specific scenario and instantiation checks (Scenario 1; for illustration only)
+
+The repository also contains the project configuration files (_CoqProject) and scripts for building and validating the project (for example build.sh and check.sh).
+
+Generated documentation note
+
+The html/ folder contains automatically generated browsing documentation (output of coqdoc). Those files provide help for navigating through the material. Definitions and proofs should be sought in the source files .v.
+
+Recommended order of reading (quick navigation)
+
+For a fast access to the main results and their application, the following reading order is recommended:
+
+1) Example/Scenario1.v
+
+The file describes specific initial state of the market, evaluates possible executions using execute function, and applies the general fairness theorems to this scenario.
+
+2) Fairness/PriorityFairness.v, Fairness/QuantityFairness.v, Fairness/PriceFairness.v
+
+These files state and prove three general fairness theorems for any initial state.
+
+3) Fairness/Interpretation.v
+
+This file connects MUDA executions to the LTL semantics by defining the trace construction and the interpretation of atomic predicates.
+
+4) MUDA/Transitions.v, MUDA/State.v, MUDA/Atoms.v
+
+These files define the deterministic transition function (delta/step), the execution function (execute), the state structure and derived quantities, and the atomic predicates used in the fairness specifications.
+
+5) LTL/Syntax.v and LTL/Semantics.v
+
+These files define the LTL formula language and the satisfaction relation satisfies. Satisfaction at time 0 is also written as sigma |= phi.
+
+B.2 Project structure
+
+The structure of the Rocq development is as follows:
+
+1) MUDA operational semantics
+
+- MUDA/Types.v
+
+- MUDA/State.v
+
+- MUDA/Sorting.v
+
+- MUDA/Matching.v
+
+- MUDA/ClearingPrice.v
+
+- MUDA/Transitions.v
+
+- MUDA/Atoms.v
+
+These files define the market objects, the MUDA state, and the deterministic transition function describing the evolution of the system across the protocol phases. The atomic state predicates used by the temporal specifications are also defined here.
+
+2) LTL foundation
+
+- LTL/Syntax.v
+
+- LTL/Semantics.v
+
+These files define the syntax and trace semantics of LTL over infinite traces. The mechanization includes the operators X (next), F (eventually), and G (always). The fairness properties verified in this thesis are invariants and are expressed using G.
+
+3) Formal verification (fairness properties)
+
+- Fairness/Interpretation.v
+
+- Fairness/PriorityFairness.v
+
+- Fairness/QuantityFairness.v
+
+- Fairness/PriceFairness.v
+
+These files define the interpretation of MUDA state predicates as atomic propositions along the execution trace and provide the mechanized proofs of the three fairness theorems.
+
+4) Example execution
+
+- Example/Scenario1.v
+
+The file provides an actual executable scenario. It is needed to show the proof of the fairnes properties by tracing and provide examples of how general theorems can be applied to a particular initial market.
+
+B.3 Correspondence between thesis chapters and Rocq files
+
+This table shows which thesis elements correspond to Rocq files.
+
+Chapter 3 (Deterministic STS for MUDA)
+
+- MUDA/Types.v, MUDA/State.v, MUDA/Sorting.v, MUDA/Matching.v, MUDA/ClearingPrice.v, MUDA/Transitions.v, MUDA/Atoms.v
+
+Chapter 4 (LTL formulas over traces)
+
+- LTL/Syntax.v, LTL/Semantics.v
+
+- Fairness/Interpretation.v
+
+Chapter 4 (fairness specifications and proofs)
+
+- Fairness/PriorityFairness.v
+
+- Fairness/QuantityFairness.v
+
+- Fairness/PriceFairness.v
+
+Chapter 5 (Scenario 1 illustration)
+
+- Example/Scenario1.v
+
+B.4 Verificability
+
+All modules of the development are automatically compiled using build scripts for the project. The scripts verify that the development contains no admitted lemmas and all fairnes theorems are proved.
+
+Sample commands include:
+
+- ./build.sh   build all modules
+
+- ./check.sh   check that there are no admitted lemmas in the development
+
+These scripts compile all .v files and form the base for reproducibility of the mechanized fairnes results from chapters 3-5.

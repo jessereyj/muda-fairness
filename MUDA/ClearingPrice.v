@@ -1,22 +1,29 @@
-(** Chapter 3 (Methodology) — Section 3.5.3 (Phase P4: Clearing Price)
-
-  - Definition-8 (marginal pair) and Definition-9 (uniform clearing price)
-  - Proposition-6 (clearing price boundedness)
-
-  Uses the final match record (the match list once matching terminates).
-*)
 From Stdlib Require Import Arith List.
 Import ListNotations.
 From LTL  Require Import Syntax Semantics.
 From MUDA Require Import Types State Matching.
 
+(** Panel index (thesis ↔ code)
+
+  Chapter 3 (Clearing price)
+  - marginal_pair: select the marginal (last) matched pair
+  - determine_clearing_price: deterministic uniform price rule (option nat)
+  - do_clearing_price: Phase P4 action (compute and store clearing_price)
+
+  Chapter 4 (Price fairness support)
+  - wf_state: well-formedness invariant for match records
+  - clearing_price_bounds: bounds property for the computed clearing price
+*)
+
 Local Open Scope LTL_scope.
 Local Open Scope nat_scope.
 
+(* wf_state: well-formedness of matches (ask_price <= bid_price for every match). *)
 Definition wf_state (s : State) : Prop :=
   forall m, In m (matches s) ->
     ask_price (matched_ask m) <= price (matched_bid m).
 
+(* in_rev_l: list helper (rev membership implies original membership). *)
 Lemma in_rev_l {A} (l : list A) (x : A) : In x (rev l) -> In x l.
 Proof.
   induction l as [|h t IH]; simpl; intro H.
@@ -29,50 +36,21 @@ Proof.
       * contradiction.
 Qed.
 
+(* wf_state_initial: initial_state has no matches, hence wf_state holds trivially. *)
 Lemma wf_state_initial : forall bs as_list,
   wf_state (initial_state bs as_list).
 Proof.
   intros bs as_list m Hin. inversion Hin.
 Qed.
 
-Lemma wf_state_match_step_preservation :
-  forall s s',
-    wf_state s ->
-    match_step s = Some s' ->
-    wf_state s'.
-Proof.
-  intros s s' Hwf Hms.
-  unfold match_step in Hms.
-  destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
-  inversion Hms; subst s'; clear Hms.
-  unfold wf_state in *. intros m Hin.
-  set (ms := matches s) in *.
-  set (m0 := create_match b a (matches s)) in *.
-  change (In m (ms ++ [m0])) in Hin.
-  rewrite in_app_iff in Hin.
-  destruct Hin as [Hin|Hin].
-  - (* inherited *) apply Hwf, Hin.
-  - simpl in Hin. destruct Hin as [Hin|Hin]; [|contradiction].
-    subst m. (* newly created match *)
-    apply find_feasible_spec in Hf.
-    unfold is_feasible in Hf.
-    repeat rewrite Bool.andb_true_iff in Hf.
-    destruct Hf as [[Hp _] _].
-    apply Nat.leb_le in Hp. simpl. exact Hp.
-Qed.
-
-(* Chapter 3 Definition numbering notes are recorded as Coqdoc comments below. *)
-
-(** Definition-8 (Last Marginal Pair).
-
-    The marginal pair is the last trade in the final match record.
-*)
+(* marginal_pair: returns the (bid,ask) from the last match record, if any. *)
 Definition marginal_pair (s : State) : option (Bid * Ask) :=
   match rev (matches s) with
   | [] => None
   | m :: _ => Some (matched_bid m, matched_ask m)
   end.
 
+(* marginal_pair_price_bound: if wf_state holds, the marginal ask price is ≤ marginal bid price. *)
 Lemma marginal_pair_price_bound :
   forall s b a,
     wf_state s ->
@@ -91,25 +69,22 @@ Proof.
   exact Hwf.
 Qed.
 
-(** Definition-9 (Uniform Clearing Price).
-
-    If the marginal seller is exhausted, use the marginal ask price; otherwise
-    use the marginal bid price.
-*)
+(* determine_clearing_price: compute the uniform clearing price from the marginal pair. *)
 Definition determine_clearing_price (s : State) : option nat :=
   match marginal_pair s with
   | None => None
   | Some (b, a) =>
-      (* Chapter 3 clearing-price rule:
-         Let (b_star, a_star) be the marginal pair. If the marginal seller still has
-         positive residual quantity, then p* = p(b_star); otherwise p* = a(a_star).
-         (In particular, if both residuals are 0, pick the marginal ask.)
-       *)
-      if (residual_ask a (matches s) =? 0)
-      then Some (ask_price a)
-      else Some (price b)
+        (* Clearing price convention used by this development:
+           Let (b_star, a_star) be the marginal pair from the final match record.
+           We deterministically select either the marginal bid price or the
+           marginal ask price based on whether the marginal seller is exhausted.
+         *)
+        if (residual_ask a (matches s) =? 0)
+        then Some (price b)
+        else Some (ask_price a)
   end.
 
+(* do_clearing_price: Phase P4 transition (store clearing_price and move to P5). *)
 Definition do_clearing_price (s : State) : State :=
   {| bids := bids s
    ; asks := asks s
@@ -117,10 +92,18 @@ Definition do_clearing_price (s : State) : State :=
    ; clearing_price := determine_clearing_price s
    ; phase := P5 |}.
 
-(** Proposition-6 (Clearing Price Boundedness).
+(* determine_clearing_price_do_clearing_price: do_clearing_price does not change the computed price. *)
+Lemma determine_clearing_price_do_clearing_price :
+  forall s,
+    determine_clearing_price (do_clearing_price s) = determine_clearing_price s.
+Proof.
+  intro s.
+  unfold determine_clearing_price, do_clearing_price.
+  simpl.
+  reflexivity.
+Qed.
 
-    The computed clearing price is within the marginal ask/bid bounds.
-*)
+(* clearing_price_bounds: the computed clearing price lies in [ask_price a, price b] for the marginal pair. *)
 Lemma clearing_price_bounds :
   forall s b a c,
     wf_state s ->
@@ -135,8 +118,8 @@ Proof.
   destruct ea;
     simpl in Hc;
     inversion Hc; subst; clear Hc.
-  - (* seller residual = 0 -> clearing price is ask_price a *)
-    split; [apply le_n | exact Hab].
-  - (* seller residual > 0 -> clearing price is price b *)
+  - (* seller residual = 0 -> clearing price is price b *)
     split; [exact Hab | apply le_n].
+  - (* seller residual > 0 -> clearing price is ask_price a *)
+    split; [apply le_n | exact Hab].
 Qed.

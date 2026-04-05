@@ -2,29 +2,25 @@
 set -euo pipefail
 
 echo "================================================"
-echo "  Checking for Admitted Lemmas"
+echo "  MUDA Fairness Verification - Proof Completeness Check"
 echo "================================================"
 echo ""
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+# Check for unfinished proofs.
+# In this development, a proof left unfinished will appear as `Admitted.`.
+# (Using `Abort.` would not compile; other tactics that leave goals open
+# ultimately result in `Admitted.`.)
 
-# Check for Admitted
-# Make this robust with 'set -euo pipefail' by allowing zero-match grep to succeed
-ADMITS="$( (grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Example/ 2>/dev/null || true) | wc -l | tr -d ' ' )"
+PATTERN='Admitted\.'
 
-if [[ ${ADMITS:-0} -eq 0 ]]; then
-    echo -e "${GREEN}✓ SUCCESS${NC}: No admitted lemmas found!"
-    echo "All proofs are complete."
-    exit 0
-else
-    echo -e "${RED}✗ FAILURE${NC}: Found $ADMITS admitted lemma(s):"
-    echo ""
-    grep -rn "Admitted\." LTL/ MUDA/ Fairness/ Example/ 2>/dev/null || true
-    echo ""
-    echo -e "${YELLOW}Please complete these proofs before submission.${NC}"
-    exit 1
+MATCHES="$(grep -RIn --exclude-dir=.git --include='*.v' -e "${PATTERN}" LTL MUDA Fairness Example 2>/dev/null || true)"
+
+if [[ -z "${MATCHES}" ]]; then
+  echo "[OK] No admitted lemmas found."
+  exit 0
 fi
+
+echo "[FAIL] Found admitted lemmas (unfinished proofs):"
+echo ""
+echo "${MATCHES}"
+exit 1

@@ -19,40 +19,181 @@
 <h1 class="libtitle">Library PriceFairness</h1>
 
 <div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Syntax</span> <span class="id" title="var">Semantics</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Types</span> <span class="id" title="var">State</span> <span class="id" title="var">Matching</span> <span class="id" title="var">ClearingPrice</span> <span class="id" title="var">Transitions</span> <span class="id" title="var">Atoms</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span>.<br/>
+
+<br/>
 </div>
 
 <div class="doc">
-Chapter 4 (Fairness Verification Layer) — Section 4.3/4.4
+Panel index (thesis ↔ code)
 
 <div class="paragraph"> </div>
 
-  Price fairness: the clearing price (when defined) follows the rule and is
-  bounded by the marginal pair.
+  Chapter 4 (Uniform price fairness)
+<ul class="doclist">
+<li> priceOK: LTL formula G(p_has_cprice → (p_bounds_pstar ∧ p_price_rule))
+
+</li>
+<li> uniform_price_fairness_LTL_initial: main theorem (holds for all initial states)
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  Chapter 3/4 (State-field connection)
+<ul class="doclist">
+<li> clearing_price_field_agrees_determine_initial: stored clearing_price agrees with determine_clearing_price once populated
+
+</li>
+<li> clearing_price_field_bounds_initial: stored clearing_price satisfies marginal bounds once populated
+
+</li>
+<li> clearing_price_field_rule_initial: stored clearing_price satisfies the deterministic price rule once populated
+
+</li>
+</ul>
 
 </div>
 <div class="code">
-<span class="id" title="keyword">From</span> <span class="id" title="var">LTL</span>  <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LTL</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">State</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span> <span class="id" title="var">QuantityFairness</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Notation</span> <span class="id" title="var">priceOK</span> := <span class="id" title="var">QuantityFairness.priceOK</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">priceOK</span> : <span class="id" title="var">LTL_formula</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_has_cprice</span> → (<span class="id" title="var">Atom</span> <span class="id" title="var">p_bounds_pstar</span> ∧ <span class="id" title="var">Atom</span> <span class="id" title="var">p_price_rule</span>)).<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">uniform_price_fairness_LTL_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">uniform_price_fairness_LTL_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
 &nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) 0 <span class="id" title="var">priceOK</span>.<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">QuantityFairness.uniform_price_fairness_LTL_initial</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">priceOK</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">satisfies_always_unfold</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">j</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">right</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">change</span> (<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) <span class="id" title="var">j</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_bounds_pstar</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>) <span class="id" title="var">j</span> <span class="id" title="var">p_bounds_pstar</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">change</span> (<span class="id" title="var">bounds_pstar_prop</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">wf_state_execute_n</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>) (<span class="id" title="var">wf_state_initial</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">as</span> <span class="id" title="var">Hwf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">bounds_pstar_prop</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">determine_clearing_price</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [<span class="id" title="var">c</span>|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hdc</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">clearing_price_bounds</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">c</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id" title="tactic">exact</span> <span class="id" title="var">Hwf</span> | <span class="id" title="tactic">exact</span> <span class="id" title="var">Hmp</span> | <span class="id" title="tactic">exact</span> <span class="id" title="var">Hdc</span>].<br/>
+&nbsp;&nbsp;- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">change</span> (<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) <span class="id" title="var">j</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_price_rule</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">mu_trace_atom_at_execute</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>) <span class="id" title="var">j</span> <span class="id" title="var">p_price_rule</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">interp_atom</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">price_rule_prop</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hphase</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+  <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+  <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+  <span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) <span class="id" title="keyword">as</span> [[<span class="id" title="var">b</span> <span class="id" title="var">a</span>]|] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hmp</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">price_rule_fairness_LTL_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
-&nbsp;&nbsp;<span class="id" title="var">satisfies</span> (<span class="id" title="var">mu_trace</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) 0 (<span class="id" title="var">G</span> (<span class="id" title="var">Atom</span> <span class="id" title="var">p_price_rule</span>)).<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">cprice_post_pricing_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">cprice_post_pricing</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>).<br/>
 <span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">QuantityFairness.price_rule_fairness_LTL_initial</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">c</span> <span class="id" title="var">Hcp</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hcp</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">discriminate</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">cprice_post_pricing_execute_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">cprice_post_pricing</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">cprice_post_pricing_execute_n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">cprice_post_pricing_initial</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">cprice_field_ok_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">cprice_field_ok_prop</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exact</span> <span class="id" title="var">I</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">cprice_field_ok_execute_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">cprice_field_ok_prop</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">cprice_field_ok_execute_n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">cprice_field_ok_initial</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">clearing_price_field_agrees_determine_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) = <span class="id" title="var">Some</span> <span class="id" title="var">c</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">determine_clearing_price</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) = <span class="id" title="var">Some</span> <span class="id" title="var">c</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span> <span class="id" title="var">Hcp</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">cprice_post_pricing_execute_initial</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span> <span class="id" title="var">Hcp</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Hphase</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">cprice_field_ok_execute_initial</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Hok</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">cprice_field_ok_prop</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hphase</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hp5</span>|[<span class="id" title="var">Hp6</span>|<span class="id" title="var">Hp7</span>]].<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hp5</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hcp</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hok</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hp6</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hcp</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hok</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hp7</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hcp</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hok</span>. <span class="id" title="tactic">exact</span> <span class="id" title="var">Hok</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">clearing_price_field_bounds_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) = <span class="id" title="var">Some</span> <span class="id" title="var">c</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">ask_price</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">c</span> /\ <span class="id" title="var">c</span> &lt;= <span class="id" title="var">price</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">Hcp</span> <span class="id" title="var">Hmp</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">clearing_price_field_agrees_determine_initial</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span> <span class="id" title="var">Hcp</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Hdc</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">wf_state_execute_n</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>) (<span class="id" title="var">wf_state_initial</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">as</span> <span class="id" title="var">Hwf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">clearing_price_bounds</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">c</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id" title="tactic">exact</span> <span class="id" title="var">Hwf</span> | <span class="id" title="tactic">exact</span> <span class="id" title="var">Hmp</span> | <span class="id" title="tactic">exact</span> <span class="id" title="var">Hdc</span>].<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">clearing_price_field_rule_initial</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) = <span class="id" title="var">Some</span> <span class="id" title="var">c</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">marginal_pair</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>)) = <span class="id" title="var">Some</span> (<span class="id" title="var">b</span>, <span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">if</span> (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) =? 0)<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">c</span> = <span class="id" title="var">price</span> <span class="id" title="var">b</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">c</span> = <span class="id" title="var">ask_price</span> <span class="id" title="var">a</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span> <span class="id" title="var">Hcp</span> <span class="id" title="var">Hmp</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">clearing_price_field_agrees_determine_initial</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span> <span class="id" title="var">j</span> <span class="id" title="var">c</span> <span class="id" title="var">Hcp</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Hdc</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">determine_clearing_price</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hdc</span>; <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hmp</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hdc</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">remember</span> (<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> <span class="id" title="var">j</span> (<span class="id" title="var">initial_state</span> <span class="id" title="var">bs</span> <span class="id" title="var">as_list</span>))) =? 0) <span class="id" title="keyword">as</span> <span class="id" title="var">ea</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Hea</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">ea</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hdc</span>; <span class="id" title="tactic">inversion</span> <span class="id" title="var">Hdc</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">reflexivity</span>.<br/>
 <span class="id" title="keyword">Qed</span>.<br/>
 </div>
 </div>

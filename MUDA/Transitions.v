@@ -1,23 +1,19 @@
-(** Chapter 3 (Methodology) — Section 3.2 / 3.5 (Deterministic STS + Phases)
+From Stdlib Require Import List.
+From MUDA Require Import Types State Sorting Matching ClearingPrice Atoms.
 
-  The deterministic transition function δ from the thesis is `step`.
-  Executing MUDA for n steps is `execute n`.
+(** Panel index (thesis ↔ code)
 
-  Phase evolution matches the Chapter 3 phase diagram and stutters at P7.
+  Chapter 3 (Deterministic STS)
+  - step: one-step transition over phases
+  - δ: thesis-level alias for the deterministic transition function
+  - execute: finite execution by iterating δ
+
+  Chapter 4 (Preservation lemmas for lifting)
+  - allocOK_after_sorting: sorting preserves allocOK
+  - wf_state_step_preservation, wf_state_execute_n: wf_state preserved along execute
 *)
-From Stdlib Require Import List Lia Sorting Permutation.
-Import ListNotations.
-From MUDA Require Import Types State Sorting Matching ClearingPrice.
 
-(** Proposition-4 (Transition from P3 to P4).
-
-    When matching terminates because no feasible buyer–seller pair exists,
-    the protocol transitions from Phase P3 to Phase P4 without changing the
-    submitted orders or the match record.
-
-    Chapter 3 also specifies that the clearing price is determined in Phase P4;
-    therefore the P3 -> P4 transition preserves `clearing_price`.
-*)
+(* finish_matching: Phase P3 → P4 transition when no feasible pair remains. *)
 Definition finish_matching (s : State) : State :=
   {| bids := bids s;
      asks := asks s;
@@ -27,14 +23,7 @@ Definition finish_matching (s : State) : State :=
     clearing_price := clearing_price s;
      phase := P4 |}.
 
-(** Structural Assumption-2 (Determinism) and Structural Assumption-3 (Terminal preservation).
-
-    The deterministic STS transition function `delta` from Chapter 3 is modeled
-    as `step : State -> State`. Determinism is by construction.
-
-    For Phase P7 (terminal), Chapter 3 requires `delta(x) = x`; this is the
-    `P7 => s` branch below.
-*)
+(* step: one deterministic protocol step (case split on current phase). *)
 Definition step (s : State) : State :=
   match phase s with
   | P1 => {| bids := bids s;
@@ -63,7 +52,10 @@ Definition step (s : State) : State :=
   | P7 => s (* Terminal state *)
   end.
 
+(* δ: thesis-level alias for the deterministic transition function step. *)
+Definition δ : State -> State := step.
 
+(* allocOK_after_sorting: sorting (P2) does not change matches, so allocOK is preserved. *)
 Lemma allocOK_after_sorting :
   forall s,
     phase s = P2 ->
@@ -76,58 +68,15 @@ Proof.
 Qed.
 
 
+(* execute: iterate δ for a fixed number of steps (used in Chapter 4 bridge lemma). *)
 Fixpoint execute (fuel : nat) (s : State) : State :=
   match fuel with
   | 0 => s
-  | S fuel' => execute fuel' (step s)
+  | S fuel' => execute fuel' (δ s)
   end.
 
 
-Lemma step_preserves_bids_asks : forall s,
-  phase s <> P2 ->
-  bids (step s) = bids s /\ asks (step s) = asks s.
-Proof.
-  intros s Hneq.
-  unfold step.
-  destruct (phase s) eqn:Hph.
-  - (* P1 *)
-    simpl; split; reflexivity.
-  - (* P2: excluded by hypothesis *)
-    exfalso. apply Hneq. reflexivity.
-  - (* P3 *)
-    destruct (match_step s) as [s'|] eqn:Hm; simpl.
-    + (* match_step Some s' preserves bids/asks by definition *)
-      unfold match_step in Hm.
-      destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
-      inversion Hm; subst; clear Hm; simpl; split; reflexivity.
-    + (* None -> finish_matching preserves bids/asks *)
-      simpl; split; reflexivity.
-  - (* P4 *)
-    unfold do_clearing_price; simpl; split; reflexivity.
-  - (* P5 *) simpl; split; reflexivity.
-  - (* P6 *) simpl; split; reflexivity.
-  - (* P7 *) simpl; split; reflexivity.
-Qed.
-
-Lemma step_monotone_matches : forall s,
-  length (matches s) <= length (matches (step s)).
-Proof.
-  intros s.
-  unfold step.
-  destruct (phase s) eqn:Hph; simpl; try lia.
-  - (* P3 *)
-    destruct (match_step s) as [s'|] eqn:Hm; simpl.
-    + (* Some s' -> one new head match *)
-      unfold match_step in Hm.
-      destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:?; try discriminate.
-      inversion Hm; subst; clear Hm.
-      simpl.
-      rewrite length_app. simpl. lia.
-    + (* None -> finish_matching, no change *)
-      lia.
-Qed.
-
-
+(* wf_state_step_preservation: wf_state is invariant under a single protocol step. *)
 Lemma wf_state_step_preservation : forall s,
   wf_state s -> wf_state (step s).
 Proof.
@@ -160,10 +109,114 @@ Proof.
   - (* P7 stays same *) exact Hwf.
 Qed.
 
+(* wf_state_execute_n: wf_state is invariant along n-step executions. *)
 Lemma wf_state_execute_n : forall n s,
   wf_state s -> wf_state (execute n s).
 Proof.
   induction n as [|n IH]; intros s Hwf; simpl.
   - exact Hwf.
   - apply IH. apply wf_state_step_preservation. exact Hwf.
+Qed.
+
+(* cprice_field_ok_step_preservation: if the state carries a clearing_price value,
+   it agrees with determine_clearing_price after one step as well. *)
+Lemma cprice_field_ok_step_preservation : forall s,
+  cprice_field_ok_prop s -> cprice_field_ok_prop (step s).
+Proof.
+  intros s H.
+  unfold cprice_field_ok_prop in *.
+  unfold step.
+  destruct (phase s) eqn:Hp; simpl.
+  - (* P1 -> P2 *) exact H.
+  - (* P2 -> P3 (sorting; clearing_price preserved) *) exact H.
+  - (* P3 matching; clearing_price preserved by both branches *)
+    destruct (match_step s) as [s'|] eqn:Hm; simpl.
+    + (* successful match: resulting phase is P3, so the property is trivial *)
+      unfold match_step in Hm.
+      destruct (find_feasible (bids s) (asks s) (matches s)) as [[b a]|] eqn:Hf; try discriminate.
+      inversion Hm; subst s'.
+      rewrite Hp.
+      simpl.
+      exact I.
+    + (* no feasible pair: finish_matching; resulting phase is P4, so the property is trivial *)
+      exact I.
+  - (* P4 -> P5 (do_clearing_price stores determine_clearing_price) *)
+    simpl.
+    destruct (determine_clearing_price s) as [c|] eqn:Hdc; simpl.
+    + rewrite determine_clearing_price_do_clearing_price. exact Hdc.
+    + exact I.
+  - (* P5 -> P6 (state fields unchanged except phase) *)
+    destruct (clearing_price s) as [c|] eqn:Hcp; simpl; [|exact I].
+    (* reduce to the corresponding fact about s *)
+    change (determine_clearing_price s = Some c).
+    exact H.
+  - (* P6 -> P7 (state fields unchanged except phase) *)
+    destruct (clearing_price s) as [c|] eqn:Hcp; simpl; [|exact I].
+    change (determine_clearing_price s = Some c).
+    exact H.
+  - (* P7 stays same *)
+    rewrite Hp.
+    simpl.
+    exact H.
+Qed.
+
+(* cprice_field_ok_execute_n: cprice_field_ok_prop holds along n-step executions. *)
+Lemma cprice_field_ok_execute_n : forall n s,
+  cprice_field_ok_prop s -> cprice_field_ok_prop (execute n s).
+Proof.
+  induction n as [|n IH]; intros s H; simpl.
+  - exact H.
+  - apply IH. apply cprice_field_ok_step_preservation. exact H.
+Qed.
+
+(* cprice_post_pricing: if the state carries a clearing_price value, it is already
+   in a post-pricing phase (P5, P6, or P7). *)
+Definition cprice_post_pricing (s : State) : Prop :=
+  forall c, clearing_price s = Some c ->
+    phase s = P5 \/ phase s = P6 \/ phase s = P7.
+
+(* cprice_post_pricing_step_preservation: cprice_post_pricing is preserved by step. *)
+Lemma cprice_post_pricing_step_preservation : forall s,
+  cprice_post_pricing s -> cprice_post_pricing (step s).
+Proof.
+  intros s Hpost c Hcp.
+  unfold step in Hcp.
+  unfold step.
+  destruct (phase s) eqn:Hp; simpl in Hcp; simpl.
+  - (* P1 -> P2 *)
+    exfalso.
+    specialize (Hpost c Hcp).
+    destruct Hpost as [H|[H|H]]; rewrite Hp in H; discriminate.
+  - (* P2 -> P3 *)
+    exfalso.
+    specialize (Hpost c Hcp).
+    destruct Hpost as [H|[H|H]]; rewrite Hp in H; discriminate.
+  - (* P3 matching *)
+    destruct (match_step s) as [s'|] eqn:Hm; simpl in Hcp.
+    + exfalso.
+      pose proof (match_step_preserves_clearing_price s s' Hm) as Hpres.
+      rewrite Hpres in Hcp.
+      specialize (Hpost c Hcp).
+      destruct Hpost as [H|[H|H]]; rewrite Hp in H; discriminate.
+    + exfalso.
+      specialize (Hpost c Hcp).
+      destruct Hpost as [H|[H|H]]; rewrite Hp in H; discriminate.
+  - (* P4 -> P5 *)
+    left; reflexivity.
+  - (* P5 -> P6 *)
+    right; left; reflexivity.
+  - (* P6 -> P7 *)
+    right; right; reflexivity.
+  - (* P7 stays same *)
+    rewrite Hp.
+    right; right; reflexivity.
+Qed.
+
+(* cprice_post_pricing_execute_n: cprice_post_pricing holds along n-step executions. *)
+Lemma cprice_post_pricing_execute_n : forall n s,
+  cprice_post_pricing s -> cprice_post_pricing (execute n s).
+Proof.
+  induction n as [|n IH]; intros s H; simpl.
+  - exact H.
+  - apply IH. apply cprice_post_pricing_step_preservation. exact H.
 Qed.

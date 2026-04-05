@@ -61,13 +61,8 @@ cat > _CoqProject <<'EOF'
 # ===== LTL Foundation (Layer 1) =====
 LTL/Syntax.v
 LTL/Semantics.v
-LTL/Axioms.v
-LTL/Soundness.v
-LTL/Completeness.v
-LTL/LTL.v
 
 # ===== MUDA Protocol (Layer 2) =====
-MUDA/Eqb.v
 MUDA/Types.v
 MUDA/State.v
 MUDA/Sorting.v
@@ -75,22 +70,16 @@ MUDA/Matching.v
 MUDA/ClearingPrice.v
 MUDA/Transitions.v
 MUDA/Atoms.v
-MUDA/MUDA.v
 
 # ===== Fairness Verification (Layer 3) =====
 Fairness/Interpretation.v
 Fairness/PriorityFairness.v
 Fairness/QuantityFairness.v
 Fairness/PriceFairness.v
-Fairness/MatchFinality.v
-Fairness/Maximality.v
-Fairness/JustifiedRejection.v
-Fairness/All.v
 
 # ===== Simulation (Layer 4) =====
-Example/LogicalSoundness.v
-Example/LogicalCompleteness.v
-Example/CloudMarket.v
+Example/Scenario1.v
+
 
 
 EOF
@@ -214,6 +203,8 @@ echo ""
 # Optional: generate HTML documentation for enabled files
 info "Generating HTML docs (optional step)..."
 mkdir -p html || true
+# Remove stale pages from previous runs (so html/ reflects only the currently enabled .v files)
+find html -maxdepth 1 -type f -name "*.html" -delete 2>/dev/null || true
 if rocq doc -html -d html ${ENABLED_VFILES}; then
     info "✓ HTML docs generated under ./html"
 else

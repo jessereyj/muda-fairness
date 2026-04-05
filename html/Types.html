@@ -19,72 +19,46 @@
 <h1 class="libtitle">Library Types</h1>
 
 <div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">PeanoNat</span>.<br/>
+
+<br/>
 </div>
 
 <div class="doc">
-Chapter 3 (Methodology) — Section 3.1 (Object and State Representation)
+Panel index (thesis ↔ code)
 
 <div class="paragraph"> </div>
 
-  Core objects of MUDA:
+  Chapter 3 (Market objects)
 <ul class="doclist">
-<li> Agents (implementation bookkeeping), bids, asks, and matches.
+<li> AgentType, Agent: ownership bookkeeping (not explicit in thesis notation)
+
+</li>
+<li> Bid, Ask: orders (price, quantity, timestamp) plus identifiers
+
+</li>
+<li> Match: recorded trade triple (b, s, q)
 
 </li>
 </ul>
 
 <div class="paragraph"> </div>
 
-  Thesis notation uses 3-tuples for bids/asks; the code refines with IDs and
-  ownership fields to support decidable equality and traceability.
+  Chapter 4 (Executable derived quantities)
+<ul class="doclist">
+<li> *<i>eq_dec: decidable equality used by executable list scans (e.g., allocated_bid/allocated_ask)
 
-<div class="paragraph"> </div>
-
-  See NOTATION.md for thesis-to-code mapping.
+</li>
+</ul>
 
 </div>
 <div class="code">
-<span class="id" title="keyword">From</span> <span class="id" title="var">Stdlib</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="var">Arith</span> <span class="id" title="var">List</span> <span class="id" title="var">Bool</span> <span class="id" title="var">PeanoNat</span>.<br/>
-<span class="id" title="keyword">From</span> <span class="id" title="var">MUDA</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <span class="id" title="var">Eqb</span>.<br/>
-<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
-<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Inductive</span> <span class="id" title="var">AgentType</span> := <span class="id" title="var">Buyer</span> | <span class="id" title="var">Seller</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">agent_type_eqb</span> (<span class="id" title="var">x</span> <span class="id" title="var">y</span> : <span class="id" title="var">AgentType</span>) : <span class="id" title="var">bool</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">x</span>, <span class="id" title="var">y</span> <span class="id" title="keyword">with</span> <span class="id" title="var">Buyer</span>, <span class="id" title="var">Buyer</span> | <span class="id" title="var">Seller</span>, <span class="id" title="var">Seller</span> =&gt; <span class="id" title="var">true</span> | <span class="id" title="var">_</span>, <span class="id" title="var">_</span> =&gt; <span class="id" title="var">false</span> <span class="id" title="keyword">end</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">agent_type_eqb_spec</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <span class="id" title="var">agent_type_eqb</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> = <span class="id" title="var">true</span> &lt;-&gt; <span class="id" title="var">x</span> = <span class="id" title="var">y</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span>, <span class="id" title="var">y</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">split</span>; <span class="id" title="tactic">intro</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">reflexivity</span>; <span class="id" title="var">now</span> <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
 <span class="id" title="keyword">Record</span> <span class="id" title="var">Agent</span> := { <span class="id" title="var">agent_id</span> : <span class="id" title="var">nat</span>; <span class="id" title="var">agent_type</span> : <span class="id" title="var">AgentType</span> }.<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">agent_eq</span> (<span class="id" title="var">a1</span> <span class="id" title="var">a2</span> : <span class="id" title="var">Agent</span>) : <span class="id" title="var">bool</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">agent_id</span> <span class="id" title="var">a1</span>) (<span class="id" title="var">agent_id</span> <span class="id" title="var">a2</span>)<br/>
-&nbsp;&nbsp;&amp;&amp; <span class="id" title="var">agent_type_eqb</span> (<span class="id" title="var">agent_type</span> <span class="id" title="var">a1</span>) (<span class="id" title="var">agent_type</span> <span class="id" title="var">a2</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">agent_eq_spec</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>, <span class="id" title="var">agent_eq</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> = <span class="id" title="var">true</span> &lt;-&gt; <span class="id" title="var">a1</span> = <span class="id" title="var">a2</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">id1</span> <span class="id" title="var">t1</span>] [<span class="id" title="var">id2</span> <span class="id" title="var">t2</span>]; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hid</span> <span class="id" title="var">Ht</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hid</span>. &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">agent_type_eqb_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Ht</span>. &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hid</span>, <span class="id" title="var">Ht</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">Heq</span>; <span class="id" title="tactic">inversion</span> <span class="id" title="var">Heq</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>.<br/>
-&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">agent_type_eqb_spec</span> <span class="id" title="var">t2</span> <span class="id" title="var">t2</span>)). <span class="id" title="tactic">reflexivity</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Record</span> <span class="id" title="var">Bid</span> := {<br/>
@@ -112,135 +86,6 @@ Chapter 3 (Methodology) — Section 3.1 (Object and State Representation)
 }.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">bid_eq</span> (<span class="id" title="var">b1</span> <span class="id" title="var">b2</span> : <span class="id" title="var">Bid</span>) : <span class="id" title="var">bool</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">bid_id</span> <span class="id" title="var">b1</span>) (<span class="id" title="var">bid_id</span> <span class="id" title="var">b2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">price</span> <span class="id" title="var">b1</span>) (<span class="id" title="var">price</span> <span class="id" title="var">b2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">quantity</span> <span class="id" title="var">b1</span>) (<span class="id" title="var">quantity</span> <span class="id" title="var">b2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">ts</span> <span class="id" title="var">b1</span>) (<span class="id" title="var">ts</span> <span class="id" title="var">b2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">agent_eq</span> (<span class="id" title="var">buyer</span> <span class="id" title="var">b1</span>) (<span class="id" title="var">buyer</span> <span class="id" title="var">b2</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">ask_eq</span> (<span class="id" title="var">a1</span> <span class="id" title="var">a2</span> : <span class="id" title="var">Ask</span>) : <span class="id" title="var">bool</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">ask_id</span> <span class="id" title="var">a1</span>) (<span class="id" title="var">ask_id</span> <span class="id" title="var">a2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">ask_price</span> <span class="id" title="var">a1</span>) (<span class="id" title="var">ask_price</span> <span class="id" title="var">a2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">ask_quantity</span> <span class="id" title="var">a1</span>) (<span class="id" title="var">ask_quantity</span> <span class="id" title="var">a2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">ask_ts</span> <span class="id" title="var">a1</span>) (<span class="id" title="var">ask_ts</span> <span class="id" title="var">a2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">agent_eq</span> (<span class="id" title="var">seller</span> <span class="id" title="var">a1</span>) (<span class="id" title="var">seller</span> <span class="id" title="var">a2</span>).<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">match_eq</span> (<span class="id" title="var">m1</span> <span class="id" title="var">m2</span> : <span class="id" title="var">Match</span>) : <span class="id" title="var">bool</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="var">bid_eq</span> (<span class="id" title="var">matched_bid</span> <span class="id" title="var">m1</span>) (<span class="id" title="var">matched_bid</span> <span class="id" title="var">m2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">ask_eq</span> (<span class="id" title="var">matched_ask</span> <span class="id" title="var">m1</span>) (<span class="id" title="var">matched_ask</span> <span class="id" title="var">m2</span>) &amp;&amp;<br/>
-&nbsp;&nbsp;<span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">match_quantity</span> <span class="id" title="var">m1</span>) (<span class="id" title="var">match_quantity</span> <span class="id" title="var">m2</span>).<br/>
-
-<br/>
-#[<span class="id" title="var">export</span>] <span class="id" title="keyword">Instance</span> <span class="id" title="var">bid_eqb</span> : <span class="id" title="var">Eqb</span> <span class="id" title="var">Bid</span> := { <span class="id" title="var">eqb</span> := <span class="id" title="var">bid_eq</span> }.<br/>
-#[<span class="id" title="var">export</span>] <span class="id" title="keyword">Instance</span> <span class="id" title="var">ask_eqb</span> : <span class="id" title="var">Eqb</span> <span class="id" title="var">Ask</span> := { <span class="id" title="var">eqb</span> := <span class="id" title="var">ask_eq</span> }.<br/>
-#[<span class="id" title="var">export</span>] <span class="id" title="keyword">Instance</span> <span class="id" title="var">match_eqb</span> : <span class="id" title="var">Eqb</span> <span class="id" title="var">Match</span> := { <span class="id" title="var">eqb</span> := <span class="id" title="var">match_eq</span> }.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">build_bid_eq</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">id1</span> <span class="id" title="var">ag1</span> <span class="id" title="var">p1</span> <span class="id" title="var">q1</span> <span class="id" title="var">ts1</span> <span class="id" title="var">id2</span> <span class="id" title="var">ag2</span> <span class="id" title="var">p2</span> <span class="id" title="var">q2</span> <span class="id" title="var">ts2</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">id1</span> = <span class="id" title="var">id2</span> -&gt; <span class="id" title="var">ag1</span> = <span class="id" title="var">ag2</span> -&gt; <span class="id" title="var">p1</span> = <span class="id" title="var">p2</span> -&gt; <span class="id" title="var">q1</span> = <span class="id" title="var">q2</span> -&gt; <span class="id" title="var">ts1</span> = <span class="id" title="var">ts2</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">bid_id</span> := <span class="id" title="var">id1</span>; <span class="id" title="var">buyer</span> := <span class="id" title="var">ag1</span>; <span class="id" title="var">price</span> := <span class="id" title="var">p1</span>; <span class="id" title="var">quantity</span> := <span class="id" title="var">q1</span>; <span class="id" title="var">ts</span> := <span class="id" title="var">ts1</span>; |} =<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">bid_id</span> := <span class="id" title="var">id2</span>; <span class="id" title="var">buyer</span> := <span class="id" title="var">ag2</span>; <span class="id" title="var">price</span> := <span class="id" title="var">p2</span>; <span class="id" title="var">quantity</span> := <span class="id" title="var">q2</span>; <span class="id" title="var">ts</span> := <span class="id" title="var">ts2</span>; |}.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">bid_eq_spec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span>,<br/>
-&nbsp;&nbsp;<span class="id" title="var">bid_eq</span> <span class="id" title="var">b1</span> <span class="id" title="var">b2</span> = <span class="id" title="var">true</span> &lt;-&gt; <span class="id" title="var">b1</span> = <span class="id" title="var">b2</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">id1</span> <span class="id" title="var">ag1</span> <span class="id" title="var">p1</span> <span class="id" title="var">q1</span> <span class="id" title="var">ts1</span>] [<span class="id" title="var">id2</span> <span class="id" title="var">ag2</span> <span class="id" title="var">p2</span> <span class="id" title="var">q2</span> <span class="id" title="var">ts2</span>]; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;- <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H1234</span> <span class="id" title="var">Hag</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H1234</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H123</span> <span class="id" title="var">Ht</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H123</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H12</span> <span class="id" title="var">Hq</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H12</span>  <span class="id" title="keyword">as</span> [<span class="id" title="var">Hid</span> <span class="id" title="var">Hp</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hid</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hp</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Ht</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hag</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">build_bid_eq</span>.<br/>
-&nbsp;&nbsp;- <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">Heq</span>; <span class="id" title="tactic">inversion</span> <span class="id" title="var">Heq</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>. &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_spec</span>; <span class="id" title="tactic">reflexivity</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">build_ask_eq</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">id1</span> <span class="id" title="var">s1</span> <span class="id" title="var">p1</span> <span class="id" title="var">q1</span> <span class="id" title="var">ts1</span> <span class="id" title="var">id2</span> <span class="id" title="var">s2</span> <span class="id" title="var">p2</span> <span class="id" title="var">q2</span> <span class="id" title="var">ts2</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">id1</span> = <span class="id" title="var">id2</span> -&gt; <span class="id" title="var">s1</span> = <span class="id" title="var">s2</span> -&gt; <span class="id" title="var">p1</span> = <span class="id" title="var">p2</span> -&gt; <span class="id" title="var">q1</span> = <span class="id" title="var">q2</span> -&gt; <span class="id" title="var">ts1</span> = <span class="id" title="var">ts2</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">ask_id</span> := <span class="id" title="var">id1</span>; <span class="id" title="var">seller</span> := <span class="id" title="var">s1</span>; <span class="id" title="var">ask_price</span> := <span class="id" title="var">p1</span>; <span class="id" title="var">ask_quantity</span> := <span class="id" title="var">q1</span>; <span class="id" title="var">ask_ts</span> := <span class="id" title="var">ts1</span> |} =<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">ask_id</span> := <span class="id" title="var">id2</span>; <span class="id" title="var">seller</span> := <span class="id" title="var">s2</span>; <span class="id" title="var">ask_price</span> := <span class="id" title="var">p2</span>; <span class="id" title="var">ask_quantity</span> := <span class="id" title="var">q2</span>; <span class="id" title="var">ask_ts</span> := <span class="id" title="var">ts2</span> |}.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">ask_eq_spec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>,<br/>
-&nbsp;&nbsp;<span class="id" title="var">ask_eq</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span> = <span class="id" title="var">true</span> &lt;-&gt; <span class="id" title="var">a1</span> = <span class="id" title="var">a2</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">id1</span> <span class="id" title="var">s1</span> <span class="id" title="var">p1</span> <span class="id" title="var">q1</span> <span class="id" title="var">ts1</span>] [<span class="id" title="var">id2</span> <span class="id" title="var">s2</span> <span class="id" title="var">p2</span> <span class="id" title="var">q2</span> <span class="id" title="var">ts2</span>]; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;- <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H1234</span> <span class="id" title="var">Hs</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H1234</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H123</span> <span class="id" title="var">Ht</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H123</span>  <span class="id" title="keyword">as</span> [<span class="id" title="var">H12</span> <span class="id" title="var">Hq</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H12</span>   <span class="id" title="keyword">as</span> [<span class="id" title="var">Hid</span> <span class="id" title="var">Hp</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hid</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hp</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Ht</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hs</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">build_ask_eq</span>.<br/>
-&nbsp;&nbsp;- <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">Heq</span>; <span class="id" title="tactic">inversion</span> <span class="id" title="var">Heq</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>. &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_spec</span>; <span class="id" title="tactic">reflexivity</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">build_match_eq</span> :<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">b1</span> <span class="id" title="var">a1</span> <span class="id" title="var">q1</span> <span class="id" title="var">b2</span> <span class="id" title="var">a2</span> <span class="id" title="var">q2</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">b1</span> = <span class="id" title="var">b2</span> -&gt; <span class="id" title="var">a1</span> = <span class="id" title="var">a2</span> -&gt; <span class="id" title="var">q1</span> = <span class="id" title="var">q2</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">matched_bid</span> := <span class="id" title="var">b1</span>; <span class="id" title="var">matched_ask</span> := <span class="id" title="var">a1</span>; <span class="id" title="var">match_quantity</span> := <span class="id" title="var">q1</span> |} =<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">matched_bid</span> := <span class="id" title="var">b2</span>; <span class="id" title="var">matched_ask</span> := <span class="id" title="var">a2</span>; <span class="id" title="var">match_quantity</span> := <span class="id" title="var">q2</span> |}.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_eq_spec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">m1</span> <span class="id" title="var">m2</span>,<br/>
-&nbsp;&nbsp;<span class="id" title="var">match_eq</span> <span class="id" title="var">m1</span> <span class="id" title="var">m2</span> = <span class="id" title="var">true</span> &lt;-&gt; <span class="id" title="var">m1</span> = <span class="id" title="var">m2</span>.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">b1</span> <span class="id" title="var">a1</span> <span class="id" title="var">q1</span>] [<span class="id" title="var">b2</span> <span class="id" title="var">a2</span> <span class="id" title="var">q2</span>]; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H12</span> <span class="id" title="var">Hq</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H12</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hb</span> <span class="id" title="var">Ha</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">bid_eq_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hb</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">ask_eq_spec</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Ha</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">build_match_eq</span>.<br/>
-&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">Heq</span>; <span class="id" title="tactic">inversion</span> <span class="id" title="var">Heq</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>; <span class="id" title="tactic">split</span>; [<span class="id" title="tactic">apply</span> <span class="id" title="var">bid_eq_spec</span> | <span class="id" title="tactic">apply</span> <span class="id" title="var">ask_eq_spec</span>]; <span class="id" title="tactic">reflexivity</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.eqb_refl</span>.<br/>
-<span class="id" title="keyword">Qed</span>.<br/>
-
-<br/>
-#[<span class="id" title="var">export</span>] <span class="id" title="keyword">Instance</span> <span class="id" title="var">bid_eqb_spec</span> : <span class="id" title="var">EqbSpec</span> <span class="id" title="var">Bid</span> := { <span class="id" title="var">eqb_eq</span> := <span class="id" title="var">bid_eq_spec</span> }.<br/>
-#[<span class="id" title="var">export</span>] <span class="id" title="keyword">Instance</span> <span class="id" title="var">ask_eqb_spec</span> : <span class="id" title="var">EqbSpec</span> <span class="id" title="var">Ask</span> := { <span class="id" title="var">eqb_eq</span> := <span class="id" title="var">ask_eq_spec</span> }.<br/>
-#[<span class="id" title="var">export</span>] <span class="id" title="keyword">Instance</span> <span class="id" title="var">match_eqb_spec</span> : <span class="id" title="var">EqbSpec</span> <span class="id" title="var">Match</span> := { <span class="id" title="var">eqb_eq</span> := <span class="id" title="var">match_eq_spec</span> }.<br/>
-
-<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">agent_type_eq_dec</span> (<span class="id" title="var">x</span> <span class="id" title="var">y</span> : <span class="id" title="var">AgentType</span>) : {<span class="id" title="var">x</span> = <span class="id" title="var">y</span>} + {<span class="id" title="var">x</span> &lt;&gt; <span class="id" title="var">y</span>}.<br/>
 <span class="id" title="keyword">Proof</span>. <span class="id" title="var">decide</span> <span class="id" title="var">equality</span>. <span class="id" title="keyword">Defined</span>.<br/>
 
@@ -261,6 +106,8 @@ Chapter 3 (Methodology) — Section 3.1 (Object and State Representation)
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">bid_id1</span> <span class="id" title="var">buyer1</span> <span class="id" title="var">price1</span> <span class="id" title="var">quantity1</span>] [<span class="id" title="var">bid_id2</span> <span class="id" title="var">buyer2</span> <span class="id" title="var">price2</span> <span class="id" title="var">quantity2</span>].<br/>
 &nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">nat_eq_dec</span>.<br/>
 <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">bid_eq_dec</span> := <span class="id" title="var">bid_eq_dec_spec</span>.<br/>
 
 <br/>
@@ -269,19 +116,13 @@ Chapter 3 (Methodology) — Section 3.1 (Object and State Representation)
 &nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">ask_id1</span> <span class="id" title="var">seller1</span> <span class="id" title="var">price1</span> <span class="id" title="var">quantity1</span>] [<span class="id" title="var">ask_id2</span> <span class="id" title="var">seller2</span> <span class="id" title="var">price2</span> <span class="id" title="var">quantity2</span>].<br/>
 &nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">agent_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">nat_eq_dec</span>.<br/>
 <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">ask_eq_dec</span> := <span class="id" title="var">ask_eq_dec_spec</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">match_eq_dec_spec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">m1</span> <span class="id" title="var">m2</span> : <span class="id" title="var">Match</span>, {<span class="id" title="var">m1</span> = <span class="id" title="var">m2</span>} + {<span class="id" title="var">m1</span> &lt;&gt; <span class="id" title="var">m2</span>}.<br/>
-<span class="id" title="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">bid1</span> <span class="id" title="var">ask1</span> <span class="id" title="var">q1</span>] [<span class="id" title="var">bid2</span> <span class="id" title="var">ask2</span> <span class="id" title="var">q2</span>].<br/>
-&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">bid_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">ask_eq_dec</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">nat_eq_dec</span>.<br/>
-<span class="id" title="keyword">Defined</span>.<br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">match_eq_dec</span> := <span class="id" title="var">match_eq_dec_spec</span>.<br/>
-
-<br/>
 #[<span class="id" title="var">global</span>]<br/>
-<span class="id" title="keyword">Hint</span> <span class="id" title="keyword">Resolve</span> <span class="id" title="var">agent_type_eq_dec</span> <span class="id" title="var">agent_eq_dec</span> <span class="id" title="var">bid_eq_dec</span> <span class="id" title="var">ask_eq_dec</span> <span class="id" title="var">match_eq_dec</span> : <span class="id" title="var">core</span>.<br/>
+<span class="id" title="keyword">Hint</span> <span class="id" title="keyword">Resolve</span> <span class="id" title="var">agent_type_eq_dec</span> <span class="id" title="var">agent_eq_dec</span> <span class="id" title="var">bid_eq_dec</span> <span class="id" title="var">ask_eq_dec</span> : <span class="id" title="var">core</span>.<br/>
 </div>
 </div>
 

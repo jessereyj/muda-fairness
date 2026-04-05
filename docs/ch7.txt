@@ -1,0 +1,24 @@
+CHAPTER 7
+CONCLUSION
+
+This thesis presents the temporal verification of the fairness properties in the Multi-Unit Double Auction (MUDA) protocol. The questions asked include whether it is possible to verify fairness properties over all executions using Linear Temporal Logic (LTL), together with a deterministic STS. The results show that priority fairness, quantity fairness, and price fairness can be expressed as invariants. These invariants hold for all execution traces generated from initial states.
+
+The contributions of this thesis can be listed as follows. The first contribution is the formulation of MUDA as a deterministic state-transition system, in which executions are obtained by iterating the deterministic transition function. The second contribution is the verification of fairness of the model using LTL properties formulated as invariants. These properties are expressed as G-formulas (G φ) and are shown to hold at all positions of all induced traces.
+
+MUDA is modeled as a deterministic STS, whose transition function is given by delta : State -> State. The finite trace is generated through multiple applications of the transition function. Once the protocol hits its terminal state, it continues its execution by looping at that particular state, thereby generating an infinite trace.
+
+Formally, the three fairness properties can be expressed by the logical formula of G φ, which is evaluated according to the trace of the execution path. Priority fairness is the first fairness property, which characterizes the correctness of the deterministic choice considering the priority relations. Quantity fairness is the second fairness property, which indicates the number of traded unit quantity between the allocation and residual quantities according to the match record. Price fairness is the third fairness property, which indicates the correctness of the clearing price pstar. The clearing price is subject to the uniform pricing policy.
+
+All three properties are verified for every trace generated from an initial state of the form initial_state(bs, as_list). The implementation consist of the state transition system, the LTL trace semantics, and the interpretation of atomic predicates. All formal proofs are completed without admitted lemma.
+
+Correctness is established at the level of the state transition system. The results do not rely on simulation or selected executions. The assertions hold at every point of every execution trace. The connection between the operational semantics and temporal logic is made explicit. Additionally, State-level predicates are treated as atomic propositions and evaluated along the trace.
+
+This is demonstrated by the execution example given in Chapter 5. It walks through an actual execution, and for every step in the execution, there is a corresponding position in the trace. At every step of the execution, the fairness properties are checked, and the trace meets the invariants.
+
+Several directions for further work remain. Additional fairness properties can be formalized, including maximality, match finality, and justified rejection. These can be defined as state predicates and then extended to temporal properties.
+
+Other temporal properties beyond invariants can also be studied. These include termination and progress properties. Their formalization requires temporal operators such as F and X, which are included in the LTL framework used in this thesis.
+
+The model can serve as a reference for future work. Implementations of MUDA can be validated against this model. Execution results can be compared with the verified transition system and its fairness properties.
+
+Fairness of MUDA is formally specified and proven in this thesis. The fairness properties hold for all executions of the deterministic transition system. The results also show a clear relationship between execution semantics and temporal properties over traces.
