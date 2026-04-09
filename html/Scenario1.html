@@ -67,30 +67,6 @@ Chapter 5 — Scenario 1 (from the thesis excerpt)
 <span class="id" title="keyword">From</span> <span class="id" title="var">Fairness</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Interpretation</span> <span class="id" title="var">PriorityFairness</span> <span class="id" title="var">QuantityFairness</span> <span class="id" title="var">PriceFairness</span>.<br/>
 
 <br/>
-</div>
-
-<div class="doc">
-Panel index (thesis ↔ code)
-
-<div class="paragraph"> </div>
-
-  Chapter 5 (Scenario 1 illustration)
-<ul class="doclist">
-<li> st0, run_s1: concrete initial state and its induced trace (both Local)
-
-</li>
-<li> Scenario1_Priority/Quantity/UniformPrice: instantiate Chapter 4 theorems (Local)
-
-</li>
-<li> Scenario1_Matches* and Scenario1_ClearingPrice*: concrete execute-based checks (Local)
-
-</li>
-</ul>
-
-</div>
-<div class="code">
-
-<br/>
 <span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">LTL_scope</span>.<br/>
 
 <br/>
@@ -196,6 +172,89 @@ Panel index (thesis ↔ code)
 <span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
 
 <br/>
+
+<br/>
+<span class="id" title="keyword">Local Definition</span> <span class="id" title="var">residB</span> (<span class="id" title="var">b</span> : <span class="id" title="var">Bid</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">residual_bid</span> <span class="id" title="var">b</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Local Definition</span> <span class="id" title="var">residS</span> (<span class="id" title="var">a</span> : <span class="id" title="var">Ask</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">residual_ask</span> <span class="id" title="var">a</span> (<span class="id" title="var">matches</span> <span class="id" title="var">s</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_Phases_Table</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> 0 <span class="id" title="var">st0</span>) = <span class="id" title="var">P1</span> /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> 1 <span class="id" title="var">st0</span>) = <span class="id" title="var">P2</span> /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> 2 <span class="id" title="var">st0</span>) = <span class="id" title="var">P3</span> /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> 6 <span class="id" title="var">st0</span>) = <span class="id" title="var">P4</span> /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> 7 <span class="id" title="var">st0</span>) = <span class="id" title="var">P5</span> /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> 8 <span class="id" title="var">st0</span>) = <span class="id" title="var">P6</span> /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> 9 <span class="id" title="var">st0</span>) = <span class="id" title="var">P7</span>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_Residuals_x0</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b1</span> (<span class="id" title="var">execute</span> 0 <span class="id" title="var">st0</span>) = 5 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b2</span> (<span class="id" title="var">execute</span> 0 <span class="id" title="var">st0</span>) = 4 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s1</span> (<span class="id" title="var">execute</span> 0 <span class="id" title="var">st0</span>) = 3 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s2</span> (<span class="id" title="var">execute</span> 0 <span class="id" title="var">st0</span>) = 4.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_Residuals_x1_x2</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> 1 <span class="id" title="var">st0</span>) = [] /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> 2 <span class="id" title="var">st0</span>) = [] /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b1</span> (<span class="id" title="var">execute</span> 1 <span class="id" title="var">st0</span>) = 5 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b2</span> (<span class="id" title="var">execute</span> 1 <span class="id" title="var">st0</span>) = 4 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s1</span> (<span class="id" title="var">execute</span> 1 <span class="id" title="var">st0</span>) = 3 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s2</span> (<span class="id" title="var">execute</span> 1 <span class="id" title="var">st0</span>) = 4 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b1</span> (<span class="id" title="var">execute</span> 2 <span class="id" title="var">st0</span>) = 5 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b2</span> (<span class="id" title="var">execute</span> 2 <span class="id" title="var">st0</span>) = 4 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s1</span> (<span class="id" title="var">execute</span> 2 <span class="id" title="var">st0</span>) = 3 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s2</span> (<span class="id" title="var">execute</span> 2 <span class="id" title="var">st0</span>) = 4.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_Residuals_x3</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b1</span> (<span class="id" title="var">execute</span> 3 <span class="id" title="var">st0</span>) = 2 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b2</span> (<span class="id" title="var">execute</span> 3 <span class="id" title="var">st0</span>) = 4 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s1</span> (<span class="id" title="var">execute</span> 3 <span class="id" title="var">st0</span>) = 0 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s2</span> (<span class="id" title="var">execute</span> 3 <span class="id" title="var">st0</span>) = 4.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_Residuals_x4</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b1</span> (<span class="id" title="var">execute</span> 4 <span class="id" title="var">st0</span>) = 0 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b2</span> (<span class="id" title="var">execute</span> 4 <span class="id" title="var">st0</span>) = 4 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s1</span> (<span class="id" title="var">execute</span> 4 <span class="id" title="var">st0</span>) = 0 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s2</span> (<span class="id" title="var">execute</span> 4 <span class="id" title="var">st0</span>) = 2.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_Residuals_x5</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b1</span> (<span class="id" title="var">execute</span> 5 <span class="id" title="var">st0</span>) = 0 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b2</span> (<span class="id" title="var">execute</span> 5 <span class="id" title="var">st0</span>) = 2 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s1</span> (<span class="id" title="var">execute</span> 5 <span class="id" title="var">st0</span>) = 0 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s2</span> (<span class="id" title="var">execute</span> 5 <span class="id" title="var">st0</span>) = 0.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_x6_to_x9_Table_Stability</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> 6 <span class="id" title="var">st0</span>) = [<span class="id" title="var">m1</span>; <span class="id" title="var">m2</span>; <span class="id" title="var">m3</span>] /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> 6 <span class="id" title="var">st0</span>) = <span class="id" title="var">None</span> /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b1</span> (<span class="id" title="var">execute</span> 6 <span class="id" title="var">st0</span>) = 0 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residB</span> <span class="id" title="var">b2</span> (<span class="id" title="var">execute</span> 6 <span class="id" title="var">st0</span>) = 2 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s1</span> (<span class="id" title="var">execute</span> 6 <span class="id" title="var">st0</span>) = 0 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">residS</span> <span class="id" title="var">s2</span> (<span class="id" title="var">execute</span> 6 <span class="id" title="var">st0</span>) = 0 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> 7 <span class="id" title="var">st0</span>) = [<span class="id" title="var">m1</span>; <span class="id" title="var">m2</span>; <span class="id" title="var">m3</span>] /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> 8 <span class="id" title="var">st0</span>) = [<span class="id" title="var">m1</span>; <span class="id" title="var">m2</span>; <span class="id" title="var">m3</span>] /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">matches</span> (<span class="id" title="var">execute</span> 9 <span class="id" title="var">st0</span>) = [<span class="id" title="var">m1</span>; <span class="id" title="var">m2</span>; <span class="id" title="var">m3</span>] /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> 7 <span class="id" title="var">st0</span>) = <span class="id" title="var">Some</span> 8 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> 8 <span class="id" title="var">st0</span>) = <span class="id" title="var">Some</span> 8 /\<br/>
+&nbsp;&nbsp;<span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> 9 <span class="id" title="var">st0</span>) = <span class="id" title="var">Some</span> 8.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">tauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
 <span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_ClearingPrice_Is_8</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> 7 <span class="id" title="var">st0</span>) = <span class="id" title="var">Some</span> 8.<br/>
 <span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
@@ -204,6 +263,11 @@ Panel index (thesis ↔ code)
 <span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_Final_Phase_And_Price</span> :<br/>
 &nbsp;&nbsp;<span class="id" title="var">phase</span> (<span class="id" title="var">execute</span> 7 <span class="id" title="var">st0</span>) = <span class="id" title="var">P5</span> /\ <span class="id" title="var">clearing_price</span> (<span class="id" title="var">execute</span> 7 <span class="id" title="var">st0</span>) = <span class="id" title="var">Some</span> 8.<br/>
 <span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Example</span> <span class="id" title="var">Scenario1_P7_Stuttering</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">execute</span> 10 <span class="id" title="var">st0</span> = <span class="id" title="var">execute</span> 9 <span class="id" title="var">st0</span>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">cbv</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
 </div>
 </div>
 

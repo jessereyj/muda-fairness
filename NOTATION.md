@@ -1,6 +1,6 @@
 # Notation Bridge: Thesis to Rocq Code
 
-This document maps mathematical notation from the thesis (Chapters 3-4) to the corresponding Rocq/Coq definitions in the codebase.
+This document maps mathematical notation from the thesis (Chapters 3–5) to the corresponding Rocq definitions in the codebase.
 
 Proof-status note
 This file is a notation and cross-reference bridge. It does not attempt to document proof completeness per module.
@@ -123,14 +123,16 @@ In the Rocq development, these are state-level predicates derived from the MUDA
 state components (orders, residuals, match record, clearing price).
 
 - `matched(b, s, q)` — true iff `(b, s, q)` is in the match record:
-  expressed directly by quantifying over `matches x` and relating the `Match` projections
+  expressible as a state-level predicate by quantifying over `matches x` and relating the `Match` projections
   (`matched_bid`, `matched_ask`, `match_quantity`).
+  (This is not one of the fixed predicate indices used by the Chapter 4 fairness proofs; it is a thesis-level relation you can state directly when needed.)
 - `residualB(b) = r` — true iff buyer order `b` has residual `r`:
   [MUDA/State.v](MUDA/State.v) computed as `residual_bid b (matches x)`.
 - `residualS(s) = r` — true iff seller order `s` has residual `r`:
   [MUDA/State.v](MUDA/State.v) computed as `residual_ask s (matches x)`.
 - `price(x) = c` — (computed price) true iff `determine_clearing_price x = Some c`:
   this is the notion used by the Chapter 4 price-fairness atoms in [MUDA/Atoms.v](MUDA/Atoms.v).
+  Since it depends only on the match record, it can hold before Phase P4 stores a price in the state.
 - `clearing_price(x) = Some c` — (stored field) true iff the MUDA state record stores `Some c`:
   [MUDA/State.v](MUDA/State.v) (`clearing_price` field of `State`).
 
@@ -142,6 +144,11 @@ The LTL layer then assigns truth values to a fixed set of *named* predicates
 (e.g., priority step correctness, quantity allocation bounds, clearing price
 bounds/rule) using [Fairness/Interpretation.v](Fairness/Interpretation.v)
 (`interp_atom`, `μ` / `mu_trace`).
+
+## Chapter 5 note (Scenario 1)
+
+The concrete Chapter 5 alignment checks (phase table, residual quantities, and stored clearing price checkpoints) live in:
+- [Example/Scenario1.v](Example/Scenario1.v)
 
 ## Core Data Types
 

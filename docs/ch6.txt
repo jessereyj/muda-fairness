@@ -31,7 +31,10 @@ Therefore, the system is internally consistent.
 
 The clearing price complies with the pricing formula whenever it is defined. This means the price lies between the marginal bid and ask and follows the deterministic formula.
 
-At the beginning of the auction process, the clearing price is not defined since no matches exist yet. The condition therefore does not apply. Once the marginal match is determined, the clearing price is defined, and from that point, the pricing formula is satisfied.
+At the beginning of the auction process, the clearing price is not defined since no matches exist yet. The condition therefore does not apply.
+In the mechanization, the Chapter 4 atom for “clearing price exists” is defined via the computed function determine_clearing_price on the current match record, so it becomes true as soon as the match record is non-empty.
+Separately, the state field clearing_price is populated by the pricing transition (Phase P4) and is carried from the subsequent Phase P5 state onward.
+From the point where the computed clearing price is defined, the pricing formula is satisfied.
 
 This shows that the pricing scheme is consistent with the matching result. The clearing price depends on the match record and does not change after the execution terminates.
 

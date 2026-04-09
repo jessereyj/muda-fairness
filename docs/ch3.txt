@@ -157,7 +157,8 @@ The predicates introduced here are state-level predicates, which are true/false 
 
 The predicates of Chapter 4 are defined in terms of components of MUDA states and transitions, introduced in Chapter 3. In particular, the predicates are
 
-matched(b, s, q, x), which is true if and only if (b, s, q) is an entry in match record M(x).
+match-record membership, i.e., whether a particular trade (b, s, q) appears as an entry in the match record M(x).
+In the mechanized development, the match record is represented explicitly as a list of matches (and residuals are computed from it), and the Chapter 4 atom set focuses on the quantity accounting atom, the pricing atoms, the priority-step atoms, and phase atoms.
 
 The predicate feasible(b, s, x) is defined by Definition 6.
 

@@ -63,6 +63,12 @@ Note that in Phase P2, the sorting transition leads to a Phase P3 state without 
 
 The clearing price is computed in the transition between Phases P4 and P5 and stored in the Phase P5 state.
 
+Important alignment note (Chapter 4 atoms vs. stored field): in the mechanization, the Chapter 4 atom for
+"clearing price exists" is defined via the computed function determine_clearing_price on the current match
+record. As a result, the atom can become true as soon as the match record is non-empty (during Phase P3),
+even though the state field clearing_price is only populated after the Phase P4 pricing step (i.e., in the
+next Phase P5 state). The table below reports the stored field.
+
 In each line, there is one state xi = execute i x0, with information about the phase, residuals, match record, and clearing price.
 
 State | Phase | Residual Quantities | Match Record | Clearing Price
