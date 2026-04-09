@@ -25,14 +25,6 @@ From LTL      Require Import Syntax Semantics.
 From MUDA     Require Import Types State Matching Transitions.
 From Fairness Require Import Interpretation PriorityFairness QuantityFairness PriceFairness.
 
-(** Panel index (thesis ↔ code)
-
-  Chapter 5 (Scenario 1 illustration)
-  - st0, run_s1: concrete initial state and its induced trace (both Local)
-  - Scenario1_Priority/Quantity/UniformPrice: instantiate Chapter 4 theorems (Local)
-  - Scenario1_Matches_* and Scenario1_ClearingPrice_*: concrete execute-based checks (Local)
-*)
-
 Local Open Scope LTL_scope.
 
 (* mk_buyer: create a buyer agent with a given identifier. *)

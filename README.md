@@ -20,6 +20,16 @@ html/      - Generated browsing documentation (coqdoc output)
 ./build.sh
 ```
 
+Note: `build.sh` ends by running `./clean.sh`, so it does not leave compiled `.vo` artifacts in the working tree.
+
+### Build and keep compiled artifacts
+
+If you want `.vo` files available for interactive exploration, run:
+
+```bash
+make -f Makefile.rocq all
+```
+
 ### Clean build artifacts
 
 ```bash
@@ -63,6 +73,7 @@ This writes/updates `UNUSED_SYMBOLS.md` (heuristic report based on cross-file te
 This repository provides these shell entry points:
 
 - [build.sh](build.sh) — clean + compile all `.v` files (and generate HTML docs)
+- [build.sh](build.sh) — compile all enabled `.v` files, generate HTML docs, then run `clean.sh` (so compiled artifacts are removed)
 - [clean.sh](clean.sh) — remove build artifacts
 - [check.sh](check.sh) — ensure there are no `Admitted.` proofs
 - [stats.sh](stats.sh) — summary statistics (counts, admitted lemmas, etc.)
@@ -78,7 +89,9 @@ The `build.sh` script performs the following steps:
 3. Generates `_CoqProject`
 4. Creates a minimal `Makefile.rocq`
 5. Builds the project using `rocq compile` with parallel jobs
-6. Runs a check to ensure no admitted lemmas remain
+6. Generates HTML docs under `html/`
+7. Runs a check to ensure no admitted lemmas remain
+8. Runs `./clean.sh` (post-build cleanup)
 
 ## Statistics
 
@@ -160,6 +173,9 @@ Chapter 5 uses a concrete market instance to align thesis-level “time index / 
 - Lemmas and theorems closed with `Qed`, reported by `stats.sh`
 - Admitted lemmas: **0**, enforced by `check.sh`
 All fairness theorems are proven using `Qed`. No fairness proof uses `Admitted`.
+
+Kernel closure note:
+- The main exported theorems also check as “Closed under the global context”.
 
 Note: `check.sh` checks for literal `Admitted.` in the current `.v` sources; it is not a broader repository trust audit.
 

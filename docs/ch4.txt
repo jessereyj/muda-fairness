@@ -207,7 +207,7 @@ Rocq: quantity_fairness_LTL_initial.
 
 Proof sketch.
 
-The predicate allocOK holds for initial state, and is maintained by each state transition. Fix any j and consider state x = execute j (initial_state(bs, as_list)). Using induction on execute establishes the predicate allocOK(x). Lemma allocOK_to_allocOK_prop connects the allocOK(x) with atom predicate p_allocOK(x). Lifting of the predicate yields the theorem.
+The predicate allocOK holds for the initial state, and is maintained by each state transition. Fix any j and consider state x = execute j (initial_state(bs, as_list)). Using induction on execute establishes allocOK(x). The LTL bridge lemma (mu_trace_atom_at_execute) reduces the LTL atom at time j to the corresponding state predicate on x, and then allocOK_prop(x) follows by unfolding its definition and using basic arithmetic on residual = initial − allocated.
 
 Theorem 3 (Price Fairness).
 
