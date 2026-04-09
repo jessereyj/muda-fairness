@@ -170,7 +170,12 @@ Define priceOK := G (Atom p_has_cprice -> (Atom p_bounds_pstar /\ Atom p_price_r
 
 Price fairness specifies the fact that the uniform pricing policy of MUDA is followed. The predicate p_has_cprice is a predicate on whether the clearing price is well-defined from the match record in state x. If this is true, the clearing price must fall between the marginal buyer and seller bids, and satisfy the deterministic pricing criterion. This property is stated using implication since it only needs to hold if a clearing price is actually defined.
 
-Note that, outside of pricing-relevant conditions (e.g., if no marginal pair is present), or outside the relevant phases (before phase P7), atoms p_bounds_pstar and p_price_rule hold trivially. These non-trivial conditions hold exactly when a clearing price is well-defined.
+Note that these atoms are formulated so they are trivial when pricing is not applicable.
+In particular, if no marginal pair is present (equivalently, no trades occurred and the match record is empty),
+then both bounds and rule conditions hold trivially.
+In addition, the deterministic price-rule atom is guarded by phases: it holds trivially in phases P1–P3,
+and becomes relevant from Phase P4 onward. The bounds atom is phase-agnostic; it becomes non-trivial
+exactly when the marginal pair and the computed clearing price are defined from the match record.
 
 4.5 Fairness Verification (Theorems and Proof Sketches)
 

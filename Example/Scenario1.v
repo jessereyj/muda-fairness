@@ -137,6 +137,85 @@ Local Example Scenario1_Enters_P4 :
   phase (execute 6 st0) = P4.
 Proof. cbv. reflexivity. Qed.
 
+(* ------------------------------------------------------------------------- *)
+(* Chapter 5 table alignment: phases and residual quantities for x0..x9.
+
+   In the thesis, residuals are written residB/residS and stored notionally.
+   In this development they are derived from the match record.
+*)
+
+Local Definition residB (b : Bid) (s : State) : nat :=
+  residual_bid b (matches s).
+
+Local Definition residS (a : Ask) (s : State) : nat :=
+  residual_ask a (matches s).
+
+Local Example Scenario1_Phases_Table :
+  phase (execute 0 st0) = P1 /\
+  phase (execute 1 st0) = P2 /\
+  phase (execute 2 st0) = P3 /\
+  phase (execute 6 st0) = P4 /\
+  phase (execute 7 st0) = P5 /\
+  phase (execute 8 st0) = P6 /\
+  phase (execute 9 st0) = P7.
+Proof. cbv. tauto. Qed.
+
+Local Example Scenario1_Residuals_x0 :
+  residB b1 (execute 0 st0) = 5 /\
+  residB b2 (execute 0 st0) = 4 /\
+  residS s1 (execute 0 st0) = 3 /\
+  residS s2 (execute 0 st0) = 4.
+Proof. cbv. tauto. Qed.
+
+Local Example Scenario1_Residuals_x1_x2 :
+  matches (execute 1 st0) = [] /\
+  matches (execute 2 st0) = [] /\
+  residB b1 (execute 1 st0) = 5 /\
+  residB b2 (execute 1 st0) = 4 /\
+  residS s1 (execute 1 st0) = 3 /\
+  residS s2 (execute 1 st0) = 4 /\
+  residB b1 (execute 2 st0) = 5 /\
+  residB b2 (execute 2 st0) = 4 /\
+  residS s1 (execute 2 st0) = 3 /\
+  residS s2 (execute 2 st0) = 4.
+Proof. cbv. tauto. Qed.
+
+Local Example Scenario1_Residuals_x3 :
+  residB b1 (execute 3 st0) = 2 /\
+  residB b2 (execute 3 st0) = 4 /\
+  residS s1 (execute 3 st0) = 0 /\
+  residS s2 (execute 3 st0) = 4.
+Proof. cbv. tauto. Qed.
+
+Local Example Scenario1_Residuals_x4 :
+  residB b1 (execute 4 st0) = 0 /\
+  residB b2 (execute 4 st0) = 4 /\
+  residS s1 (execute 4 st0) = 0 /\
+  residS s2 (execute 4 st0) = 2.
+Proof. cbv. tauto. Qed.
+
+Local Example Scenario1_Residuals_x5 :
+  residB b1 (execute 5 st0) = 0 /\
+  residB b2 (execute 5 st0) = 2 /\
+  residS s1 (execute 5 st0) = 0 /\
+  residS s2 (execute 5 st0) = 0.
+Proof. cbv. tauto. Qed.
+
+Local Example Scenario1_x6_to_x9_Table_Stability :
+  matches (execute 6 st0) = [m1; m2; m3] /\
+  clearing_price (execute 6 st0) = None /\
+  residB b1 (execute 6 st0) = 0 /\
+  residB b2 (execute 6 st0) = 2 /\
+  residS s1 (execute 6 st0) = 0 /\
+  residS s2 (execute 6 st0) = 0 /\
+  matches (execute 7 st0) = [m1; m2; m3] /\
+  matches (execute 8 st0) = [m1; m2; m3] /\
+  matches (execute 9 st0) = [m1; m2; m3] /\
+  clearing_price (execute 7 st0) = Some 8 /\
+  clearing_price (execute 8 st0) = Some 8 /\
+  clearing_price (execute 9 st0) = Some 8.
+Proof. cbv. tauto. Qed.
+
 (* Scenario1_ClearingPrice_Is_8: computed p* matches the thesis value. *)
 Local Example Scenario1_ClearingPrice_Is_8 :
   clearing_price (execute 7 st0) = Some 8.
@@ -146,3 +225,8 @@ Proof. cbv. reflexivity. Qed.
 Local Example Scenario1_Final_Phase_And_Price :
   phase (execute 7 st0) = P5 /\ clearing_price (execute 7 st0) = Some 8.
 Proof. cbv. auto. Qed.
+
+(* Scenario1_P7_Stuttering: once P7 is reached, δ is the identity (stuttering). *)
+Local Example Scenario1_P7_Stuttering :
+  execute 10 st0 = execute 9 st0.
+Proof. cbv. reflexivity. Qed.
