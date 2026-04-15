@@ -1,0 +1,35 @@
+REFERENCE
+[1] D. K. Bart, E. Markakis, G. Schäfer, and O. Telelis, “On the Inefficiency of Standard Multi-Unit Auctions,” arXiv (Cornell University), Jan. 2013, doi: 10.48550/arxiv.1303.1646.
+[2] L. Bartolini and C. Cottarelli, “Designing effective auctions for Treasury securities,” SSRN Electronic Journal, Jan. 1997, doi: 10.2139/ssrn.998866.
+[3] S. Brânzei, M. Derakhshan, N. Golrezaei, and Y. Han, “Learning and collusion in multi-unit auctions,” arXiv (Cornell University), Jan. 2023, doi: 10.48550/arxiv.2305.17402.
+[4] S. Chandlekar, E. Subramanian, S. Bhat, P. Paruchuri, and S. Gujar, “Multi-unit Double Auctions: Equilibrium Analysis and Bidding Strategy using DDPG in Smart-grids,” arXiv (Cornell University), Jan. 2022, doi: 10.48550/arxiv.2201.10127.
+[5] A. Fallah, M. Jordan I., and A. Ulichney, “Fair allocation in dynamic mechanism design,” arXiv (Cornell University), May 2024, doi: 10.48550/arxiv.2406.00147.
+[6] M. Garg and S. Sarswat, “Efficient and verified continuous double auctions,” arXiv (Cornell University), Dec. 2024, doi: 10.48550/arxiv.2412.08624.
+[7] M. Garg, N. Raja, S. Sarswat, and A. K. Singh, “Double auctions: formalization and automated checkers,” arXiv (Cornell University), Oct. 2024, doi: 10.48550/arxiv.2410.18751.
+[8] J. Guo, J. Zhang, and T. C. E. Cheng, “Truthful Multi-unit Double Auction with Transaction Costs and Sellers’ Changing Marginal Costs,” International Journal of Production Economics, vol. 278, p. 109430, Oct. 2024, doi: 10.1016/j.ijpe.2024.109430.åç
+[9] R. Hassanzadeh, A. Movaghar, and H. R. Hassanzadeh, “A Multi-Dimensional Fairness Combinatorial Double-Sided auction model in cloud environment,” arXiv (Cornell University), Jan. 2016, doi: 10.48550/arxiv.1608.05315.
+[10] P. Huang, A. Scheller–Wolf, and K. Sycara, “Design of a Multi–Unit double auction E–Market,” Computational Intelligence, vol. 18, no. 4, pp. 596–617, Nov. 2002, doi: 10.1111/1467-8640.t01-1-00206.
+[11] T. Jing, C. Zhao, X. Xing, Y. Huo, W. Li, and X. Cheng, “A multi-unit truthful double auction framework for secondary market,” 2013 IEEE International Conference on Communications (ICC), pp. 2817–2822, Jun. 2013, doi: 10.1109/icc.2013.6654967.
+[12] P. Khezr and A. Cumpston, “Multi-Unit Auctions: A survey of theoretical literature,” SSRN Electronic Journal, Jan. 2020, doi: 10.2139/ssrn.3596663.
+[13] A. M. Kwasnica and K. Sherstyuk, “Multiunit Auctions,” Wiley Online Library, vol. 75–108, pp. 75–108, Nov. 2013, doi: 10.1002/9781118790700.ch5.
+[14] X. Liu, W. Wu, M. Li, and W. Wang, “Two-sided auctions with budgets: fairness, incentives and efficiency,” In Proceedings of the 19th International Conference on Autonomous Agents and MultiAgent Systems (AAMAS ’20), pp. 1907–1909, 2020, doi: 10.5555/3398761.3399023.
+[15] E. Markakis and O. Telelis, “Uniform price auctions: Equilibria and efficiency,” Theory of Computing Systems, vol. 57, no. 3, pp. 549–575, Mar. 2014, doi: 10.1007/s00224-014-9537-9.
+[16] J. Murillo, V. Muñoz, B. López, and D. Busquets, “A fair mechanism for recurrent multi-unit auctions,” in Lecture notes in computer science, 2008, pp. 147–158. doi: 10.1007/978-3-540-87805-6_14.
+[17] R. Natarajan, S. Sarswat, and A. K. Singh, “Verified double sided auctions for financial markets,” arXiv (Cornell University), Jan. 2021, doi: 10.48550/arxiv.2104.08437.
+[18] S. Sarswat and A. K. Singh, “Formally verified trades in financial markets,” arXiv (Cornell University), Jan. 2020, doi: 10.48550/arxiv.2007.10805.
+[19] S. Sarswat and A. K. Singh, “Formal verification of trading in financial markets,” arXiv (Cornell University), Jan. 2019, doi: 10.48550/arxiv.1907.07885.
+[20] E. Segal-Halevi, A. Hassidim, and Y. Aumann, “MUDA: a truthful Multi-Unit Double-Auction mechanism,” arXiv (Cornell University), Jan. 2017, doi: 10.48550/arxiv.1712.06848.
+------
+[21] T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, Introduction To Algorithms. MIT Press.
+[22] J. Avigad, Mathematical Logic and Computation. doi: 10.1017/9781108778756. 
+[23] M. O’Leary and Wiley, A first course in mathematical logic and set theory. [Online].
+[24] H. B. Enderton, A Mathematical Introduction to Logic, 2nd Edition, San Diego, CA: Harcourt Academic Press, 2001.
+[25] S. Demri, V. Goranko, and M. Lange, “Temporal Logics in Computer Science,” Cambridge University Press, Sep. 2016, doi: 10.1017/cbo9781139236119. 
+[26] C. Baier and J.-P. Katoen, Principles of Model Checking. Cambridge, MA: MIT Press, 2008.
+[27] “Introduction and Contents - The Rocq Prover 9.1.0 documentation.” https://rocq-prover.org/doc/V9.1.0/refman/index.html
+[28] A. W. Appel et al., Program Logics for Certified Compilers. Cambridge: Cambridge University Press, 2014.
+[29] K. R. Apt, F. S. De Boer, and E.-R. Olderog, Verification of sequential and concurrent programs. 2009. doi: 10.1007/978-1-84882-745-5.
+[30] S. Ito, T. Ichinose, M. Shimakawa, N. Izumi, S. Hagihara, and N. Yonezaki, “Qualitative analysis of gene regulatory networks by temporal logic,” Theoretical Computer Science, vol. 594, pp. 151–179, Jun. 2015, doi: 10.1016/j.tcs.2015.06.017.
+[31] S. Brookes and P. W. O’Hearn, “Concurrent separation logic,” ACM SIGLOG News, vol. 3, no. 3, pp. 47–65, Aug. 2016, doi: 10.1145/2984450.2984457.
+[32] C. Boutilier, “Probabilistic modal logic,” in Proc. 10th Conf. on Uncertainty in Artificial Intelligence (UAI), Seattle, WA, USA, Jul. 1994, pp. 61–68.
+[33] S. G. Krantz, “A Primer of Mathematical Writing, second edition,” arXiv (Cornell University), Dec. 2016, doi: 10.48550/arxiv.1612.04888.
